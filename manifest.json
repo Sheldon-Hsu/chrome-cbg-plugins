@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "藏宝阁账号价值计算器，侧边栏版本",
+  "version": "1.0",
+  "description": "用来计算CBG账号上任务技能、修炼的价值",
+  "background": {
+    "service_worker": "background.js"
+  },
+  "web_accessible_resources": [{
+    "resources": ["data/data.json"],
+    "matches": ["<all_urls>"]
+  },{
+    "resources": ["show_role_detail.js"],
+    "matches": ["*://cbg-xyq.res.netease.com/*"]
+  }],
+  "action": {
+    "default_title": "点击打开侧边栏"
+  },
+  "side_panel": {
+    "default_path": "sidebar.html"
+  },
+  "permissions": ["activeTab", "tabs","scripting","sidePanel","debugger"],
+  "host_permissions": ["<all_urls>"]
+}

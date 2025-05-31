@@ -1,0 +1,126 @@
+  render_to_replace: function(panel_id, data_obj) {
+        $(panel_id).innerHTML = this.render(data_obj);
+    },
+    render: function(data_obj) {
+        var context = new Object();
+        context = Object.merge(context, data_obj);
+        context.__run = this.compile();
+        return context.__run();
+    },
+	  compile: function() {
+        var start = 0;
+        var delimeter = '_%_';
+        var body = this.template.replace(this.options.tag_re, function(matchedString, group, offset, fullString) {
+            var replace = delimeter + ";\n";
+            if (matchedString.charAt(2) == "=") {
+                replace += "  __out += " + group + ";\n";
+            } else {
+                replace += "  " + group + "\n";
+            }
+            replace += "  __out += " + delimeter;
+            return replace;
+        })
+        var functionBody = "__out += " + delimeter + body + delimeter + ";\n" + "return __out.join(" + delimeter + "" + delimeter + ");\n";
+        functionBody = functionBody.replace(/'/g, "\\'");
+        var regex = new RegExp(delimeter,'g');
+        functionBody = functionBody.replace(regex, "'");
+        var re_replace = function foo($1) {
+            return "__out.push(" + $1.match(/^__out\s\+\=\s(.*);$/)[1] + ");";
+        };
+        this.function_body = "var __out = new Array();" + functionBody.replace(/__out\s\+\=\s(.*);/g, re_replace);
+        return new Function(this.function_body);
+    },
+	
+	
+	var Template = new Class({
+    initialize: function(template_id, isStrMode) {
+        this.options = {
+            "tag_re": /<%=?(.*?)%>/g
+        };
+        this.template = isStrMode ? template_id : this.get_template_source(template_id);
+        this.function_body = null;
+    },
+    get_template_source: function(el_id) {
+        var el = $(el_id)
+        if (!el.innerHTML) {
+            return "";
+        }
+        return el.innerHTML.trim().replace(/^<!--|-->$|\n|\r/g, "");
+    },
+    render_to_replace: function(panel_id, data_obj) {
+        $(panel_id).innerHTML = this.render(data_obj);
+    },
+    render: function(data_obj) {
+        var context = new Object();
+        context = Object.merge(context, data_obj);
+        context.__run = this.compile();
+        return context.__run();
+    },
+    get_js_src: function() {
+        if (!this.function_body) {
+            this.compile();
+        }
+        return this.function_body;
+    },
+    compile: function() {
+        var start = 0;
+        var delimeter = '_%_';
+        var body = this.template.replace(this.options.tag_re, function(matchedString, group, offset, fullString) {
+            var replace = delimeter + ";\n";
+            if (matchedString.charAt(2) == "=") {
+                replace += "  __out += " + group + ";\n";
+            } else {
+                replace += "  " + group + "\n";
+            }
+            replace += "  __out += " + delimeter;
+            return replace;
+        })
+        var functionBody = "__out += " + delimeter + body + delimeter + ";\n" + "return __out.join(" + delimeter + "" + delimeter + ");\n";
+        functionBody = functionBody.replace(/'/g, "\\'");
+        var regex = new RegExp(delimeter,'g');
+        functionBody = functionBody.replace(regex, "'");
+        var re_replace = function foo($1) {
+            return "__out.push(" + $1.match(/^__out\s\+\=\s(.*);$/)[1] + ");";
+        };
+        this.function_body = "var __out = new Array();" + functionBody.replace(/__out\s\+\=\s(.*);/g, re_replace);
+        return new Function(this.function_body);
+    }
+});
+
+
+核心代码： function RoleInfoParser(roleInfo, options) {
+        var ctx = this;
+        var typeRoleInfo = typeOf(roleInfo);
+        switch (typeRoleInfo) {
+        case 'object':
+            ctx.raw_info = roleInfo;
+            break;
+        case 'string':
+            ctx.raw_info = js_eval(lpc_2_js(trim(roleInfo)));
+            break;
+        default:
+            throw 'roleInfo should be Object or String.';
+        }
+        options = extend({
+            conf: new RoleNameConf(),
+            gConf: window.CBG_GAME_CONFIG || {},
+            resUrl: window.ResUrl || '',
+            serverId: '',
+            equipRequestTime: window.EquipRequestTime || '',
+            serverCurrentTime: window.ServerCurrentTime || ''
+        }, options || {});
+        ctx.conf = options.conf;
+        ctx.gConf = options.gConf;
+        ctx.resUrl = options.resUrl;
+        ctx.serverId = options.serverId;
+        ctx.equipRequestTime = options.equipRequestTime;
+        ctx.serverCurrentTime = options.serverCurrentTime;
+        ctx.split_equip_dict = options.split_equip_dict || {};
+        ctx.is_support_inquiry = options.is_support_inquiry;
+        ctx.inquiry_support_info = options.inquiry_support_info || {};
+        ctx.game_ordersn = options.game_ordersn;
+        ctx.is_my_equip = options.is_my_equip;
+        ctx.equip_level = options.equip_level
+        ctx.result = {};
+        ctx.parse_role();
+    }

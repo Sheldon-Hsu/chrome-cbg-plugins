@@ -1,0 +1,1954 @@
+{
+  "bbxiu": {
+    "0": {
+      "level": 0,
+      "exp": 0,
+      "totalexp": 0,
+      "guozi_size": 0
+    },
+    "1": {
+      "level": 1,
+      "exp": 150,
+      "totalexp": 150,
+      "guozi_size": 1
+    },
+    "2": {
+      "level": 2,
+      "exp": 210,
+      "totalexp": 360,
+      "guozi_size": 2
+    },
+    "3": {
+      "level": 3,
+      "exp": 290,
+      "totalexp": 650,
+      "guozi_size": 4
+    },
+    "4": {
+      "level": 4,
+      "exp": 390,
+      "totalexp": 1040,
+      "guozi_size": 7
+    },
+    "5": {
+      "level": 5,
+      "exp": 510,
+      "totalexp": 1550,
+      "guozi_size": 10
+    },
+    "6": {
+      "level": 6,
+      "exp": 650,
+      "totalexp": 2200,
+      "guozi_size": 15
+    },
+    "7": {
+      "level": 7,
+      "exp": 810,
+      "totalexp": 3010,
+      "guozi_size": 20
+    },
+    "8": {
+      "level": 8,
+      "exp": 990,
+      "totalexp": 4000,
+      "guozi_size": 27
+    },
+    "9": {
+      "level": 9,
+      "exp": 1190,
+      "totalexp": 5190,
+      "guozi_size": 35
+    },
+    "10": {
+      "level": 10,
+      "exp": 1410,
+      "totalexp": 6600,
+      "guozi_size": 44
+    },
+    "11": {
+      "level": 11,
+      "exp": 1650,
+      "totalexp": 8250,
+      "guozi_size": 55
+    },
+    "12": {
+      "level": 12,
+      "exp": 1910,
+      "totalexp": 10160,
+      "guozi_size": 68
+    },
+    "13": {
+      "level": 13,
+      "exp": 2190,
+      "totalexp": 12350,
+      "guozi_size": 82
+    },
+    "14": {
+      "level": 14,
+      "exp": 2490,
+      "totalexp": 14840,
+      "guozi_size": 99
+    },
+    "15": {
+      "level": 15,
+      "exp": 2810,
+      "totalexp": 17650,
+      "guozi_size": 118
+    },
+    "16": {
+      "level": 16,
+      "exp": 3150,
+      "totalexp": 20800,
+      "guozi_size": 139
+    },
+    "17": {
+      "level": 17,
+      "exp": 3510,
+      "totalexp": 24310,
+      "guozi_size": 162
+    },
+    "18": {
+      "level": 18,
+      "exp": 3890,
+      "totalexp": 28200,
+      "guozi_size": 188
+    },
+    "19": {
+      "level": 19,
+      "exp": 4290,
+      "totalexp": 32490,
+      "guozi_size": 217
+    },
+    "20": {
+      "level": 20,
+      "exp": 4710,
+      "totalexp": 37200,
+      "guozi_size": 248
+    },
+    "21": {
+      "level": 21,
+      "exp": 5150,
+      "totalexp": 42350,
+      "guozi_size": 282
+    },
+    "22": {
+      "level": 22,
+      "exp": 5610,
+      "totalexp": 47960,
+      "guozi_size": 320
+    },
+    "23": {
+      "level": 23,
+      "exp": 6090,
+      "totalexp": 54050,
+      "guozi_size": 360
+    },
+    "24": {
+      "level": 24,
+      "exp": 6590,
+      "totalexp": 60640,
+      "guozi_size": 404
+    },
+    "25": {
+      "level": 25,
+      "exp": 7110,
+      "totalexp": 67750,
+      "guozi_size": 452
+    }
+  },
+  "fangxiu": {
+    "1": {
+      "level": 1,
+      "totalcost": 30
+    },
+    "2": {
+      "level": 2,
+      "totalcost": 72
+    },
+    "3": {
+      "level": 3,
+      "totalcost": 130
+    },
+    "4": {
+      "level": 4,
+      "totalcost": 208
+    },
+    "5": {
+      "level": 5,
+      "totalcost": 310
+    },
+    "6": {
+      "level": 6,
+      "totalcost": 440
+    },
+    "7": {
+      "level": 7,
+      "totalcost": 602
+    },
+    "8": {
+      "level": 8,
+      "totalcost": 800
+    },
+    "9": {
+      "level": 9,
+      "totalcost": 1038
+    },
+    "10": {
+      "level": 10,
+      "totalcost": 1320
+    },
+    "11": {
+      "level": 11,
+      "totalcost": 1650
+    },
+    "12": {
+      "level": 12,
+      "totalcost": 2032
+    },
+    "13": {
+      "level": 13,
+      "totalcost": 2470
+    },
+    "14": {
+      "level": 14,
+      "totalcost": 2968
+    },
+    "15": {
+      "level": 15,
+      "totalcost": 3530
+    },
+    "16": {
+      "level": 16,
+      "totalcost": 4160
+    },
+    "17": {
+      "level": 17,
+      "totalcost": 4862
+    },
+    "18": {
+      "level": 18,
+      "totalcost": 5640
+    },
+    "19": {
+      "level": 19,
+      "totalcost": 6498
+    },
+    "20": {
+      "level": 20,
+      "totalcost": 7440
+    },
+    "21": {
+      "level": 21,
+      "totalcost": 8740
+    },
+    "22": {
+      "level": 22,
+      "totalcost": 9592
+    },
+    "23": {
+      "level": 23,
+      "totalcost": 10810
+    },
+    "24": {
+      "level": 24,
+      "totalcost": 12128
+    },
+    "25": {
+      "level": 25,
+      "totalcost": 13550
+    }
+  },
+  "gongxiu": {
+    "1": {
+      "level": 1,
+      "totalcost": 45
+    },
+    "2": {
+      "level": 2,
+      "totalcost": 108
+    },
+    "3": {
+      "level": 3,
+      "totalcost": 195
+    },
+    "4": {
+      "level": 4,
+      "totalcost": 312
+    },
+    "5": {
+      "level": 5,
+      "totalcost": 465
+    },
+    "6": {
+      "level": 6,
+      "totalcost": 660
+    },
+    "7": {
+      "level": 7,
+      "totalcost": 903
+    },
+    "8": {
+      "level": 8,
+      "totalcost": 1200
+    },
+    "9": {
+      "level": 9,
+      "totalcost": 1557
+    },
+    "10": {
+      "level": 10,
+      "totalcost": 1980
+    },
+    "11": {
+      "level": 11,
+      "totalcost": 2475
+    },
+    "12": {
+      "level": 12,
+      "totalcost": 3048
+    },
+    "13": {
+      "level": 13,
+      "totalcost": 3705
+    },
+    "14": {
+      "level": 14,
+      "totalcost": 4452
+    },
+    "15": {
+      "level": 15,
+      "totalcost": 5295
+    },
+    "16": {
+      "level": 16,
+      "totalcost": 6240
+    },
+    "17": {
+      "level": 17,
+      "totalcost": 7293
+    },
+    "18": {
+      "level": 18,
+      "totalcost": 8460
+    },
+    "19": {
+      "level": 19,
+      "totalcost": 9747
+    },
+    "20": {
+      "level": 20,
+      "totalcost": 11160
+    },
+    "21": {
+      "level": 21,
+      "totalcost": 12705
+    },
+    "22": {
+      "level": 22,
+      "totalcost": 14388
+    },
+    "23": {
+      "level": 23,
+      "totalcost": 16125
+    },
+    "24": {
+      "level": 24,
+      "totalcost": 18192
+    },
+    "25": {
+      "level": 25,
+      "totalcost": 20325
+    }
+  },
+  "qianyuandan": {
+    "0": {
+      "exp": 0,
+      "cost": 0,
+      "totalcost": 0
+    },
+    "1": {
+      "exp": 22341872,
+      "cost": 4468371,
+      "totalcost": 447
+    },
+    "2": {
+      "exp": 27846728,
+      "cost": 5569343,
+      "totalcost": 1004
+    },
+    "3": {
+      "exp": 34534248,
+      "cost": 6906847,
+      "totalcost": 1694
+    },
+    "4": {
+      "exp": 42519680,
+      "cost": 8503933,
+      "totalcost": 2545
+    },
+    "5": {
+      "exp": 51918272,
+      "cost": 10383652,
+      "totalcost": 3583
+    },
+    "6": {
+      "exp": 62845272,
+      "cost": 12569051,
+      "totalcost": 4840
+    },
+    "7": {
+      "exp": 75415928,
+      "cost": 15083183,
+      "totalcost": 6348
+    },
+    "8": {
+      "exp": 75977600,
+      "cost": 15195518,
+      "totalcost": 7868
+    },
+    "9": {
+      "exp": 72201200,
+      "cost": 14440238,
+      "totalcost": 9312
+    }
+  },
+  "qiangzhuang": {
+    "1": {
+      "level": 1,
+      "totalcost": 43
+    },
+    "2": {
+      "level": 2,
+      "totalcost": 93
+    },
+    "3": {
+      "level": 3,
+      "totalcost": 150
+    },
+    "4": {
+      "level": 4,
+      "totalcost": 215
+    },
+    "5": {
+      "level": 5,
+      "totalcost": 290
+    },
+    "6": {
+      "level": 6,
+      "totalcost": 376
+    },
+    "7": {
+      "level": 7,
+      "totalcost": 473
+    },
+    "8": {
+      "level": 8,
+      "totalcost": 582
+    },
+    "9": {
+      "level": 9,
+      "totalcost": 705
+    },
+    "10": {
+      "level": 10,
+      "totalcost": 843
+    },
+    "11": {
+      "level": 11,
+      "totalcost": 996
+    },
+    "12": {
+      "level": 12,
+      "totalcost": 1165
+    },
+    "13": {
+      "level": 13,
+      "totalcost": 1352
+    },
+    "14": {
+      "level": 14,
+      "totalcost": 1558
+    },
+    "15": {
+      "level": 15,
+      "totalcost": 1783
+    },
+    "16": {
+      "level": 16,
+      "totalcost": 2028
+    },
+    "17": {
+      "level": 17,
+      "totalcost": 2295
+    },
+    "18": {
+      "level": 18,
+      "totalcost": 2585
+    },
+    "19": {
+      "level": 19,
+      "totalcost": 2898
+    },
+    "20": {
+      "level": 20,
+      "totalcost": 3235
+    },
+    "21": {
+      "level": 21,
+      "totalcost": 3598
+    },
+    "22": {
+      "level": 22,
+      "totalcost": 3988
+    },
+    "23": {
+      "level": 23,
+      "totalcost": 4405
+    },
+    "24": {
+      "level": 24,
+      "totalcost": 4850
+    },
+    "25": {
+      "level": 25,
+      "totalcost": 5325
+    },
+    "26": {
+      "level": 26,
+      "totalcost": 5831
+    },
+    "27": {
+      "level": 27,
+      "totalcost": 6368
+    },
+    "28": {
+      "level": 28,
+      "totalcost": 6937
+    },
+    "29": {
+      "level": 29,
+      "totalcost": 7540
+    },
+    "30": {
+      "level": 30,
+      "totalcost": 8178
+    },
+    "31": {
+      "level": 31,
+      "totalcost": 8851
+    },
+    "32": {
+      "level": 32,
+      "totalcost": 9560
+    },
+    "33": {
+      "level": 33,
+      "totalcost": 10307
+    },
+    "34": {
+      "level": 34,
+      "totalcost": 11093
+    },
+    "35": {
+      "level": 35,
+      "totalcost": 11918
+    },
+    "36": {
+      "level": 36,
+      "totalcost": 12783
+    },
+    "37": {
+      "level": 37,
+      "totalcost": 13690
+    },
+    "38": {
+      "level": 38,
+      "totalcost": 14640
+    },
+    "39": {
+      "level": 39,
+      "totalcost": 15633
+    },
+    "40": {
+      "level": 40,
+      "totalcost": 16670
+    },
+    "0": {
+      "level": 0,
+      "totalcost": 0
+    }
+  },
+  "school_skill": {
+    "0": {
+      "level": 0,
+      "totalcost": 0
+    },
+    "1": {
+      "level": 1,
+      "totalcost": 0
+    },
+    "2": {
+      "level": 2,
+      "totalcost": 0
+    },
+    "3": {
+      "level": 3,
+      "totalcost": 0
+    },
+    "4": {
+      "level": 4,
+      "totalcost": 0
+    },
+    "5": {
+      "level": 5,
+      "totalcost": 0
+    },
+    "6": {
+      "level": 6,
+      "totalcost": 0
+    },
+    "7": {
+      "level": 7,
+      "totalcost": 0
+    },
+    "8": {
+      "level": 8,
+      "totalcost": 0
+    },
+    "9": {
+      "level": 9,
+      "totalcost": 0
+    },
+    "10": {
+      "level": 10,
+      "totalcost": 0
+    },
+    "11": {
+      "level": 11,
+      "totalcost": 0
+    },
+    "12": {
+      "level": 12,
+      "totalcost": 0
+    },
+    "13": {
+      "level": 13,
+      "totalcost": 0
+    },
+    "14": {
+      "level": 14,
+      "totalcost": 0
+    },
+    "15": {
+      "level": 15,
+      "totalcost": 0
+    },
+    "16": {
+      "level": 16,
+      "totalcost": 0
+    },
+    "17": {
+      "level": 17,
+      "totalcost": 0
+    },
+    "18": {
+      "level": 18,
+      "totalcost": 0
+    },
+    "19": {
+      "level": 19,
+      "totalcost": 0
+    },
+    "20": {
+      "level": 20,
+      "totalcost": 1
+    },
+    "21": {
+      "level": 21,
+      "totalcost": 1
+    },
+    "22": {
+      "level": 22,
+      "totalcost": 1
+    },
+    "23": {
+      "level": 23,
+      "totalcost": 1
+    },
+    "24": {
+      "level": 24,
+      "totalcost": 1
+    },
+    "25": {
+      "level": 25,
+      "totalcost": 1
+    },
+    "26": {
+      "level": 26,
+      "totalcost": 1
+    },
+    "27": {
+      "level": 27,
+      "totalcost": 2
+    },
+    "28": {
+      "level": 28,
+      "totalcost": 2
+    },
+    "29": {
+      "level": 29,
+      "totalcost": 2
+    },
+    "30": {
+      "level": 30,
+      "totalcost": 3
+    },
+    "31": {
+      "level": 31,
+      "totalcost": 3
+    },
+    "32": {
+      "level": 32,
+      "totalcost": 3
+    },
+    "33": {
+      "level": 33,
+      "totalcost": 4
+    },
+    "34": {
+      "level": 34,
+      "totalcost": 4
+    },
+    "35": {
+      "level": 35,
+      "totalcost": 5
+    },
+    "36": {
+      "level": 36,
+      "totalcost": 6
+    },
+    "37": {
+      "level": 37,
+      "totalcost": 6
+    },
+    "38": {
+      "level": 38,
+      "totalcost": 7
+    },
+    "39": {
+      "level": 39,
+      "totalcost": 8
+    },
+    "40": {
+      "level": 40,
+      "totalcost": 9
+    },
+    "41": {
+      "level": 41,
+      "totalcost": 10
+    },
+    "42": {
+      "level": 42,
+      "totalcost": 11
+    },
+    "43": {
+      "level": 43,
+      "totalcost": 12
+    },
+    "44": {
+      "level": 44,
+      "totalcost": 13
+    },
+    "45": {
+      "level": 45,
+      "totalcost": 15
+    },
+    "46": {
+      "level": 46,
+      "totalcost": 16
+    },
+    "47": {
+      "level": 47,
+      "totalcost": 18
+    },
+    "48": {
+      "level": 48,
+      "totalcost": 20
+    },
+    "49": {
+      "level": 49,
+      "totalcost": 22
+    },
+    "50": {
+      "level": 50,
+      "totalcost": 24
+    },
+    "51": {
+      "level": 51,
+      "totalcost": 26
+    },
+    "52": {
+      "level": 52,
+      "totalcost": 28
+    },
+    "53": {
+      "level": 53,
+      "totalcost": 31
+    },
+    "54": {
+      "level": 54,
+      "totalcost": 33
+    },
+    "55": {
+      "level": 55,
+      "totalcost": 36
+    },
+    "56": {
+      "level": 56,
+      "totalcost": 39
+    },
+    "57": {
+      "level": 57,
+      "totalcost": 43
+    },
+    "58": {
+      "level": 58,
+      "totalcost": 46
+    },
+    "59": {
+      "level": 59,
+      "totalcost": 50
+    },
+    "60": {
+      "level": 60,
+      "totalcost": 54
+    },
+    "61": {
+      "level": 61,
+      "totalcost": 58
+    },
+    "62": {
+      "level": 62,
+      "totalcost": 62
+    },
+    "63": {
+      "level": 63,
+      "totalcost": 67
+    },
+    "64": {
+      "level": 64,
+      "totalcost": 72
+    },
+    "65": {
+      "level": 65,
+      "totalcost": 77
+    },
+    "66": {
+      "level": 66,
+      "totalcost": 83
+    },
+    "67": {
+      "level": 67,
+      "totalcost": 89
+    },
+    "68": {
+      "level": 68,
+      "totalcost": 95
+    },
+    "69": {
+      "level": 69,
+      "totalcost": 101
+    },
+    "70": {
+      "level": 70,
+      "totalcost": 108
+    },
+    "71": {
+      "level": 71,
+      "totalcost": 115
+    },
+    "72": {
+      "level": 72,
+      "totalcost": 123
+    },
+    "73": {
+      "level": 73,
+      "totalcost": 131
+    },
+    "74": {
+      "level": 74,
+      "totalcost": 140
+    },
+    "75": {
+      "level": 75,
+      "totalcost": 149
+    },
+    "76": {
+      "level": 76,
+      "totalcost": 158
+    },
+    "77": {
+      "level": 77,
+      "totalcost": 168
+    },
+    "78": {
+      "level": 78,
+      "totalcost": 178
+    },
+    "79": {
+      "level": 79,
+      "totalcost": 189
+    },
+    "80": {
+      "level": 80,
+      "totalcost": 200
+    },
+    "81": {
+      "level": 81,
+      "totalcost": 212
+    },
+    "82": {
+      "level": 82,
+      "totalcost": 224
+    },
+    "83": {
+      "level": 83,
+      "totalcost": 237
+    },
+    "84": {
+      "level": 84,
+      "totalcost": 251
+    },
+    "85": {
+      "level": 85,
+      "totalcost": 265
+    },
+    "86": {
+      "level": 86,
+      "totalcost": 280
+    },
+    "87": {
+      "level": 87,
+      "totalcost": 295
+    },
+    "88": {
+      "level": 88,
+      "totalcost": 311
+    },
+    "89": {
+      "level": 89,
+      "totalcost": 328
+    },
+    "90": {
+      "level": 90,
+      "totalcost": 346
+    },
+    "91": {
+      "level": 91,
+      "totalcost": 364
+    },
+    "92": {
+      "level": 92,
+      "totalcost": 383
+    },
+    "93": {
+      "level": 93,
+      "totalcost": 403
+    },
+    "94": {
+      "level": 94,
+      "totalcost": 424
+    },
+    "95": {
+      "level": 95,
+      "totalcost": 445
+    },
+    "96": {
+      "level": 96,
+      "totalcost": 468
+    },
+    "97": {
+      "level": 97,
+      "totalcost": 491
+    },
+    "98": {
+      "level": 98,
+      "totalcost": 515
+    },
+    "99": {
+      "level": 99,
+      "totalcost": 540
+    },
+    "100": {
+      "level": 100,
+      "totalcost": 566
+    },
+    "101": {
+      "level": 101,
+      "totalcost": 593
+    },
+    "102": {
+      "level": 102,
+      "totalcost": 621
+    },
+    "103": {
+      "level": 103,
+      "totalcost": 650
+    },
+    "104": {
+      "level": 104,
+      "totalcost": 681
+    },
+    "105": {
+      "level": 105,
+      "totalcost": 712
+    },
+    "106": {
+      "level": 106,
+      "totalcost": 744
+    },
+    "107": {
+      "level": 107,
+      "totalcost": 778
+    },
+    "108": {
+      "level": 108,
+      "totalcost": 813
+    },
+    "109": {
+      "level": 109,
+      "totalcost": 849
+    },
+    "110": {
+      "level": 110,
+      "totalcost": 886
+    },
+    "111": {
+      "level": 111,
+      "totalcost": 925
+    },
+    "112": {
+      "level": 112,
+      "totalcost": 965
+    },
+    "113": {
+      "level": 113,
+      "totalcost": 1006
+    },
+    "114": {
+      "level": 114,
+      "totalcost": 1049
+    },
+    "115": {
+      "level": 115,
+      "totalcost": 1093
+    },
+    "116": {
+      "level": 116,
+      "totalcost": 1139
+    },
+    "117": {
+      "level": 117,
+      "totalcost": 1186
+    },
+    "118": {
+      "level": 118,
+      "totalcost": 1235
+    },
+    "119": {
+      "level": 119,
+      "totalcost": 1285
+    },
+    "120": {
+      "level": 120,
+      "totalcost": 1337
+    },
+    "121": {
+      "level": 121,
+      "totalcost": 1390
+    },
+    "122": {
+      "level": 122,
+      "totalcost": 1446
+    },
+    "123": {
+      "level": 123,
+      "totalcost": 1503
+    },
+    "124": {
+      "level": 124,
+      "totalcost": 1561
+    },
+    "125": {
+      "level": 125,
+      "totalcost": 1622
+    },
+    "126": {
+      "level": 126,
+      "totalcost": 1685
+    },
+    "127": {
+      "level": 127,
+      "totalcost": 1749
+    },
+    "128": {
+      "level": 128,
+      "totalcost": 1815
+    },
+    "129": {
+      "level": 129,
+      "totalcost": 1884
+    },
+    "130": {
+      "level": 130,
+      "totalcost": 1954
+    },
+    "131": {
+      "level": 131,
+      "totalcost": 2026
+    },
+    "132": {
+      "level": 132,
+      "totalcost": 2101
+    },
+    "133": {
+      "level": 133,
+      "totalcost": 2178
+    },
+    "134": {
+      "level": 134,
+      "totalcost": 2257
+    },
+    "135": {
+      "level": 135,
+      "totalcost": 2338
+    },
+    "136": {
+      "level": 136,
+      "totalcost": 2422
+    },
+    "137": {
+      "level": 137,
+      "totalcost": 2508
+    },
+    "138": {
+      "level": 138,
+      "totalcost": 2596
+    },
+    "139": {
+      "level": 139,
+      "totalcost": 2687
+    },
+    "140": {
+      "level": 140,
+      "totalcost": 2780
+    },
+    "141": {
+      "level": 141,
+      "totalcost": 2876
+    },
+    "142": {
+      "level": 142,
+      "totalcost": 2975
+    },
+    "143": {
+      "level": 143,
+      "totalcost": 3076
+    },
+    "144": {
+      "level": 144,
+      "totalcost": 3180
+    },
+    "145": {
+      "level": 145,
+      "totalcost": 3287
+    },
+    "146": {
+      "level": 146,
+      "totalcost": 3397
+    },
+    "147": {
+      "level": 147,
+      "totalcost": 3509
+    },
+    "148": {
+      "level": 148,
+      "totalcost": 3625
+    },
+    "149": {
+      "level": 149,
+      "totalcost": 3743
+    },
+    "150": {
+      "level": 150,
+      "totalcost": 3865
+    },
+    "151": {
+      "level": 151,
+      "totalcost": 4114
+    },
+    "152": {
+      "level": 152,
+      "totalcost": 4370
+    },
+    "153": {
+      "level": 153,
+      "totalcost": 4632
+    },
+    "154": {
+      "level": 154,
+      "totalcost": 4901
+    },
+    "155": {
+      "level": 155,
+      "totalcost": 5177
+    },
+    "156": {
+      "level": 156,
+      "totalcost": 5601
+    },
+    "157": {
+      "level": 157,
+      "totalcost": 6036
+    },
+    "158": {
+      "level": 158,
+      "totalcost": 6481
+    },
+    "159": {
+      "level": 159,
+      "totalcost": 6937
+    },
+    "160": {
+      "level": 160,
+      "totalcost": 7404
+    },
+    "161": {
+      "level": 161,
+      "totalcost": 7854
+    },
+    "162": {
+      "level": 162,
+      "totalcost": 8314
+    },
+    "162": {
+      "level": 162,
+      "totalcost": 8782
+    },
+    "164": {
+      "level": 164,
+      "totalcost": 9258
+    },
+    "165": {
+      "level": 165,
+      "totalcost": 9744
+    },
+    "166": {
+      "level": 166,
+      "totalcost": 10238
+    },
+    "167": {
+      "level": 167,
+      "totalcost": 10741
+    },
+    "168": {
+      "level": 168,
+      "totalcost": 11254
+    },
+    "169": {
+      "level": 169,
+      "totalcost": 11775
+    },
+    "170": {
+      "level": 170,
+      "totalcost": 12306
+    },
+    "171": {
+      "level": 171,
+      "totalcost": 13027
+    },
+    "172": {
+      "level": 172,
+      "totalcost": 13760
+    },
+    "173": {
+      "level": 173,
+      "totalcost": 14506
+    },
+    "174": {
+      "level": 174,
+      "totalcost": 15265
+    },
+    "175": {
+      "level": 175,
+      "totalcost": 16037
+    },
+    "176": {
+      "level": 176,
+      "totalcost": 17019
+    },
+    "177": {
+      "level": 177,
+      "totalcost": 18018
+    },
+    "178": {
+      "level": 178,
+      "totalcost": 19033
+    },
+    "179": {
+      "level": 179,
+      "totalcost": 20066
+    },
+    "180": {
+      "level": 180,
+      "totalcost": 21291
+    }
+  },
+  "life_skill": {
+    "0": {
+      "level": 0,
+      "totalcost": 0
+    },
+    "1": {
+      "level": 1,
+      "totalcost": 0
+    },
+    "2": {
+      "level": 2,
+      "totalcost": 0
+    },
+    "3": {
+      "level": 3,
+      "totalcost": 0
+    },
+    "4": {
+      "level": 4,
+      "totalcost": 0
+    },
+    "5": {
+      "level": 5,
+      "totalcost": 0
+    },
+    "6": {
+      "level": 6,
+      "totalcost": 0
+    },
+    "7": {
+      "level": 7,
+      "totalcost": 0
+    },
+    "8": {
+      "level": 8,
+      "totalcost": 0
+    },
+    "9": {
+      "level": 9,
+      "totalcost": 0
+    },
+    "10": {
+      "level": 10,
+      "totalcost": 0
+    },
+    "11": {
+      "level": 11,
+      "totalcost": 0
+    },
+    "12": {
+      "level": 12,
+      "totalcost": 0
+    },
+    "13": {
+      "level": 13,
+      "totalcost": 0
+    },
+    "14": {
+      "level": 14,
+      "totalcost": 0
+    },
+    "15": {
+      "level": 15,
+      "totalcost": 0
+    },
+    "16": {
+      "level": 16,
+      "totalcost": 0
+    },
+    "17": {
+      "level": 17,
+      "totalcost": 0
+    },
+    "18": {
+      "level": 18,
+      "totalcost": 0
+    },
+    "19": {
+      "level": 19,
+      "totalcost": 0
+    },
+    "20": {
+      "level": 20,
+      "totalcost": 0
+    },
+    "21": {
+      "level": 21,
+      "totalcost": 0
+    },
+    "22": {
+      "level": 22,
+      "totalcost": 0
+    },
+    "23": {
+      "level": 23,
+      "totalcost": 0
+    },
+    "24": {
+      "level": 24,
+      "totalcost": 1
+    },
+    "25": {
+      "level": 25,
+      "totalcost": 1
+    },
+    "26": {
+      "level": 26,
+      "totalcost": 1
+    },
+    "27": {
+      "level": 27,
+      "totalcost": 1
+    },
+    "28": {
+      "level": 28,
+      "totalcost": 1
+    },
+    "29": {
+      "level": 29,
+      "totalcost": 1
+    },
+    "30": {
+      "level": 30,
+      "totalcost": 1
+    },
+    "31": {
+      "level": 31,
+      "totalcost": 2
+    },
+    "32": {
+      "level": 32,
+      "totalcost": 2
+    },
+    "33": {
+      "level": 33,
+      "totalcost": 2
+    },
+    "34": {
+      "level": 34,
+      "totalcost": 2
+    },
+    "35": {
+      "level": 35,
+      "totalcost": 3
+    },
+    "36": {
+      "level": 36,
+      "totalcost": 3
+    },
+    "37": {
+      "level": 37,
+      "totalcost": 3
+    },
+    "38": {
+      "level": 38,
+      "totalcost": 4
+    },
+    "39": {
+      "level": 39,
+      "totalcost": 4
+    },
+    "40": {
+      "level": 40,
+      "totalcost": 4
+    },
+    "41": {
+      "level": 41,
+      "totalcost": 5
+    },
+    "42": {
+      "level": 42,
+      "totalcost": 5
+    },
+    "43": {
+      "level": 43,
+      "totalcost": 6
+    },
+    "44": {
+      "level": 44,
+      "totalcost": 7
+    },
+    "45": {
+      "level": 45,
+      "totalcost": 7
+    },
+    "46": {
+      "level": 46,
+      "totalcost": 8
+    },
+    "47": {
+      "level": 47,
+      "totalcost": 9
+    },
+    "48": {
+      "level": 48,
+      "totalcost": 10
+    },
+    "49": {
+      "level": 49,
+      "totalcost": 11
+    },
+    "50": {
+      "level": 50,
+      "totalcost": 12
+    },
+    "51": {
+      "level": 51,
+      "totalcost": 13
+    },
+    "52": {
+      "level": 52,
+      "totalcost": 14
+    },
+    "53": {
+      "level": 53,
+      "totalcost": 15
+    },
+    "54": {
+      "level": 54,
+      "totalcost": 17
+    },
+    "55": {
+      "level": 55,
+      "totalcost": 18
+    },
+    "56": {
+      "level": 56,
+      "totalcost": 20
+    },
+    "57": {
+      "level": 57,
+      "totalcost": 21
+    },
+    "58": {
+      "level": 58,
+      "totalcost": 23
+    },
+    "59": {
+      "level": 59,
+      "totalcost": 25
+    },
+    "60": {
+      "level": 60,
+      "totalcost": 27
+    },
+    "61": {
+      "level": 61,
+      "totalcost": 29
+    },
+    "62": {
+      "level": 62,
+      "totalcost": 31
+    },
+    "63": {
+      "level": 63,
+      "totalcost": 33
+    },
+    "64": {
+      "level": 64,
+      "totalcost": 36
+    },
+    "65": {
+      "level": 65,
+      "totalcost": 39
+    },
+    "66": {
+      "level": 66,
+      "totalcost": 41
+    },
+    "67": {
+      "level": 67,
+      "totalcost": 44
+    },
+    "68": {
+      "level": 68,
+      "totalcost": 47
+    },
+    "69": {
+      "level": 69,
+      "totalcost": 51
+    },
+    "70": {
+      "level": 70,
+      "totalcost": 54
+    },
+    "71": {
+      "level": 71,
+      "totalcost": 58
+    },
+    "72": {
+      "level": 72,
+      "totalcost": 62
+    },
+    "73": {
+      "level": 73,
+      "totalcost": 66
+    },
+    "74": {
+      "level": 74,
+      "totalcost": 70
+    },
+    "75": {
+      "level": 75,
+      "totalcost": 74
+    },
+    "76": {
+      "level": 76,
+      "totalcost": 79
+    },
+    "77": {
+      "level": 77,
+      "totalcost": 84
+    },
+    "78": {
+      "level": 78,
+      "totalcost": 89
+    },
+    "79": {
+      "level": 79,
+      "totalcost": 94
+    },
+    "80": {
+      "level": 80,
+      "totalcost": 100
+    },
+    "81": {
+      "level": 81,
+      "totalcost": 106
+    },
+    "82": {
+      "level": 82,
+      "totalcost": 112
+    },
+    "83": {
+      "level": 83,
+      "totalcost": 119
+    },
+    "84": {
+      "level": 84,
+      "totalcost": 125
+    },
+    "85": {
+      "level": 85,
+      "totalcost": 133
+    },
+    "86": {
+      "level": 86,
+      "totalcost": 140
+    },
+    "87": {
+      "level": 87,
+      "totalcost": 148
+    },
+    "88": {
+      "level": 88,
+      "totalcost": 156
+    },
+    "89": {
+      "level": 89,
+      "totalcost": 164
+    },
+    "90": {
+      "level": 90,
+      "totalcost": 173
+    },
+    "91": {
+      "level": 91,
+      "totalcost": 182
+    },
+    "92": {
+      "level": 92,
+      "totalcost": 192
+    },
+    "93": {
+      "level": 93,
+      "totalcost": 202
+    },
+    "94": {
+      "level": 94,
+      "totalcost": 212
+    },
+    "95": {
+      "level": 95,
+      "totalcost": 223
+    },
+    "96": {
+      "level": 96,
+      "totalcost": 234
+    },
+    "97": {
+      "level": 97,
+      "totalcost": 245
+    },
+    "98": {
+      "level": 98,
+      "totalcost": 257
+    },
+    "99": {
+      "level": 99,
+      "totalcost": 270
+    },
+    "100": {
+      "level": 100,
+      "totalcost": 283
+    },
+    "101": {
+      "level": 101,
+      "totalcost": 297
+    },
+    "102": {
+      "level": 102,
+      "totalcost": 311
+    },
+    "103": {
+      "level": 103,
+      "totalcost": 325
+    },
+    "104": {
+      "level": 104,
+      "totalcost": 340
+    },
+    "105": {
+      "level": 105,
+      "totalcost": 356
+    },
+    "106": {
+      "level": 106,
+      "totalcost": 372
+    },
+    "107": {
+      "level": 107,
+      "totalcost": 389
+    },
+    "108": {
+      "level": 108,
+      "totalcost": 406
+    },
+    "109": {
+      "level": 109,
+      "totalcost": 424
+    },
+    "110": {
+      "level": 110,
+      "totalcost": 443
+    },
+    "111": {
+      "level": 111,
+      "totalcost": 462
+    },
+    "112": {
+      "level": 112,
+      "totalcost": 482
+    },
+    "113": {
+      "level": 113,
+      "totalcost": 503
+    },
+    "114": {
+      "level": 114,
+      "totalcost": 524
+    },
+    "115": {
+      "level": 115,
+      "totalcost": 547
+    },
+    "116": {
+      "level": 116,
+      "totalcost": 569
+    },
+    "117": {
+      "level": 117,
+      "totalcost": 593
+    },
+    "118": {
+      "level": 118,
+      "totalcost": 617
+    },
+    "119": {
+      "level": 119,
+      "totalcost": 642
+    },
+    "120": {
+      "level": 120,
+      "totalcost": 668
+    },
+    "121": {
+      "level": 121,
+      "totalcost": 695
+    },
+    "122": {
+      "level": 122,
+      "totalcost": 723
+    },
+    "123": {
+      "level": 123,
+      "totalcost": 751
+    },
+    "124": {
+      "level": 124,
+      "totalcost": 781
+    },
+    "125": {
+      "level": 125,
+      "totalcost": 811
+    },
+    "126": {
+      "level": 126,
+      "totalcost": 842
+    },
+    "127": {
+      "level": 127,
+      "totalcost": 874
+    },
+    "128": {
+      "level": 128,
+      "totalcost": 908
+    },
+    "129": {
+      "level": 129,
+      "totalcost": 942
+    },
+    "130": {
+      "level": 130,
+      "totalcost": 977
+    },
+    "131": {
+      "level": 131,
+      "totalcost": 1013
+    },
+    "132": {
+      "level": 132,
+      "totalcost": 1051
+    },
+    "133": {
+      "level": 133,
+      "totalcost": 1089
+    },
+    "134": {
+      "level": 134,
+      "totalcost": 1128
+    },
+    "135": {
+      "level": 135,
+      "totalcost": 1169
+    },
+    "136": {
+      "level": 136,
+      "totalcost": 1211
+    },
+    "137": {
+      "level": 137,
+      "totalcost": 1254
+    },
+    "138": {
+      "level": 138,
+      "totalcost": 1298
+    },
+    "139": {
+      "level": 139,
+      "totalcost": 1343
+    },
+    "140": {
+      "level": 140,
+      "totalcost": 1390
+    },
+    "141": {
+      "level": 141,
+      "totalcost": 1438
+    },
+    "142": {
+      "level": 142,
+      "totalcost": 1487
+    },
+    "143": {
+      "level": 143,
+      "totalcost": 1538
+    },
+    "144": {
+      "level": 144,
+      "totalcost": 1590
+    },
+    "145": {
+      "level": 145,
+      "totalcost": 1643
+    },
+    "146": {
+      "level": 146,
+      "totalcost": 1698
+    },
+    "147": {
+      "level": 147,
+      "totalcost": 1755
+    },
+    "148": {
+      "level": 148,
+      "totalcost": 1812
+    },
+    "149": {
+      "level": 149,
+      "totalcost": 1872
+    },
+    "150": {
+      "level": 150,
+      "totalcost": 1932
+    },
+    "151": {
+      "level": 151,
+      "totalcost": 2032
+    },
+    "152": {
+      "level": 152,
+      "totalcost": 2134
+    },
+    "153": {
+      "level": 153,
+      "totalcost": 2239
+    },
+    "154": {
+      "level": 154,
+      "totalcost": 2347
+    },
+    "155": {
+      "level": 155,
+      "totalcost": 2457
+    },
+    "156": {
+      "level": 156,
+      "totalcost": 2627
+    },
+    "157": {
+      "level": 157,
+      "totalcost": 2801
+    },
+    "158": {
+      "level": 158,
+      "totalcost": 2979
+    },
+    "159": {
+      "level": 159,
+      "totalcost": 3161
+    },
+    "160": {
+      "level": 160,
+      "totalcost": 3348
+    }
+  }
+}
