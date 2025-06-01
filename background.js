@@ -37,121 +37,87 @@ async function loadJSON() {
 }
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.action === "fetchXiulian") {
+    if (request.action === "fetchData") {
         chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
 
-            // 先注入依赖脚本
-            chrome.scripting.executeScript({
-                target: { tabId: tabs[0].id },
-                world: 'MAIN',
-                files: ['/top/cbg-xyq.res.netease.com/rcc10a11c2d3fb39c7e084/js/show_role_detail.js'] // 确保路径正确
-            }, () => {
-                // 依赖加载后再执行主逻辑
-                chrome.scripting.executeScript({
-                    target: {tabId: tabs[0].id},
-                    function: (injectedData) => {
-                        console.log("进入脚本");
-
-                        //
-                        const roleShow = new RoleInfoShow();
-                        console.log(roleShow.role_parser.get_qian_yuan_dan())
-                        console.log(roleShow.role_parser.get_skill_data())
-
-
-                        const data = {}
-                        // 提取目标表格数据
-                        const roleBox = document.getElementById('role_info_box');
-                        if (!roleBox) {
-                            throw new Error('未找到role_info_box元素,' + document.textContent);
-                        }
-                        console.log("接收到的数据:", injectedData);
-                        Array.from(roleBox.querySelectorAll('td')).forEach(td => {
-                            if (td.textContent.includes('新版乾元丹数量')) {
-                                data.qyd = td.textContent.split('：')[1].trim();
-                                data.qydCost = injectedData["qianyuandan"][data.qyd]["totalcost"]
-                            }
-                        });
-
-
-                        // 防御修炼数据提取（兼容方案）
-                        Array.from(roleBox.querySelectorAll('th')).forEach(th => {
-                            if (th.textContent.includes('攻击修炼')) {
-                                const valueCell = th.nextElementSibling;
-                                const gjxlAndupper = valueCell.textContent.trim();
-                                data.gjxl = gjxlAndupper.split("/")[0]
-                                const gjxlUpper = gjxlAndupper.split("/")[1]
-                                data.gjxlCost = injectedData["gongxiu"][data.gjxl]["totalcost"]
-                            }
-                            if (th.textContent.includes('防御修炼')) {
-                                const valueCell = th.nextElementSibling;
-                                const fyxlAndupper = valueCell.textContent.trim();
-                                data.fyxl = fyxlAndupper.split("/")[0]
-                                const gjxlUpper = fyxlAndupper.split("/")[1]
-                                data.fyxlCost = injectedData["fangxiu"][data.fyxl]["totalcost"]
-                            }
-                            if (th.textContent.includes('法术修炼')) {
-                                const valueCell = th.nextElementSibling
-                                const fsxlAndupper = valueCell.textContent.trim();
-                                data.fsxl = fsxlAndupper.split("/")[0]
-                                const fsxlUpper = fsxlAndupper.split("/")[1]
-                                data.fsxlCost = injectedData["gongxiu"][data.fsxl]["totalcost"]
-                            }
-                            if (th.textContent.includes('抗法修炼')) {
-                                const valueCell = th.nextElementSibling;
-                                const kfxlAndupper = valueCell.textContent.trim();
-                                data.kfxl = kfxlAndupper.split("/")[0]
-                                const kfxlUpper = kfxlAndupper.split("/")[1]
-                                data.kfxlCost = injectedData["fangxiu"][data.kfxl]["totalcost"]
-                            }
-                            if (th.textContent.includes('攻击控制力')) {
-                                const valueCell = th.nextElementSibling;
-                                data.gjkzl = valueCell.textContent.trim();
-                                data.guoziSize1 = injectedData["bbxiu"][data.gjkzl]["guozi_size"]
-                            }
-                            if (th.textContent.includes('防御控制力')) {
-                                const valueCell = th.nextElementSibling;
-                                data.fykzl = valueCell.textContent.trim();
-                                data.guoziSize2 = injectedData["bbxiu"][data.fykzl]["guozi_size"]
-                            }
-                            if (th.textContent.includes('法术控制力')) {
-                                const valueCell = th.nextElementSibling;
-                                data.fskzl = valueCell.textContent.trim();
-                                data.guoziSize3 = injectedData["bbxiu"][data.fskzl]["guozi_size"]
-                            }
-                            if (th.textContent.includes('抗法控制力')) {
-                                const valueCell = th.nextElementSibling;
-                                data.kfkzl = valueCell.textContent.trim();
-                                data.guoziSize4 = injectedData["bbxiu"][data.kfkzl]["guozi_size"]
-                            }
-
-                        });
-
-                        return data;
-                    },
-                    args: [globalCostData] // 将数据作为参数传入
-                }, (results) => {
-                    // 将数据传回侧边栏
-                    chrome.runtime.sendMessage({
-                        action: "updateXiulian",
-                        data: results[0].result
-                    });
-                });
-            });
-
-
-        });
-        return true; // 保持消息通道开放:ml-citation{ref="5" data="citationList"}
-    }
-});
-
-
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.action === "fetchSkill") {
-        chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
+            // 依赖加载后再执行主逻辑
             chrome.scripting.executeScript({
                 target: {tabId: tabs[0].id},
                 function: (injectedData) => {
+                    //
                     const data = {}
+                    const button = document.getElementById('role_basic');
+                    if (button) button.click();
+
+                    // 提取目标表格数据
+                    const roleBox = document.getElementById('role_info_box');
+                    if (!roleBox) {
+                        throw new Error('未找到role_info_box元素,' + document.textContent);
+                    }
+                    Array.from(roleBox.querySelectorAll('td')).forEach(td => {
+                        if (td.textContent.includes('新版乾元丹数量')) {
+                            data.qyd = td.textContent.split('：')[1].trim();
+                            data.qydCost = injectedData["qianyuandan"][data.qyd]["totalcost"]
+                        }
+                    });
+
+                    // 防御修炼数据提取（兼容方案）
+                    Array.from(roleBox.querySelectorAll('th')).forEach(th => {
+                        if (th.textContent.includes('攻击修炼')) {
+                            const valueCell = th.nextElementSibling;
+                            const gjxlAndupper = valueCell.textContent.trim();
+                            data.gjxl = gjxlAndupper.split("/")[0]
+                            const gjxlUpper = gjxlAndupper.split("/")[1]
+                            data.gjxlCost = injectedData["gongxiu"][data.gjxl]["totalcost"]
+                        }
+                        if (th.textContent.includes('防御修炼')) {
+                            const valueCell = th.nextElementSibling;
+                            const fyxlAndupper = valueCell.textContent.trim();
+                            data.fyxl = fyxlAndupper.split("/")[0]
+                            const gjxlUpper = fyxlAndupper.split("/")[1]
+                            data.fyxlCost = injectedData["fangxiu"][data.fyxl]["totalcost"]
+                        }
+                        if (th.textContent.includes('法术修炼')) {
+                            const valueCell = th.nextElementSibling
+                            const fsxlAndupper = valueCell.textContent.trim();
+                            data.fsxl = fsxlAndupper.split("/")[0]
+                            const fsxlUpper = fsxlAndupper.split("/")[1]
+                            data.fsxlCost = injectedData["gongxiu"][data.fsxl]["totalcost"]
+                        }
+                        if (th.textContent.includes('抗法修炼')) {
+                            const valueCell = th.nextElementSibling;
+                            const kfxlAndupper = valueCell.textContent.trim();
+                            data.kfxl = kfxlAndupper.split("/")[0]
+                            const kfxlUpper = kfxlAndupper.split("/")[1]
+                            data.kfxlCost = injectedData["fangxiu"][data.kfxl]["totalcost"]
+                        }
+                        if (th.textContent.includes('攻击控制力')) {
+                            const valueCell = th.nextElementSibling;
+                            data.gjkzl = valueCell.textContent.trim();
+                            data.guoziSize1 = injectedData["bbxiu"][data.gjkzl]["guozi_size"]
+                        }
+                        if (th.textContent.includes('防御控制力')) {
+                            const valueCell = th.nextElementSibling;
+                            data.fykzl = valueCell.textContent.trim();
+                            data.guoziSize2 = injectedData["bbxiu"][data.fykzl]["guozi_size"]
+                        }
+                        if (th.textContent.includes('法术控制力')) {
+                            const valueCell = th.nextElementSibling;
+                            data.fskzl = valueCell.textContent.trim();
+                            data.guoziSize3 = injectedData["bbxiu"][data.fskzl]["guozi_size"]
+                        }
+                        if (th.textContent.includes('抗法控制力')) {
+                            const valueCell = th.nextElementSibling;
+                            data.kfkzl = valueCell.textContent.trim();
+                            data.guoziSize4 = injectedData["bbxiu"][data.kfkzl]["guozi_size"]
+                        }
+
+                    });
+
+                    console.log("点击技能按钮")
+                    const button2 = document.getElementById('role_skill');
+                    if (button2) button2.click();
+
                     const skill_level = Array.from(document.getElementById('role_info_box').querySelector('#school_skill_lists').getElementsByTagName('p'))
                         .map(p => p.textContent);
                     if (skill_level.length === 7) {
@@ -192,13 +158,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                         }
                     });
 
+                    if (button) button.click();
                     return data;
                 },
                 args: [globalCostData] // 将数据作为参数传入
             }, (results) => {
                 // 将数据传回侧边栏
                 chrome.runtime.sendMessage({
-                    action: "updateSkill",
+                    action: "updateData",
                     data: results[0].result
                 });
             });
@@ -206,5 +173,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         return true; // 保持消息通道开放:ml-citation{ref="5" data="citationList"}
     }
 });
+
 
 

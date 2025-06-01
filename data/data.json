@@ -158,6 +158,10 @@
     }
   },
   "fangxiu": {
+    "0": {
+      "level": 0,
+      "totalcost": 0
+    },
     "1": {
       "level": 1,
       "totalcost": 30
@@ -260,6 +264,10 @@
     }
   },
   "gongxiu": {
+    "0": {
+      "level": 0,
+      "totalcost": 0
+    },
     "1": {
       "level": 1,
       "totalcost": 45

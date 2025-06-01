@@ -14,11 +14,19 @@
     "matches": ["*://cbg-xyq.res.netease.com/*"]
   }],
   "action": {
-    "default_title": "点击打开侧边栏"
+    "default_title": "点击打开侧边栏",
+    "default_icon": {
+      "128": "icons/icon128.png"
+    }
   },
+
+  "icons": {
+    "128": "icons/icon128.png"
+  },
+
   "side_panel": {
     "default_path": "sidebar.html"
   },
-  "permissions": ["activeTab", "tabs","scripting","sidePanel","debugger"],
+  "permissions": [ "scripting","sidePanel"],
   "host_permissions": ["<all_urls>"]
 }
