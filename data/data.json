@@ -582,6 +582,86 @@
       "level": 40,
       "totalcost": 16670
     },
+    "41": {
+      "level": 41,
+      "totalcost": 17953
+    },
+    "42": {
+      "level": 42,
+      "totalcost": 19482
+    },
+    "43": {
+      "level": 43,
+      "totalcost": 21259
+    },
+    "44": {
+      "level": 44,
+      "totalcost": 23285
+    },
+    "45": {
+      "level": 45,
+      "totalcost": 25560
+    },
+    "46": {
+      "level": 46,
+      "totalcost": 28085
+    },
+    "47": {
+      "level": 47,
+      "totalcost": 30862
+    },
+    "48": {
+      "level": 48,
+      "totalcost": 33892
+    },
+    "49": {
+      "level": 49,
+      "totalcost": 37175
+    },
+    "50": {
+      "level": 50,
+      "totalcost": 40712
+    },
+    "51": {
+      "level": 51,
+      "totalcost": 44505
+    },
+    "52": {
+      "level": 52,
+      "totalcost": 48555
+    },
+    "53": {
+      "level": 53,
+      "totalcost": 52862
+    },
+    "54": {
+      "level": 54,
+      "totalcost": 57427
+    },
+    "55": {
+      "level": 55,
+      "totalcost": 62252
+    },
+    "56": {
+      "level": 56,
+      "totalcost": 67338
+    },
+    "57": {
+      "level": 57,
+      "totalcost": 72685
+    },
+    "58": {
+      "level": 58,
+      "totalcost": 78294
+    },
+    "59": {
+      "level": 59,
+      "totalcost": 84167
+    },
+    "60": {
+      "level": 60,
+      "totalcost": 90305
+    },
     "0": {
       "level": 0,
       "totalcost": 0
@@ -1240,8 +1320,8 @@
       "level": 162,
       "totalcost": 8314
     },
-    "162": {
-      "level": 162,
+    "163": {
+      "level": 163,
       "totalcost": 8782
     },
     "164": {

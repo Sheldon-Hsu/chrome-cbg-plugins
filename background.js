@@ -44,6 +44,20 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             chrome.scripting.executeScript({
                 target: {tabId: tabs[0].id},
                 function: (injectedData) => {
+
+                    function upper_limit_school_skill(skill_level) {
+                        if (!skill_level) {
+                            return 0;
+                        }
+                        let origin_level = parseInt(skill_level)
+                        if (origin_level > 180) {
+                            return 180;
+                        } else {
+                            return origin_level;
+                        }
+
+                    }
+
                     //
                     const data = {}
                     const button = document.getElementById('role_basic');
@@ -121,13 +135,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                     const skill_level = Array.from(document.getElementById('role_info_box').querySelector('#school_skill_lists').getElementsByTagName('p'))
                         .map(p => p.textContent);
                     if (skill_level.length === 7) {
-                        data.skill_1 = skill_level[0].trim() || '未找到';
-                        data.skill_2 = skill_level[1].trim() || '未找到';
-                        data.skill_3 = skill_level[2].trim() || '未找到';
-                        data.skill_4 = skill_level[3].trim() || '未找到';
-                        data.skill_5 = skill_level[4].trim() || '未找到';
-                        data.skill_6 = skill_level[5].trim() || '未找到';
-                        data.skill_7 = skill_level[6].trim() || '未找到';
+                        data.skill_1 = upper_limit_school_skill(skill_level[0].trim());
+                        data.skill_2 = upper_limit_school_skill(skill_level[1].trim());
+                        data.skill_3 = upper_limit_school_skill(skill_level[2].trim());
+                        data.skill_4 = upper_limit_school_skill(skill_level[3].trim());
+                        data.skill_5 = upper_limit_school_skill(skill_level[4].trim());
+                        data.skill_6 = upper_limit_school_skill(skill_level[5].trim());
+                        data.skill_7 = upper_limit_school_skill(skill_level[6].trim());
 
                         data.skill_1_cost = injectedData["school_skill"][data.skill_1]["totalcost"]
                         data.skill_2_cost = injectedData["school_skill"][data.skill_2]["totalcost"]

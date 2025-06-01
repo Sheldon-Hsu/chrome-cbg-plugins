@@ -1,8 +1,8 @@
 document.addEventListener('DOMContentLoaded', function () {
-    const xiulian = document.getElementById('find_xiulian');
-    const skill = document.getElementById('find_school_skill');
+    const find_data = document.getElementById('find_data');
     const xiulian_data = document.getElementById('xiulian_data');
-    const skill_data = document.getElementById('skill_data');
+    const school_skill_data = document.getElementById('school_skill_data');
+    const life_skill_data = document.getElementById('life_skill_data');
     const calculate = document.getElementById('calculate');
     const calculate_data = document.getElementById('calculate_data');
 
@@ -21,16 +21,16 @@ document.addEventListener('DOMContentLoaded', function () {
                 parseFloat(xiulian_data.querySelector('#fykzl_cost').value) +
                 parseFloat(xiulian_data.querySelector('#fskzl_cost').value) +
                 parseFloat(xiulian_data.querySelector('#kfkzl_cost').value) +
-                parseFloat(skill_data.querySelector('#skill_0_cost').value) +
-                parseFloat(skill_data.querySelector('#skill_1_cost').value) +
-                parseFloat(skill_data.querySelector('#skill_2_cost').value) +
-                parseFloat(skill_data.querySelector('#skill_3_cost').value) +
-                parseFloat(skill_data.querySelector('#skill_4_cost').value) +
-                parseFloat(skill_data.querySelector('#skill_5_cost').value) +
-                parseFloat(skill_data.querySelector('#skill_6_cost').value) +
-                parseFloat(skill_data.querySelector('#qs_cost').value) +
-                parseFloat(skill_data.querySelector('#speed_cost').value) +
-                parseFloat(skill_data.querySelector('#strong_cost').value);
+                parseFloat(school_skill_data.querySelector('#skill_0_cost').value) +
+                parseFloat(school_skill_data.querySelector('#skill_1_cost').value) +
+                parseFloat(school_skill_data.querySelector('#skill_2_cost').value) +
+                parseFloat(school_skill_data.querySelector('#skill_3_cost').value) +
+                parseFloat(school_skill_data.querySelector('#skill_4_cost').value) +
+                parseFloat(school_skill_data.querySelector('#skill_5_cost').value) +
+                parseFloat(school_skill_data.querySelector('#skill_6_cost').value) +
+                parseFloat(life_skill_data.querySelector('#qs_cost').value) +
+                parseFloat(life_skill_data.querySelector('#speed_cost').value) +
+                parseFloat(life_skill_data.querySelector('#strong_cost').value);
 
             calculate_data.querySelector('#totalCost_value').textContent = total_cost || 0
             calculate_data.querySelector('#totalCost_rmb').textContent = parseInt(parseFloat(total_cost) * yxbPrice || 0)
@@ -38,8 +38,8 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-
-    xiulian.addEventListener('click', function () {
+    
+    find_data.addEventListener('click', function () {
 
         // console.log(data);
         // if (window.JSON ) {
@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', function () {
         } else {
             chrome.runtime.sendMessage({action: "fetchData"});
             chrome.runtime.onMessage.addListener((request) => {
-                console.log("修炼数据：")
+                console.log("侧边栏获取到的技能数据：")
                 console.log(request.data)
                 if (request.action === "updateData") {
                     //乾元丹
@@ -94,30 +94,31 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
                     console.log("获取技能数据：" + request.data)
-                    skill_data.querySelector('#skill_0_value').value = request.data.skill_1 || 0;
-                    skill_data.querySelector('#skill_1_value').value = request.data.skill_2 || 0;
-                    skill_data.querySelector('#skill_2_value').value = request.data.skill_3 || 0;
-                    skill_data.querySelector('#skill_3_value').value = request.data.skill_4 || 0;
-                    skill_data.querySelector('#skill_4_value').value = request.data.skill_5 || 0;
-                    skill_data.querySelector('#skill_5_value').value = request.data.skill_6 || 0;
-                    skill_data.querySelector('#skill_6_value').value = request.data.skill_7 || 0;
+                    school_skill_data.querySelector('#skill_0_value').value = request.data.skill_1 || 0;
+                    school_skill_data.querySelector('#skill_1_value').value = request.data.skill_2 || 0;
+                    school_skill_data.querySelector('#skill_2_value').value = request.data.skill_3 || 0;
+                    school_skill_data.querySelector('#skill_3_value').value = request.data.skill_4 || 0;
+                    school_skill_data.querySelector('#skill_4_value').value = request.data.skill_5 || 0;
+                    school_skill_data.querySelector('#skill_5_value').value = request.data.skill_6 || 0;
+                    school_skill_data.querySelector('#skill_6_value').value = request.data.skill_7 || 0;
 
 
-                    skill_data.querySelector('#skill_0_cost').value = request.data.skill_1_cost || 0;
-                    skill_data.querySelector('#skill_1_cost').value = request.data.skill_2_cost || 0;
-                    skill_data.querySelector('#skill_2_cost').value = request.data.skill_3_cost || 0;
-                    skill_data.querySelector('#skill_3_cost').value = request.data.skill_4_cost || 0;
-                    skill_data.querySelector('#skill_4_cost').value = request.data.skill_5_cost || 0;
-                    skill_data.querySelector('#skill_5_cost').value = request.data.skill_6_cost || 0;
-                    skill_data.querySelector('#skill_6_cost').value = request.data.skill_7_cost || 0;
 
-                    skill_data.querySelector('#qs_value').value = request.data.qs || 0
-                    skill_data.querySelector('#speed_value').value = request.data.speed || 0
-                    skill_data.querySelector('#strong_value').value = request.data.strong || 0
+                    school_skill_data.querySelector('#skill_0_cost').value = request.data.skill_1_cost || 0;
+                    school_skill_data.querySelector('#skill_1_cost').value = request.data.skill_2_cost || 0;
+                    school_skill_data.querySelector('#skill_2_cost').value = request.data.skill_3_cost || 0;
+                    school_skill_data.querySelector('#skill_3_cost').value = request.data.skill_4_cost || 0;
+                    school_skill_data.querySelector('#skill_4_cost').value = request.data.skill_5_cost || 0;
+                    school_skill_data.querySelector('#skill_5_cost').value = request.data.skill_6_cost || 0;
+                    school_skill_data.querySelector('#skill_6_cost').value = request.data.skill_7_cost || 0;
 
-                    skill_data.querySelector('#qs_cost').value = request.data.qsCost || 0
-                    skill_data.querySelector('#speed_cost').value = request.data.speedCost || 0
-                    skill_data.querySelector('#strong_cost').value = request.data.strongCost || 0
+                    life_skill_data.querySelector('#qs_value').value = request.data.qs || 0
+                    life_skill_data.querySelector('#speed_value').value = request.data.speed || 0
+                    life_skill_data.querySelector('#strong_value').value = request.data.strong || 0
+
+                    life_skill_data.querySelector('#qs_cost').value = request.data.qsCost || 0
+                    life_skill_data.querySelector('#speed_cost').value = request.data.speedCost || 0
+                    life_skill_data.querySelector('#strong_cost').value = request.data.strongCost || 0
 
 
                     calculator();
