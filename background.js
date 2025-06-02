@@ -63,6 +63,25 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                     if (button) button.click();
 
                     // 提取目标表格数据
+                    const infoBox = document.getElementById('info_panel');
+                    if (!infoBox) {
+                        console.warn('未找到info_panel元素');
+                        //    尝试使用其他方式获取
+                        Array.from(document.querySelectorAll('.price .p10000')).forEach(span => {
+                            if (span.textContent.includes('（元）')) {
+                                data.price = span.textContent.replace(/\s/g, '').split('￥')[1].split("（元）")[0].trim();
+                            }
+                        })
+                    } else {
+                        Array.from(infoBox.querySelectorAll('li')).forEach(li => {
+                            if (li.textContent.includes('价格')) {
+                                data.price = li.textContent.replace(/\s/g, '').split('价格：￥')[1].split("（元）")[0].trim();
+                            } else if (li.textContent.includes('类型：')) {
+                                data.school = li.textContent.replace(/\s/g, '').split('：')[1].trim();
+                            }
+                        })
+                    }
+
                     const roleBox = document.getElementById('role_info_box');
                     if (!roleBox) {
                         throw new Error('未找到role_info_box元素,' + document.textContent);
@@ -159,13 +178,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                         if (h5Value.trim() === "强壮") {
                             data.strong = pValue.trim();
                             data.strongCost = injectedData["qiangzhuang"][data.strong]["totalcost"];
-                            console.log("强壮等级:" + data.strong)
                         } else if (h5Value.trim() === "神速") {
                             data.speed = pValue.trim();
                             data.speedCost = injectedData["qiangzhuang"][data.speed]["totalcost"];
                         } else if (h5Value.trim() === "强身术") {
                             data.qs = pValue.trim();
                             data.qsCost = injectedData["life_skill"][data.qs]["totalcost"];
+                        }else if (h5Value.trim() === "冥想") {
+                            data.mx = pValue.trim();
+                            data.mxCost = injectedData["life_skill"][data.mx]["totalcost"];
                         }
                     });
 

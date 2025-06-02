@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const calculate_data = document.getElementById('calculate_data');
 
 
-    function calculator() {
+    function calculator(priceOnWeb) {
         let yxbPrice = parseFloat(document.getElementById('yxbPrice_value').value);
         if (!yxbPrice) {
             alert("先输入游戏币价格比例，如0.086")
@@ -32,13 +32,19 @@ document.addEventListener('DOMContentLoaded', function () {
                 parseFloat(life_skill_data.querySelector('#speed_cost').value) +
                 parseFloat(life_skill_data.querySelector('#strong_cost').value);
 
+
+            let priceByCal = parseInt(parseFloat(total_cost) * yxbPrice || 0)
             calculate_data.querySelector('#totalCost_value').textContent = total_cost || 0
-            calculate_data.querySelector('#totalCost_rmb').textContent = parseInt(parseFloat(total_cost) * yxbPrice || 0)
+            calculate_data.querySelector('#totalCost_rmb').textContent = priceByCal
+
+            if (priceOnWeb) {
+                calculate_data.querySelector('#discount_value').textContent = parseFloat(priceOnWeb/priceByCal ).toFixed(3);
+            }
 
         }
     }
 
-    
+
     find_data.addEventListener('click', function () {
 
         let yxbPrice = parseFloat(document.getElementById('yxbPrice_value').value);
@@ -94,7 +100,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     school_skill_data.querySelector('#skill_6_value').value = request.data.skill_7 || 0;
 
 
-
                     school_skill_data.querySelector('#skill_0_cost').value = request.data.skill_1_cost || 0;
                     school_skill_data.querySelector('#skill_1_cost').value = request.data.skill_2_cost || 0;
                     school_skill_data.querySelector('#skill_2_cost').value = request.data.skill_3_cost || 0;
@@ -104,15 +109,17 @@ document.addEventListener('DOMContentLoaded', function () {
                     school_skill_data.querySelector('#skill_6_cost').value = request.data.skill_7_cost || 0;
 
                     life_skill_data.querySelector('#qs_value').value = request.data.qs || 0
+                    life_skill_data.querySelector('#mx_value').value = request.data.mx || 0
                     life_skill_data.querySelector('#speed_value').value = request.data.speed || 0
                     life_skill_data.querySelector('#strong_value').value = request.data.strong || 0
 
                     life_skill_data.querySelector('#qs_cost').value = request.data.qsCost || 0
+                    life_skill_data.querySelector('#mx_cost').value = request.data.mxCost || 0
                     life_skill_data.querySelector('#speed_cost').value = request.data.speedCost || 0
                     life_skill_data.querySelector('#strong_cost').value = request.data.strongCost || 0
 
-
-                    calculator();
+                    let priceOnWeb = parseFloat(request.data.price);
+                    calculator(priceOnWeb);
                 }
             });
 

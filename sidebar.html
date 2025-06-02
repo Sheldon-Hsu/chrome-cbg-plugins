@@ -221,6 +221,11 @@
             font-size: 0.75rem;
         }
 
+        .price-set {
+            justify-content: space-between;
+            align-items: center;
+        }
+
         .total-cost {
             display: flex;
             justify-content: space-between;
@@ -228,7 +233,8 @@
             background: linear-gradient(135deg, #f6d365, #fda085);
             padding: 8px 10px;
             border-radius: 6px;
-            margin-top: 8px;
+            margin-top: 6px;
+            margin-bottom: 6px;
             color: white;
             font-weight: bold;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -245,6 +251,13 @@
             font-size: 0.95rem;
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
         }
+        .discount-value {
+            font-size: 0.95rem;
+            background: rgba(255,255,255,0.2);
+            padding: 4px 8px;
+            border-radius: 12px;
+            text-align: center;
+        }
 
         .footer {
             text-align: center;
@@ -258,17 +271,17 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin: 8px 0;
+            margin: 6px 0;
         }
+        .section-header button {
+             flex: 1; /* 关键属性：等分剩余空间 */
+             min-width: 0; /* 允许内容压缩 */
+             margin: 0 4px; /* 按钮间距 */
+             white-space: nowrap; /* 防止文字换行 */
+             overflow: hidden;
+             text-overflow: ellipsis; /* 文字过长显示省略号 */
+         }
 
-        .section-title {
-            font-size: 0.9rem;
-            font-weight: bold;
-            color: white;
-            background: rgba(0, 0, 0, 0.3);
-            padding: 4px 8px;
-            border-radius: 4px;
-        }
 
         .columns-container {
             display: flex;
@@ -318,51 +331,59 @@
 <body>
 <div class="app-container">
     <header class="app-header">
-        <h1><i class="fas fa-dragon"></i> 梦幻西游角色数据工具</h1>
+        <h1><i class="fas fa-dragon"></i>梦幻西游角色数据工具</h1>
         <p>快速提取和计算角色修炼、技能数据</p>
     </header>
 
     <div class="card">
         <div class="card-title">
             <i class="fas fa-coins"></i>
-            <h2>价格设置</h2>
+            <h2>数值设置</h2>
         </div>
 
-        <div class="input-group">
-            <div class="input-field">
-                <label for="yxbPrice_value"><i class="fas fa-money-bill-wave"></i> 金价（元/万两）</label>
-                <input type="text" id="yxbPrice_value" placeholder="输入金价" value="0.0716">
-            </div>
+        <div class="input-group price-set">
+            <div class="data-item">
+                <div class="input-field">
+                    <label for="yxbPrice_value"><i class="fas fa-money-bill-wave"></i> 金价（元/万两）</label>
+                    <input type="text" id="yxbPrice_value" placeholder="输入金价" value="0.0716">
+                </div>
 
-            <div class="input-field">
-                <label for="guoziPrice_value"><i class="fas fa-apple-alt"></i> 修炼果价格（万两）</label>
-                <input type="text" id="guoziPrice_value" placeholder="输入修炼果价格" value="85">
+                <div class="input-field" style="margin-left: 10px;">
+                    <label for="guoziPrice_value"><i class="fas fa-apple-alt"></i> 修炼果价格（万两）</label>
+                    <input type="text" id="guoziPrice_value" placeholder="输入修炼果价格" value="85">
+                </div>
             </div>
         </div>
+    </div>
 
-        <div class="btn-container">
-            <button id="calculate" class="btn btn-primary pulse">
+
+        <div class="section-header" >
+            <button id="find_data" class="btn btn-success pulse" >
+                <i class="fas fa-search"></i> 提取技能并计算
+            </button>
+
+            <button id="calculate" class="btn btn-primary pulse" >
                 <i class="fas fa-calculator"></i> 计算消耗
             </button>
         </div>
 
-        <div class="total-cost" id="calculate_data">
-            <div class="total-label">
-                <i class="fas fa-file-invoice-dollar"></i>
-                <span>总消耗：</span>
-            </div>
-            <div class="total-value">
-                <span id="totalCost_value">0</span> 万两 /
-                <span id="totalCost_rmb">0</span> 元
-            </div>
+
+
+    <div class="total-cost" id="calculate_data">
+        <div class="total-label">
+            <i class="fas fa-file-invoice-dollar"></i>
+            <span>总消耗：</span>
+        </div>
+        <div class="total-value">
+            <span id="totalCost_value">0</span> 万两 /
+            <span id="totalCost_rmb">0</span> 元
+        </div>
+
+        <div class="discount-value">
+            <span id="discount_value">?</span> 折
         </div>
     </div>
 
-    <div class="section-header">
-        <button id="find_data" class="btn btn-success pulse" style="padding: 6px 8px; font-size: 1rem;">
-            <i class="fas fa-search"></i> 提取技能并计算
-        </button>
-    </div>
 
     <div class="card">
         <div class="data-grid" id="xiulian_data">
@@ -476,6 +497,11 @@
                         <div class="item-label">强身</div>
                         <input type="text" class="item-value" id="qs_value">
                         <input type="text" class="item-cost" id="qs_cost">
+                    </div>
+                    <div class="data-item">
+                        <div class="item-label">冥想</div>
+                        <input type="text" class="item-value" id="mx_value">
+                        <input type="text" class="item-cost" id="mx_cost">
                     </div>
                     <div class="data-item">
                         <div class="item-label">神速</div>
