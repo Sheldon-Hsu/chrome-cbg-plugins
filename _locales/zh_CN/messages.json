@@ -1,0 +1,14 @@
+{
+  "extName": {
+    "message": "藏宝阁计算器",
+    "description": "藏宝阁账号价值计算器"
+  },
+  "extDesc": {
+    "message": "藏宝阁计算器",
+    "description": "用来计算CBG账号上任务技能、修炼的价值"
+  },
+  "btnText": {
+    "message": "藏宝阁计算器",
+    "description": "打开侧边栏"
+  }
+}

@@ -148,47 +148,50 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
                     const button2 = document.getElementById('role_skill');
                     if (button2) button2.click();
+                    const role_info_box = document.getElementById('role_info_box').querySelector('#school_skill_lists');
+                    if (role_info_box) {
+                        const skill_level = Array.from(role_info_box.getElementsByTagName('p'))
+                            .map(p => p.textContent);
+                        if (skill_level.length === 7) {
+                            data.skill_1 = upper_limit_school_skill(skill_level[0].trim());
+                            data.skill_2 = upper_limit_school_skill(skill_level[1].trim());
+                            data.skill_3 = upper_limit_school_skill(skill_level[2].trim());
+                            data.skill_4 = upper_limit_school_skill(skill_level[3].trim());
+                            data.skill_5 = upper_limit_school_skill(skill_level[4].trim());
+                            data.skill_6 = upper_limit_school_skill(skill_level[5].trim());
+                            data.skill_7 = upper_limit_school_skill(skill_level[6].trim());
 
-                    const skill_level = Array.from(document.getElementById('role_info_box').querySelector('#school_skill_lists').getElementsByTagName('p'))
-                        .map(p => p.textContent);
-                    if (skill_level.length === 7) {
-                        data.skill_1 = upper_limit_school_skill(skill_level[0].trim());
-                        data.skill_2 = upper_limit_school_skill(skill_level[1].trim());
-                        data.skill_3 = upper_limit_school_skill(skill_level[2].trim());
-                        data.skill_4 = upper_limit_school_skill(skill_level[3].trim());
-                        data.skill_5 = upper_limit_school_skill(skill_level[4].trim());
-                        data.skill_6 = upper_limit_school_skill(skill_level[5].trim());
-                        data.skill_7 = upper_limit_school_skill(skill_level[6].trim());
+                            data.skill_1_cost = injectedData["school_skill"][data.skill_1]["totalcost"]
+                            data.skill_2_cost = injectedData["school_skill"][data.skill_2]["totalcost"]
+                            data.skill_3_cost = injectedData["school_skill"][data.skill_3]["totalcost"]
+                            data.skill_4_cost = injectedData["school_skill"][data.skill_4]["totalcost"]
+                            data.skill_5_cost = injectedData["school_skill"][data.skill_5]["totalcost"]
+                            data.skill_6_cost = injectedData["school_skill"][data.skill_6]["totalcost"]
+                            data.skill_7_cost = injectedData["school_skill"][data.skill_7]["totalcost"]
+                        }
 
-                        data.skill_1_cost = injectedData["school_skill"][data.skill_1]["totalcost"]
-                        data.skill_2_cost = injectedData["school_skill"][data.skill_2]["totalcost"]
-                        data.skill_3_cost = injectedData["school_skill"][data.skill_3]["totalcost"]
-                        data.skill_4_cost = injectedData["school_skill"][data.skill_4]["totalcost"]
-                        data.skill_5_cost = injectedData["school_skill"][data.skill_5]["totalcost"]
-                        data.skill_6_cost = injectedData["school_skill"][data.skill_6]["totalcost"]
-                        data.skill_7_cost = injectedData["school_skill"][data.skill_7]["totalcost"]
+                        const h5Elements = document.getElementById('role_info_box').querySelector('#life_skill_lists').querySelectorAll('h5');
+                        h5Elements.forEach(h5 => {
+                            // 获取前面的p元素内容
+                            const pValue = h5.previousElementSibling.textContent;
+                            const h5Value = h5.textContent;
+
+                            if (h5Value.trim() === "强壮") {
+                                data.strong = pValue.trim();
+                                data.strongCost = injectedData["qiangzhuang"][data.strong]["totalcost"];
+                            } else if (h5Value.trim() === "神速") {
+                                data.speed = pValue.trim();
+                                data.speedCost = injectedData["qiangzhuang"][data.speed]["totalcost"];
+                            } else if (h5Value.trim() === "强身术") {
+                                data.qs = pValue.trim();
+                                data.qsCost = injectedData["life_skill"][data.qs]["totalcost"];
+                            } else if (h5Value.trim() === "冥想") {
+                                data.mx = pValue.trim();
+                                data.mxCost = injectedData["life_skill"][data.mx]["totalcost"];
+                            }
+                        });
                     }
 
-                    const h5Elements = document.getElementById('role_info_box').querySelector('#life_skill_lists').querySelectorAll('h5');
-                    h5Elements.forEach(h5 => {
-                        // 获取前面的p元素内容
-                        const pValue = h5.previousElementSibling.textContent;
-                        const h5Value = h5.textContent;
-
-                        if (h5Value.trim() === "强壮") {
-                            data.strong = pValue.trim();
-                            data.strongCost = injectedData["qiangzhuang"][data.strong]["totalcost"];
-                        } else if (h5Value.trim() === "神速") {
-                            data.speed = pValue.trim();
-                            data.speedCost = injectedData["qiangzhuang"][data.speed]["totalcost"];
-                        } else if (h5Value.trim() === "强身术") {
-                            data.qs = pValue.trim();
-                            data.qsCost = injectedData["life_skill"][data.qs]["totalcost"];
-                        }else if (h5Value.trim() === "冥想") {
-                            data.mx = pValue.trim();
-                            data.mxCost = injectedData["life_skill"][data.mx]["totalcost"];
-                        }
-                    });
 
                     if (button) button.click();
                     return data;

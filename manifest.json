@@ -1,21 +1,23 @@
 {
   "manifest_version": 3,
+  "default_locale": "zh_CN",
   "minimum_chrome_version": "114",
-  "name": "藏宝阁账号价值计算器，侧边栏版本",
+  "name": "__MSG_extName__",
+  "description": "__MSG_extDesc__",
   "version": "1.0",
-  "description": "用来计算CBG账号上任务技能、修炼的价值",
+
   "background": {
     "service_worker": "background.js"
   },
   "web_accessible_resources": [{
     "resources": ["data/data.json"],
-    "matches": ["<all_urls>"]
-  },{
-    "resources": ["show_role_detail.js"],
-    "matches": ["*://cbg-xyq.res.netease.com/*"]
+    "matches": [
+      "*://xyq.cbg.163.com/*",
+      "file:///*/*"
+    ]
   }],
   "action": {
-    "default_title": "点击打开侧边栏",
+    "default_title": "__MSG_btnText__" ,
     "default_icon": {
       "128": "icons/icon128.png"
     }
@@ -29,5 +31,8 @@
     "default_path": "sidebar.html"
   },
   "permissions": [ "scripting","sidePanel"],
-  "host_permissions": ["<all_urls>"]
+  "host_permissions": [
+    "*://xyq.cbg.163.com/*",
+    "file:///*/*"
+  ]
 }
