@@ -1,5 +1,6 @@
 {
   "manifest_version": 3,
+  "minimum_chrome_version": "114",
   "name": "藏宝阁账号价值计算器，侧边栏版本",
   "version": "1.0",
   "description": "用来计算CBG账号上任务技能、修炼的价值",

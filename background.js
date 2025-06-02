@@ -30,7 +30,6 @@ async function loadJSON() {
         const response = await fetch(url);
         if (!response.ok) throw new Error('Network response was not ok');
         globalCostData = await response.json();
-        console.log("读取的json文件内容：", globalCostData)
     } catch (error) {
         console.error('Failed to load JSON:', error);
     }
@@ -128,7 +127,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
                     });
 
-                    console.log("点击技能按钮")
                     const button2 = document.getElementById('role_skill');
                     if (button2) button2.click();
 
@@ -152,7 +150,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                         data.skill_7_cost = injectedData["school_skill"][data.skill_7]["totalcost"]
                     }
 
-                    console.log("提取生活技能")
                     const h5Elements = document.getElementById('role_info_box').querySelector('#life_skill_lists').querySelectorAll('h5');
                     h5Elements.forEach(h5 => {
                         // 获取前面的p元素内容
