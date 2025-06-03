@@ -6,12 +6,18 @@ document.addEventListener('DOMContentLoaded', function () {
     const calculate = document.getElementById('calculate');
     const calculate_data = document.getElementById('calculate_data');
 
+    function addItem(item_id,total_cost,element){
+        // element.querySelector('#')
+    }
+
 
     function calculator(priceOnWeb) {
         let yxbPrice = parseFloat(document.getElementById('yxbPrice_value').value);
         if (!yxbPrice) {
             alert("先输入游戏币价格比例，如0.086")
         } else {
+            // let total_cost = 0;
+
             let total_cost = parseFloat(xiulian_data.querySelector('#qyd_cost').value) +
                 parseFloat(xiulian_data.querySelector('#gjxl_cost').value) +
                 parseFloat(xiulian_data.querySelector('#fyxl_cost').value) +

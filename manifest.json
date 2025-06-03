@@ -10,10 +10,11 @@
     "service_worker": "background.js"
   },
   "web_accessible_resources": [{
-    "resources": ["data/data.json"],
+    "resources": [
+      "data/data.json"
+    ],
     "matches": [
-      "*://xyq.cbg.163.com/*",
-      "file:///*/*"
+      "*://xyq.cbg.163.com/*"
     ]
   }],
   "action": {
