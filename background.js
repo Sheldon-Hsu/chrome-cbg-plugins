@@ -11,16 +11,12 @@ chrome.action.onClicked.addListener(() => {
 let globalCostData = null;
 
 
-
-
 // 确保侧边栏可用
 chrome.runtime.onInstalled.addListener(() => {
     chrome.sidePanel.setOptions({
         enabled: true
     });
 });
-
-
 
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
@@ -51,26 +47,21 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                     if (button) button.click();
 
                     // 提取目标表格数据
-                    const infoBox = document.getElementById('info_panel');
-                    if (!infoBox) {
-                        console.warn('未找到info_panel元素');
-                        //    尝试使用其他方式获取
-                        Array.from(document.querySelectorAll('.price .p10000')).forEach(span => {
-                            if (span.textContent.includes('（元）')) {
-                                data.price = span.textContent.replace(/\s/g, '').split('￥')[1].split("（元）")[0].trim();
-                            }
-                        })
-                    } else {
-                        Array.from(infoBox.querySelectorAll('li')).forEach(li => {
-                            if (li.textContent.includes('价格')) {
-                                data.price = li.textContent.replace(/\s/g, '').split('价格：￥')[1].split("（元）")[0].trim();
-                            } else if (li.textContent.includes('类型：')) {
-                                data.school = li.textContent.replace(/\s/g, '').split('：')[1].trim();
-                            }
-                        })
+                    const priceBox = document.querySelector('.infoList').querySelector('.price');
+
+                    let array = Array.from(priceBox.querySelectorAll('span'));
+                    for (let i = 0; i < array.length; i++) {
+                        let li = array[i]
+                        console.log(li.textContent)
+                        if (li.textContent.includes('元')) {
+                            console.log(li.textContent)
+                            data.price = li.textContent.replace(/\s/g, '').split('￥')[1].split("（元）")[0].trim();
+                            break;
+                        }
                     }
 
                     const roleBox = document.getElementById('role_info_box');
+                    data.school = roleBox.querySelector('#kindName').textContent
                     if (!roleBox) {
                         throw new Error('未找到role_info_box元素,' + document.textContent);
                     }
@@ -158,19 +149,19 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                                 data.qs = pValue.trim();
                             } else if (h5Value.trim() === "冥想") {
                                 data.mx = pValue.trim();
-                            }else if (h5Value.trim() === "暗器技巧") {
+                            } else if (h5Value.trim() === "暗器技巧") {
                                 data.cWeapon = pValue.trim();
-                            }else if (h5Value.trim() === "烹饪技巧") {
+                            } else if (h5Value.trim() === "烹饪技巧") {
                                 data.cook = pValue.trim();
-                            }else if (h5Value.trim() === "中药医理") {
+                            } else if (h5Value.trim() === "中药医理") {
                                 data.zy = pValue.trim();
-                            }else if (h5Value.trim() === "养生之道") {
+                            } else if (h5Value.trim() === "养生之道") {
                                 data.ys = pValue.trim();
-                            }else if (h5Value.trim() === "健身术") {
+                            } else if (h5Value.trim() === "健身术") {
                                 data.js = pValue.trim();
-                            }else if (h5Value.trim() === "巧匠之术") {
+                            } else if (h5Value.trim() === "巧匠之术") {
                                 data.qj = pValue.trim();
-                            }else if (h5Value.trim() === "烹饪技巧") {
+                            } else if (h5Value.trim() === "烹饪技巧") {
                                 data.cook = pValue.trim();
                             }
                         });

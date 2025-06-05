@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>梦幻西游角色数据工具</title>
+    <title>游戏角色消耗计算器</title>
     <style>
         * {
             margin: 0;
@@ -250,9 +250,10 @@
             font-size: 0.95rem;
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
         }
+
         .discount-value {
             font-size: 0.95rem;
-            background: rgba(255,255,255,0.2);
+            background: rgba(255, 255, 255, 0.2);
             padding: 4px 8px;
             border-radius: 12px;
             text-align: center;
@@ -266,20 +267,28 @@
             padding: 5px;
         }
 
+        .legal-section {
+            margin-top: 10px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.7rem;
+            padding: 5px;
+        }
+
         .section-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
             margin: 6px 0;
         }
+
         .section-header button {
-             flex: 1; /* 关键属性：等分剩余空间 */
-             min-width: 0; /* 允许内容压缩 */
-             margin: 0 4px; /* 按钮间距 */
-             white-space: nowrap; /* 防止文字换行 */
-             overflow: hidden;
-             text-overflow: ellipsis; /* 文字过长显示省略号 */
-         }
+            flex: 1; /* 关键属性：等分剩余空间 */
+            min-width: 0; /* 允许内容压缩 */
+            margin: 0 4px; /* 按钮间距 */
+            white-space: nowrap; /* 防止文字换行 */
+            overflow: hidden;
+            text-overflow: ellipsis; /* 文字过长显示省略号 */
+        }
 
 
         .columns-container {
@@ -316,7 +325,7 @@
                 padding: 5px;
             }
 
-            .item-value{
+            .item-value {
                 width: 40px;
                 padding: 3px
             }
@@ -335,14 +344,14 @@
 <body>
 <div class="app-container">
     <header class="app-header">
-        <h1><i class="fas fa-dragon"></i>梦幻西游角色数据工具</h1>
-        <p>快速提取和计算角色修炼、技能数据</p>
+        <h1><i class="fas fa-dragon"></i>游戏角色数据工具</h1>
+        <p>快速计算角色修炼、技能数据所需要消耗的游戏币</p>
     </header>
 
     <div class="card">
         <div class="card-title">
             <i class="fas fa-coins"></i>
-            <h2>数值设置</h2>
+            <h2>请设置</h2>
         </div>
 
         <div class="input-group price-set">
@@ -361,16 +370,15 @@
     </div>
 
 
-        <div class="section-header" >
-            <button id="find_data" class="btn btn-success pulse" >
-                <i class="fas fa-search"></i> 提取技能并计算
-            </button>
+    <div class="section-header">
+        <button id="find_data" class="btn btn-success pulse">
+            <i class="fas fa-search"></i> 快速计算
+        </button>
 
-            <button id="calculate" class="btn btn-primary pulse" >
-                <i class="fas fa-calculator"></i> 计算消耗
-            </button>
-        </div>
-
+        <button id="calculate" class="btn btn-primary pulse">
+            <i class="fas fa-calculator"></i> 计算
+        </button>
+    </div>
 
 
     <div class="total-cost" id="calculate_data">
@@ -393,60 +401,60 @@
         <div class="data-grid" id="xiulian_data">
             <div class="data-item">
                 <div class="item-label"></div>
-                <div class="item-label" style=" text-align: center;"> 等级</div>
-                <div class="item-label" style=" text-align: center;"> 消耗</div>
+                <div class="item-label" style=" text-align: center;">等级</div>
+                <div class="item-label" style=" text-align: center;">游戏币</div>
             </div>
-            <div class="data-item" id = "qyd">
-               <input type="checkbox" class="item-select" checked>
-                <div class="item-label" >乾元丹</div>
+            <div class="data-item" id="qyd">
+                <input type="checkbox" class="item-select" checked>
+                <div class="item-label">乾元丹</div>
                 <input type="text" class="item-value" id="qyd_value">
                 <input type="text" class="item-cost" id="qyd_cost" readonly>
             </div>
 
-            <div class="data-item" id = "gjxl">
-               <input type="checkbox" class="item-select" checked>
+            <div class="data-item" id="gjxl">
+                <input type="checkbox" class="item-select" checked>
                 <div class="item-label">攻修</div>
                 <input type="text" class="item-value" id="gjxl_value">
                 <input type="text" class="item-cost" id="gjxl_cost" readonly>
             </div>
-            <div class="data-item" id = "gjkzl">
-               <input type="checkbox" class="item-select" checked>
+            <div class="data-item" id="gjkzl">
+                <input type="checkbox" class="item-select" checked>
                 <div class="item-label">BB攻修</div>
                 <input type="text" class="item-value" id="gjkzl_value">
                 <input type="text" class="item-cost" id="gjkzl_cost" readonly>
             </div>
-            <div class="data-item" id = "fsxl">
-               <input type="checkbox" class="item-select" checked>
+            <div class="data-item" id="fsxl">
+                <input type="checkbox" class="item-select" checked>
                 <div class="item-label">法修</div>
                 <input type="text" class="item-value" id="fsxl_value">
                 <input type="text" class="item-cost" id="fsxl_cost" readonly>
             </div>
-            <div class="data-item" id = "fskzl">
-               <input type="checkbox" class="item-select" checked>
+            <div class="data-item" id="fskzl">
+                <input type="checkbox" class="item-select" checked>
                 <div class="item-label">BB法修</div>
                 <input type="text" class="item-value" id="fskzl_value">
                 <input type="text" class="item-cost" id="fskzl_cost" readonly>
             </div>
-            <div class="data-item" id = "fyxl">
-               <input type="checkbox" class="item-select" checked>
+            <div class="data-item" id="fyxl">
+                <input type="checkbox" class="item-select" checked>
                 <div class="item-label">防修</div>
                 <input type="text" class="item-value" id="fyxl_value">
                 <input type="text" class="item-cost" id="fyxl_cost" readonly>
             </div>
-            <div class="data-item" id = "fykzl">
-               <input type="checkbox" class="item-select" checked>
+            <div class="data-item" id="fykzl">
+                <input type="checkbox" class="item-select" checked>
                 <div class="item-label">BB防修</div>
                 <input type="text" class="item-value" id="fykzl_value">
                 <input type="text" class="item-cost" id="fykzl_cost" readonly>
             </div>
-            <div class="data-item" id = "kfxl">
-               <input type="checkbox" class="item-select" checked>
+            <div class="data-item" id="kfxl">
+                <input type="checkbox" class="item-select" checked>
                 <div class="item-label">法抗</div>
                 <input type="text" class="item-value" id="kfxl_value">
                 <input type="text" class="item-cost" id="kfxl_cost" readonly>
             </div>
-            <div class="data-item" id = "kfkzl">
-               <input type="checkbox" class="item-select" checked>
+            <div class="data-item" id="kfkzl">
+                <input type="checkbox" class="item-select" checked>
                 <div class="item-label">BB法防</div>
                 <input type="text" class="item-value" id="kfkzl_value">
                 <input type="text" class="item-cost" id="kfkzl_cost" readonly>
@@ -460,44 +468,44 @@
         <div class="columns-container" id="school_skill_data">
             <div class="column">
                 <div class="data-grid">
-                    <div class="data-item" id = "skill_0">
-                       <input type="checkbox" class="item-select" checked>
+                    <div class="data-item" id="skill_0">
+                        <input type="checkbox" class="item-select" checked>
                         <div class="item-label">技能1</div>
                         <input type="text" class="item-value" id="skill_0_value">
                         <input type="text" class="item-cost" id="skill_0_cost" readonly>
                     </div>
-                    <div class="data-item" id = "skill_1">
-                       <input type="checkbox" class="item-select" checked>
+                    <div class="data-item" id="skill_1">
+                        <input type="checkbox" class="item-select" checked>
                         <div class="item-label">技能2</div>
                         <input type="text" class="item-value" id="skill_1_value">
                         <input type="text" class="item-cost" id="skill_1_cost" readonly>
                     </div>
-                    <div class="data-item" id = "skill_2">
-                       <input type="checkbox" class="item-select" checked>
+                    <div class="data-item" id="skill_2">
+                        <input type="checkbox" class="item-select" checked>
                         <div class="item-label">技能3</div>
                         <input type="text" class="item-value" id="skill_2_value">
                         <input type="text" class="item-cost" id="skill_2_cost" readonly>
                     </div>
-                    <div class="data-item" id = "skill_3">
-                       <input type="checkbox" class="item-select" checked>
+                    <div class="data-item" id="skill_3">
+                        <input type="checkbox" class="item-select" checked>
                         <div class="item-label">技能4</div>
                         <input type="text" class="item-value" id="skill_3_value">
                         <input type="text" class="item-cost" id="skill_3_cost" readonly>
                     </div>
-                    <div class="data-item" id = "skill_4">
-                       <input type="checkbox" class="item-select" checked>
+                    <div class="data-item" id="skill_4">
+                        <input type="checkbox" class="item-select" checked>
                         <div class="item-label">技能5</div>
                         <input type="text" class="item-value" id="skill_4_value">
                         <input type="text" class="item-cost" id="skill_4_cost" readonly>
                     </div>
-                    <div class="data-item" id = "skill_5">
-                       <input type="checkbox" class="item-select" checked>
+                    <div class="data-item" id="skill_5">
+                        <input type="checkbox" class="item-select" checked>
                         <div class="item-label">技能6</div>
                         <input type="text" class="item-value" id="skill_5_value">
                         <input type="text" class="item-cost" id="skill_5_cost" readonly>
                     </div>
-                    <div class="data-item" id = "skill_6">
-                       <input type="checkbox" class="item-select" checked>
+                    <div class="data-item" id="skill_6">
+                        <input type="checkbox" class="item-select" checked>
                         <div class="item-label">技能7</div>
                         <input type="text" class="item-value" id="skill_6_value">
                         <input type="text" class="item-cost" id="skill_6_cost" readonly>
@@ -514,62 +522,63 @@
             <div class="column">
                 <div class="data-grid">
 
-                    <div class="data-item" id = "qs">
-                       <input type="checkbox" class="item-select" checked>
+                    <div class="data-item" id="qs">
+                        <input type="checkbox" class="item-select" checked>
                         <div class="item-label">强身</div>
                         <input type="text" class="item-value" id="qs_value">
                         <input type="text" class="item-cost" id="qs_cost" readonly>
                     </div>
-                    <div class="data-item" id = "mx">
-                       <input type="checkbox" class="item-select" >
+                    <div class="data-item" id="mx">
+                        <input type="checkbox" class="item-select" checked>
                         <div class="item-label">冥想</div>
                         <input type="text" class="item-value" id="mx_value">
                         <input type="text" class="item-cost" id="mx_cost" readonly>
                     </div>
-                    <div class="data-item" id = "cWeapon">
-                       <input type="checkbox" class="item-select">
-                        <div class="item-label">暗器</div>
-                        <input type="text" class="item-value" id="cWeapon_value">
-                        <input type="text" class="item-cost" id="cWeapon_cost" readonly>
-                    </div>
-                    <div class="data-item" id = "speed">
-                       <input type="checkbox" class="item-select" checked>
+
+                    <div class="data-item" id="speed">
+                        <input type="checkbox" class="item-select" checked>
                         <div class="item-label">神速</div>
                         <input type="text" class="item-value" id="speed_value">
                         <input type="text" class="item-cost" id="speed_cost" readonly>
                     </div>
-                    <div class="data-item" id = "strong">
-                       <input type="checkbox" class="item-select" checked>
+                    <div class="data-item" id="strong">
+                        <input type="checkbox" class="item-select" checked>
                         <div class="item-label">强壮</div>
                         <input type="text" class="item-value" id="strong_value">
                         <input type="text" class="item-cost" id="strong_cost" readonly>
                     </div>
-                    <div class="data-item" id = "cook">
-                        <input type="checkbox" class="item-select" >
+                    <div class="data-item" id="cWeapon">
+                        <input type="checkbox" class="item-select">
+                        <div class="item-label">暗器</div>
+                        <input type="text" class="item-value" id="cWeapon_value">
+                        <input type="text" class="item-cost" id="cWeapon_cost" readonly>
+                    </div>
+                    <div class="data-item" id="cook">
+                        <input type="checkbox" class="item-select">
                         <div class="item-label">烹饪</div>
                         <input type="text" class="item-value" id="cook_value">
                         <input type="text" class="item-cost" id="cook_cost" readonly>
                     </div>
-                    <div class="data-item" id = "ys">
-                        <input type="checkbox" class="item-select" >
+                    <div class="data-item" id="ys">
+                        <input type="checkbox" class="item-select">
                         <div class="item-label">养生之道</div>
                         <input type="text" class="item-value" id="ys_value">
                         <input type="text" class="item-cost" id="ys_cost" readonly>
                     </div>
-                    <div class="data-item" id = "js">
-                        <input type="checkbox" class="item-select" >
+                    <div class="data-item" id="js">
+                        <input type="checkbox" class="item-select">
                         <div class="item-label">健身</div>
                         <input type="text" class="item-value" id="js_value">
                         <input type="text" class="item-cost" id="js_cost" readonly>
                     </div>
-                    <div class="data-item" id = "qj">
-                        <input type="checkbox" class="item-select" >
+                    <div class="data-item" id="qj">
+                        <input type="checkbox" class="item-select">
                         <div class="item-label">巧匠</div>
                         <input type="text" class="item-value" id="qj_value">
                         <input type="text" class="item-cost" id="qj_cost" readonly>
                     </div>
-                    <div class="data-item" id = "zy">
-                        <input type="checkbox" class="item-select" >
+                    <div class="data-item" id="zy">
+                        <input type="checkbox" class="item-select">
                         <div class="item-label">中药</div>
                         <input type="text" class="item-value" id="zy_value">
                         <input type="text" class="item-cost" id="zy_cost" readonly>
@@ -579,8 +588,17 @@
         </div>
     </div>
 
+    <div class="legal-section">
+        <div class="legal-section">用户协议与免责声明
+            <p>本插件仅读取当前页面的公开数据，不会存储、上传任何用户数据</p>
+            <p>计算结果仅供参考，实际游戏消耗以官方数据为准</p>
+            <p>本插件与任何游戏公司无任何关联，非官方出品</p>
+            <p>使用本插件即表示您同意自行承担所有风险</p>
+        </div>
+
+    </div>
     <div class="footer">
-        <p>梦幻西游角色数据工具 &copy; 2025 | 为玩家提供便捷的数据计算</p>
+        <p>游戏数据计算工具 &copy; 2025 | 为玩家提供便捷的数据计算</p>
     </div>
 </div>
 <script src="sidebar.js"></script>

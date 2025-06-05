@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
     function setCost(element, item_id, type, level) {
-        console.log(item_id, " type ", type, " level ", level)
+
         if (type === "bbxiu") {
             let size = globalCostData["bbxiu"][level.toString()]["guozi_size"]
             const cost = parseFloat(size) * guoziPrice
@@ -54,10 +54,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
     function calculator(priceOnWeb) {
-        console.log(priceOnWeb)
+
         let yxbPrice = parseFloat(document.getElementById('yxbPrice_value').value);
         if (!yxbPrice) {
-            alert("先输入游戏币价格比例，如0.086")
+            alert("先输入游戏币价格比例，如0.086");
         } else {
             let total_cost = 0;
             let level = 0;
@@ -66,141 +66,143 @@ document.addEventListener('DOMContentLoaded', function () {
 
             item_id = "qyd";
             level = xiulian_data.querySelector(`#${item_id}`+'_value').value;
-            setCost(xiulian_data, item_id, type, level)
+            setCost(xiulian_data, item_id, type, level);
             total_cost = addItem(xiulian_data, item_id, total_cost);
 
             type = "gongxiu";
             item_id = "gjxl";
             level = xiulian_data.querySelector('#gjxl_value').value;
-            setCost(xiulian_data, item_id, type, level)
+            setCost(xiulian_data, item_id, type, level);
             total_cost = addItem(xiulian_data, item_id, total_cost);
+
 
             item_id = "fsxl";
             level = xiulian_data.querySelector('#fsxl_value').value;
+            setCost(xiulian_data, item_id, type, level);
             total_cost = addItem(xiulian_data, item_id, total_cost);
-            setCost(xiulian_data, item_id, type, level)
+
 
             type = "fangxiu";
             item_id = "fyxl";
             level = xiulian_data.querySelector('#fyxl_value').value;
+            setCost(xiulian_data, item_id, type, level);
             total_cost = addItem(xiulian_data, item_id, total_cost);
-            setCost(xiulian_data, item_id, type, level)
 
             item_id = "kfxl";
             level = xiulian_data.querySelector('#kfxl_value').value;
+            setCost(xiulian_data, item_id, type, level);
             total_cost = addItem(xiulian_data, item_id, total_cost);
-            setCost(xiulian_data, item_id, type, level)
 
             type = "bbxiu";
             item_id = "gjkzl";
             level = xiulian_data.querySelector('#gjkzl_value').value;
+            setCost(xiulian_data, item_id, type, level);
             total_cost = addItem(xiulian_data, item_id, total_cost);
-            setCost(xiulian_data, item_id, type, level)
 
             item_id = "fskzl";
             level = xiulian_data.querySelector('#fskzl_value').value;
+            setCost(xiulian_data, item_id, type, level);
             total_cost = addItem(xiulian_data, item_id, total_cost);
-            setCost(xiulian_data, item_id, type, level)
 
             item_id = "fykzl";
             level = xiulian_data.querySelector('#fykzl_value').value;
+            setCost(xiulian_data, item_id, type, level);
             total_cost = addItem(xiulian_data, item_id, total_cost);
-            setCost(xiulian_data, item_id, type, level)
 
             item_id = "kfkzl";
             level = xiulian_data.querySelector('#kfkzl_value').value;
+            setCost(xiulian_data, item_id, type, level);
             total_cost = addItem(xiulian_data, item_id, total_cost);
-            setCost(xiulian_data, item_id, type, level)
 
             type = "school_skill";
             item_id = "skill_0";
             level = school_skill_data.querySelector('#skill_0_value').value;
+            setCost(school_skill_data, item_id, type, level);
             total_cost = addItem(school_skill_data, item_id, total_cost);
-            setCost(school_skill_data, item_id, type, level)
 
             item_id = "skill_1";
             level = school_skill_data.querySelector('#skill_1_value').value;
+            setCost(school_skill_data, item_id, type, level);
             total_cost = addItem(school_skill_data, item_id, total_cost);
-            setCost(school_skill_data, item_id, type, level)
 
             item_id = "skill_2";
             level = school_skill_data.querySelector('#skill_2_value').value;
+            setCost(school_skill_data, item_id, type, level);
             total_cost = addItem(school_skill_data, item_id, total_cost);
-            setCost(school_skill_data, item_id, type, level)
 
             item_id = "skill_3";
             level = school_skill_data.querySelector('#skill_3_value').value;
+            setCost(school_skill_data, item_id, type, level);
             total_cost = addItem(school_skill_data, item_id, total_cost);
-            setCost(school_skill_data, item_id, type, level)
 
             item_id = "skill_4";
             level = school_skill_data.querySelector('#skill_4_value').value;
+            setCost(school_skill_data, item_id, type, level);
             total_cost = addItem(school_skill_data, item_id, total_cost);
-            setCost(school_skill_data, item_id, type, level)
 
             item_id = "skill_5";
             level = school_skill_data.querySelector('#skill_5_value').value;
+            setCost(school_skill_data, item_id, type, level);
             total_cost = addItem(school_skill_data, item_id, total_cost);
-            setCost(school_skill_data, item_id, type, level)
 
             item_id = "skill_6";
             level = school_skill_data.querySelector('#skill_6_value').value;
+            setCost(school_skill_data, item_id, type, level);
             total_cost = addItem(school_skill_data, item_id, total_cost);
-            setCost(school_skill_data, item_id, type, level)
 
 
             type = "qiangzhuang";
             item_id = "speed";
             level = life_skill_data.querySelector(`#${item_id}`+'_value').value;
+            setCost(life_skill_data, item_id, type, level);
             total_cost = addItem(life_skill_data, item_id, total_cost);
-            setCost(life_skill_data, item_id, type, level)
 
             item_id = "strong";
             level = life_skill_data.querySelector(`#${item_id}`+'_value').value;
+            setCost(life_skill_data, item_id, type, level);
             total_cost = addItem(life_skill_data, item_id, total_cost);
-            setCost(life_skill_data, item_id, type, level)
 
             type = "life_skill";
             item_id = "qs";
             level = life_skill_data.querySelector(`#${item_id}`+'_value').value;
+            setCost(life_skill_data, item_id, type, level);
             total_cost = addItem(life_skill_data, item_id, total_cost);
-            setCost(life_skill_data, item_id, type, level)
 
             item_id = "mx";
             level = life_skill_data.querySelector(`#${item_id}`+'_value').value;
+            setCost(life_skill_data, item_id, type, level);
             total_cost = addItem(life_skill_data, item_id, total_cost);
-            setCost(life_skill_data, item_id, type, level)
 
             item_id = "cWeapon";
             level = life_skill_data.querySelector(`#${item_id}`+'_value').value;
+            setCost(life_skill_data, item_id, type, level);
             total_cost = addItem(life_skill_data, item_id, total_cost);
-            setCost(life_skill_data, item_id, type, level)
 
             item_id = "cook";
             level = life_skill_data.querySelector(`#${item_id}`+'_value').value;
+            setCost(life_skill_data, item_id, type, level);
             total_cost = addItem(life_skill_data, item_id, total_cost);
-            setCost(life_skill_data, item_id, type, level)
 
             item_id = "ys";
             level = life_skill_data.querySelector(`#${item_id}`+'_value').value;
+            setCost(life_skill_data, item_id, type, level);
             total_cost = addItem(life_skill_data, item_id, total_cost);
-            setCost(life_skill_data, item_id, type, level)
 
             item_id = "js";
             level = life_skill_data.querySelector(`#${item_id}`+'_value').value;
+            setCost(life_skill_data, item_id, type, level);
             total_cost = addItem(life_skill_data, item_id, total_cost);
-            setCost(life_skill_data, item_id, type, level)
 
             item_id = "qj";
             level = life_skill_data.querySelector(`#${item_id}`+'_value').value;
+            setCost(life_skill_data, item_id, type, level);
             total_cost = addItem(life_skill_data, item_id, total_cost);
-            setCost(life_skill_data, item_id, type, level)
 
 
             item_id = "zy";
             level = life_skill_data.querySelector(`#${item_id}`+'_value').value;
+            setCost(life_skill_data, item_id, type, level);
             total_cost = addItem(life_skill_data, item_id, total_cost);
-            setCost(life_skill_data, item_id, type, level)
 
 
             let priceByCal = parseInt(parseFloat(total_cost) * yxbPrice || 0)
@@ -298,7 +300,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     school_skill_data.querySelector('#skill_6_value').value = level;
 
 
-
                     //life skill
                     level = request.data.qs || 0;
                     life_skill_data.querySelector('#qs_value').value = level || 0
@@ -341,8 +342,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     level = request.data.strong || 0;
                     life_skill_data.querySelector('#strong_value').value = level || 0
-
-
 
                     priceOnWeb = parseFloat(request.data.price);
                     calculator(priceOnWeb);
