@@ -2,12 +2,16 @@ chrome.action.onClicked.addListener(() => {
     chrome.windows.getCurrent(w => {
         if (w) {
             chrome.sidePanel.open({windowId: w.id});
-            loadJSON();
         } else {
             console.error("无法获取当前窗口");
         }
     });
 });
+
+let globalCostData = null;
+
+
+
 
 // 确保侧边栏可用
 chrome.runtime.onInstalled.addListener(() => {
@@ -16,24 +20,8 @@ chrome.runtime.onInstalled.addListener(() => {
     });
 });
 
-let globalCostData = null;
 
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.action === "getCostData") {
-        sendResponse(globalCostData);
-    }
-});
 
-async function loadJSON() {
-    try {
-        const url = chrome.runtime.getURL('data/data.json');
-        const response = await fetch(url);
-        if (!response.ok) throw new Error('Network response was not ok');
-        globalCostData = await response.json();
-    } catch (error) {
-        console.error('Failed to load JSON:', error);
-    }
-}
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "fetchData") {
@@ -42,7 +30,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             // 依赖加载后再执行主逻辑
             chrome.scripting.executeScript({
                 target: {tabId: tabs[0].id},
-                function: (injectedData) => {
+                function: () => {
 
                     function upper_limit_school_skill(skill_level) {
                         if (!skill_level) {
@@ -89,7 +77,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                     Array.from(roleBox.querySelectorAll('td')).forEach(td => {
                         if (td.textContent.includes('新版乾元丹数量')) {
                             data.qyd = td.textContent.split('：')[1].trim();
-                            data.qydCost = injectedData["qianyuandan"][data.qyd]["totalcost"]
                         }
                     });
 
@@ -100,48 +87,41 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                             const gjxlAndupper = valueCell.textContent.trim();
                             data.gjxl = gjxlAndupper.split("/")[0]
                             const gjxlUpper = gjxlAndupper.split("/")[1]
-                            data.gjxlCost = injectedData["gongxiu"][data.gjxl]["totalcost"]
                         }
                         if (th.textContent.includes('防御修炼')) {
                             const valueCell = th.nextElementSibling;
                             const fyxlAndupper = valueCell.textContent.trim();
                             data.fyxl = fyxlAndupper.split("/")[0]
                             const gjxlUpper = fyxlAndupper.split("/")[1]
-                            data.fyxlCost = injectedData["fangxiu"][data.fyxl]["totalcost"]
                         }
                         if (th.textContent.includes('法术修炼')) {
                             const valueCell = th.nextElementSibling
                             const fsxlAndupper = valueCell.textContent.trim();
                             data.fsxl = fsxlAndupper.split("/")[0]
                             const fsxlUpper = fsxlAndupper.split("/")[1]
-                            data.fsxlCost = injectedData["gongxiu"][data.fsxl]["totalcost"]
                         }
                         if (th.textContent.includes('抗法修炼')) {
                             const valueCell = th.nextElementSibling;
                             const kfxlAndupper = valueCell.textContent.trim();
                             data.kfxl = kfxlAndupper.split("/")[0]
                             const kfxlUpper = kfxlAndupper.split("/")[1]
-                            data.kfxlCost = injectedData["fangxiu"][data.kfxl]["totalcost"]
                         }
                         if (th.textContent.includes('攻击控制力')) {
                             const valueCell = th.nextElementSibling;
                             data.gjkzl = valueCell.textContent.trim();
-                            data.guoziSize1 = injectedData["bbxiu"][data.gjkzl]["guozi_size"]
+
                         }
                         if (th.textContent.includes('防御控制力')) {
                             const valueCell = th.nextElementSibling;
                             data.fykzl = valueCell.textContent.trim();
-                            data.guoziSize2 = injectedData["bbxiu"][data.fykzl]["guozi_size"]
                         }
                         if (th.textContent.includes('法术控制力')) {
                             const valueCell = th.nextElementSibling;
                             data.fskzl = valueCell.textContent.trim();
-                            data.guoziSize3 = injectedData["bbxiu"][data.fskzl]["guozi_size"]
                         }
                         if (th.textContent.includes('抗法控制力')) {
                             const valueCell = th.nextElementSibling;
                             data.kfkzl = valueCell.textContent.trim();
-                            data.guoziSize4 = injectedData["bbxiu"][data.kfkzl]["guozi_size"]
                         }
 
                     });
@@ -153,21 +133,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                         const skill_level = Array.from(role_info_box.getElementsByTagName('p'))
                             .map(p => p.textContent);
                         if (skill_level.length === 7) {
-                            data.skill_1 = upper_limit_school_skill(skill_level[0].trim());
-                            data.skill_2 = upper_limit_school_skill(skill_level[1].trim());
-                            data.skill_3 = upper_limit_school_skill(skill_level[2].trim());
-                            data.skill_4 = upper_limit_school_skill(skill_level[3].trim());
-                            data.skill_5 = upper_limit_school_skill(skill_level[4].trim());
-                            data.skill_6 = upper_limit_school_skill(skill_level[5].trim());
-                            data.skill_7 = upper_limit_school_skill(skill_level[6].trim());
+                            data.skill_0 = upper_limit_school_skill(skill_level[0].trim());
+                            data.skill_1 = upper_limit_school_skill(skill_level[1].trim());
+                            data.skill_2 = upper_limit_school_skill(skill_level[2].trim());
+                            data.skill_3 = upper_limit_school_skill(skill_level[3].trim());
+                            data.skill_4 = upper_limit_school_skill(skill_level[4].trim());
+                            data.skill_5 = upper_limit_school_skill(skill_level[5].trim());
+                            data.skill_6 = upper_limit_school_skill(skill_level[6].trim());
 
-                            data.skill_1_cost = injectedData["school_skill"][data.skill_1]["totalcost"]
-                            data.skill_2_cost = injectedData["school_skill"][data.skill_2]["totalcost"]
-                            data.skill_3_cost = injectedData["school_skill"][data.skill_3]["totalcost"]
-                            data.skill_4_cost = injectedData["school_skill"][data.skill_4]["totalcost"]
-                            data.skill_5_cost = injectedData["school_skill"][data.skill_5]["totalcost"]
-                            data.skill_6_cost = injectedData["school_skill"][data.skill_6]["totalcost"]
-                            data.skill_7_cost = injectedData["school_skill"][data.skill_7]["totalcost"]
+
                         }
 
                         const h5Elements = document.getElementById('role_info_box').querySelector('#life_skill_lists').querySelectorAll('h5');
@@ -178,25 +152,33 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
                             if (h5Value.trim() === "强壮") {
                                 data.strong = pValue.trim();
-                                data.strongCost = injectedData["qiangzhuang"][data.strong]["totalcost"];
                             } else if (h5Value.trim() === "神速") {
                                 data.speed = pValue.trim();
-                                data.speedCost = injectedData["qiangzhuang"][data.speed]["totalcost"];
                             } else if (h5Value.trim() === "强身术") {
                                 data.qs = pValue.trim();
-                                data.qsCost = injectedData["life_skill"][data.qs]["totalcost"];
                             } else if (h5Value.trim() === "冥想") {
                                 data.mx = pValue.trim();
-                                data.mxCost = injectedData["life_skill"][data.mx]["totalcost"];
+                            }else if (h5Value.trim() === "暗器技巧") {
+                                data.cWeapon = pValue.trim();
+                            }else if (h5Value.trim() === "烹饪技巧") {
+                                data.cook = pValue.trim();
+                            }else if (h5Value.trim() === "中药医理") {
+                                data.zy = pValue.trim();
+                            }else if (h5Value.trim() === "养生之道") {
+                                data.ys = pValue.trim();
+                            }else if (h5Value.trim() === "健身术") {
+                                data.js = pValue.trim();
+                            }else if (h5Value.trim() === "巧匠之术") {
+                                data.qj = pValue.trim();
+                            }else if (h5Value.trim() === "烹饪技巧") {
+                                data.cook = pValue.trim();
                             }
                         });
                     }
 
-
                     if (button) button.click();
                     return data;
-                },
-                args: [globalCostData] // 将数据作为参数传入
+                }
             }, (results) => {
                 // 将数据传回侧边栏
                 chrome.runtime.sendMessage({
