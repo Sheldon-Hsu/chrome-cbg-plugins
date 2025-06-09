@@ -27,15 +27,24 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function setCost(element, item_id, type, level) {
 
+        if (!level) level = 0;
         if (type === "bbxiu") {
-            let size = globalCostData["bbxiu"][level.toString()]["guozi_size"]
-            const cost = parseFloat(size) * guoziPrice
-            let costId = item_id + "_cost"
-            element.querySelector(`#${costId}`).value = cost || 0;
+            try {
+                let size = globalCostData["bbxiu"][level.toString()]["guozi_size"]
+                const cost = parseFloat(size) * guoziPrice
+                let costId = item_id + "_cost"
+                element.querySelector(`#${costId}`).value = cost || 0;
+            } catch (err) {
+                alert("等级["+ level+"]超过限制，请修正");
+            }
         } else {
-            let cost = globalCostData[type][level.toString()]["totalcost"]
-            let costId = item_id + "_cost"
-            element.querySelector(`#${costId}`).value = cost || 0;
+            try {
+                let cost = globalCostData[type][level.toString()]["totalcost"]
+                let costId = item_id + "_cost"
+                element.querySelector(`#${costId}`).value = cost || 0;
+            } catch (err) {
+                alert("等级["+ level+"]超过限制，请修正");
+            }
         }
 
     }
@@ -65,7 +74,7 @@ document.addEventListener('DOMContentLoaded', function () {
             let type = "qianyuandan";
 
             item_id = "qyd";
-            level = xiulian_data.querySelector(`#${item_id}`+'_value').value;
+            level = xiulian_data.querySelector(`#${item_id}` + '_value').value;
             setCost(xiulian_data, item_id, type, level);
             total_cost = addItem(xiulian_data, item_id, total_cost);
 
@@ -153,54 +162,54 @@ document.addEventListener('DOMContentLoaded', function () {
 
             type = "qiangzhuang";
             item_id = "speed";
-            level = life_skill_data.querySelector(`#${item_id}`+'_value').value;
+            level = life_skill_data.querySelector(`#${item_id}` + '_value').value;
             setCost(life_skill_data, item_id, type, level);
             total_cost = addItem(life_skill_data, item_id, total_cost);
 
             item_id = "strong";
-            level = life_skill_data.querySelector(`#${item_id}`+'_value').value;
+            level = life_skill_data.querySelector(`#${item_id}` + '_value').value;
             setCost(life_skill_data, item_id, type, level);
             total_cost = addItem(life_skill_data, item_id, total_cost);
 
             type = "life_skill";
             item_id = "qs";
-            level = life_skill_data.querySelector(`#${item_id}`+'_value').value;
+            level = life_skill_data.querySelector(`#${item_id}` + '_value').value;
             setCost(life_skill_data, item_id, type, level);
             total_cost = addItem(life_skill_data, item_id, total_cost);
 
             item_id = "mx";
-            level = life_skill_data.querySelector(`#${item_id}`+'_value').value;
+            level = life_skill_data.querySelector(`#${item_id}` + '_value').value;
             setCost(life_skill_data, item_id, type, level);
             total_cost = addItem(life_skill_data, item_id, total_cost);
 
             item_id = "cWeapon";
-            level = life_skill_data.querySelector(`#${item_id}`+'_value').value;
+            level = life_skill_data.querySelector(`#${item_id}` + '_value').value;
             setCost(life_skill_data, item_id, type, level);
             total_cost = addItem(life_skill_data, item_id, total_cost);
 
             item_id = "cook";
-            level = life_skill_data.querySelector(`#${item_id}`+'_value').value;
+            level = life_skill_data.querySelector(`#${item_id}` + '_value').value;
             setCost(life_skill_data, item_id, type, level);
             total_cost = addItem(life_skill_data, item_id, total_cost);
 
             item_id = "ys";
-            level = life_skill_data.querySelector(`#${item_id}`+'_value').value;
+            level = life_skill_data.querySelector(`#${item_id}` + '_value').value;
             setCost(life_skill_data, item_id, type, level);
             total_cost = addItem(life_skill_data, item_id, total_cost);
 
             item_id = "js";
-            level = life_skill_data.querySelector(`#${item_id}`+'_value').value;
+            level = life_skill_data.querySelector(`#${item_id}` + '_value').value;
             setCost(life_skill_data, item_id, type, level);
             total_cost = addItem(life_skill_data, item_id, total_cost);
 
             item_id = "qj";
-            level = life_skill_data.querySelector(`#${item_id}`+'_value').value;
+            level = life_skill_data.querySelector(`#${item_id}` + '_value').value;
             setCost(life_skill_data, item_id, type, level);
             total_cost = addItem(life_skill_data, item_id, total_cost);
 
 
             item_id = "zy";
-            level = life_skill_data.querySelector(`#${item_id}`+'_value').value;
+            level = life_skill_data.querySelector(`#${item_id}` + '_value').value;
             setCost(life_skill_data, item_id, type, level);
             total_cost = addItem(life_skill_data, item_id, total_cost);
 
@@ -269,7 +278,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     xiulian_data.querySelector('#kfkzl_value').value = level;
 
 
-
                     console.log("获取技能数据：" + request.data)
                     //school skill
                     level = request.data.skill_0 || 0;
@@ -321,15 +329,12 @@ document.addEventListener('DOMContentLoaded', function () {
                     life_skill_data.querySelector('#zy_value').value = level || 0
 
 
-
                     level = request.data.ys || 0;
                     life_skill_data.querySelector('#ys_value').value = level || 0
 
 
-
                     level = request.data.js || 0;
                     life_skill_data.querySelector('#js_value').value = level || 0
-
 
 
                     level = request.data.qj || 0;
@@ -354,7 +359,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
     calculate.addEventListener('click', function () {
-        calculator(priceOnWeb);
+        calculator();
     });
 
 });
