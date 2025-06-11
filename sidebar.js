@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const life_skill_data = document.getElementById('life_skill_data');
     const calculate = document.getElementById('calculate');
     const calculate_data = document.getElementById('calculate_data');
-    const guoziPrice = parseFloat(document.getElementById('guoziPrice_value').value);
+    let guoziPrice = {};
 
 
     function setCost(element, item_id, type, level) {
@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 let costId = item_id + "_cost"
                 element.querySelector(`#${costId}`).value = cost || 0;
             } catch (err) {
-                alert("等级["+ level+"]超过限制，请修正");
+                alert("等级[" + level + "]超过限制，请修正");
             }
         } else {
             try {
@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 let costId = item_id + "_cost"
                 element.querySelector(`#${costId}`).value = cost || 0;
             } catch (err) {
-                alert("等级["+ level+"]超过限制，请修正");
+                alert("等级[" + level + "]超过限制，请修正");
             }
         }
 
@@ -232,7 +232,7 @@ document.addEventListener('DOMContentLoaded', function () {
     find_data.addEventListener('click', function () {
 
         let yxbPrice = parseFloat(document.getElementById('yxbPrice_value').value);
-
+        guoziPrice = parseFloat(document.getElementById('guoziPrice_value').value);
         if (!yxbPrice || !guoziPrice) {
             alert("先输入游戏币价格和修炼果价格")
         } else {
