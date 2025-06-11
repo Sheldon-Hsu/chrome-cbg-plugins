@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const life_skill_data = document.getElementById('life_skill_data');
     const calculate = document.getElementById('calculate');
     const calculate_data = document.getElementById('calculate_data');
-    const guoziPrice = parseFloat(document.getElementById('guoziPrice_value').value);
+    let guoziPrice = parseFloat(document.getElementById('guoziPrice_value').value);
 
 
     function setCost(element, item_id, type, level) {
@@ -65,6 +65,7 @@ document.addEventListener('DOMContentLoaded', function () {
     function calculator(priceOnWeb) {
 
         let yxbPrice = parseFloat(document.getElementById('yxbPrice_value').value);
+        guoziPrice = parseFloat(document.getElementById('guoziPrice_value').value);
         if (!yxbPrice) {
             alert("先输入游戏币价格比例，如0.086");
         } else {
