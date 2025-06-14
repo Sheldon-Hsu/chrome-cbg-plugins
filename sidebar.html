@@ -247,8 +247,31 @@
         }
 
         .total-value {
-            font-size: 0.95rem;
+            font-size: 1rem;
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .section {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            flex: 1;
+        }
+
+        .section-left {
+            justify-content: flex-start;
+        }
+
+        .section-right {
+            justify-content: flex-end;
+        }
+
+        .item-1 {
+            width: calc(60% - 5px); /* 2/3空间减去间距 */
+        }
+
+        .item-2 {
+            width: calc(40% - 5px); /* 1/3空间减去间距 */
         }
 
         .discount-value {
@@ -309,6 +332,10 @@
             .input-group {
                 flex-direction: column;
                 gap: 6px;
+            }
+
+            .section {
+                justify-content: space-between;
             }
 
             .btn {
@@ -380,91 +407,152 @@
         </button>
     </div>
 
+    <div id="calculate_data">
+        <div class="total-cost data-item" id="calculate_cost">
+            <div class="item-1 section-left total-label">
+                <span>原始消耗：</span>
+                <div class="total-value">
+                    <span id="totalCost_value">0</span> 万两
+                </div>
+            </div>
 
-    <div class="total-cost" id="calculate_data">
-        <div class="total-label">
-            <i class="fas fa-file-invoice-dollar"></i>
-            <span>总消耗：</span>
-        </div>
-        <div class="total-value">
-            <span id="totalCost_value">0</span> 万两 /
-            <span id="totalCost_rmb">0</span> 元
+            <div class="item-2  total-label" style="margin-left: 10px;">
+                <span>RMB：</span>
+                <div class="total-value">
+                    <span id="totalCost_rmb">0</span> 元
+                </div>
+            </div>
         </div>
 
-        <div class="discount-value">
-            <span id="discount_value">?</span> 折
+        <div class="total-cost data-item" id="calculate_ratio_cost">
+            <div class=" item-1 total-label">
+                <span>算比例后：</span>
+                <div class="total-value">
+                    <span id="totalCost_ratio_value">0</span> 万两
+                </div>
+            </div>
+
+            <div class=" item-2 total-label" style="margin-left: 10px;">
+                <span>RMB：</span>
+                <div class="total-value">
+                    <span id="totalCost_ratio_rmb">0</span> 元
+                </div>
+            </div>
         </div>
+
+        <div class="total-cost data-item" id="price_data">
+            <div class=" item-1 total-label">
+                <span>页面价：</span>
+                <div class="total-value">
+                    <input type="text" id="price_value" style="width: 70px">元
+                </div>
+            </div>
+
+            <div class=" item-2 total-label" style="margin-left: 10px;">
+                <span>折扣：</span>
+                <div class="total-value">
+                    <span id="discount_value">?</span> 折
+                </div>
+            </div>
+        </div>
+
+
     </div>
 
 
     <div class="card">
-        <div class="data-grid" id="xiulian_data">
-            <div class="data-item">
-                <div class="item-label"></div>
-                <div class="item-label" style=" text-align: center;">等级</div>
-                <div class="item-label" style=" text-align: center;">游戏币</div>
-            </div>
-            <div class="data-item" id="qyd">
-                <input type="checkbox" class="item-select" checked>
-                <div class="item-label">乾元丹</div>
-                <input type="text" class="item-value" id="qyd_value">
-                <input type="text" class="item-cost" id="qyd_cost" readonly>
-            </div>
+        <div class="data-item">
+            <div class="item-label">此类消耗游戏币计算比例</div>
+            <input type="text" class="item-value" id="bbxiu_ratio" value="1">
+        </div>
+        <div class="data-grid" id="bbxiu_data">
 
-            <div class="data-item" id="gjxl">
-                <input type="checkbox" class="item-select" checked>
-                <div class="item-label">攻修</div>
-                <input type="text" class="item-value" id="gjxl_value">
-                <input type="text" class="item-cost" id="gjxl_cost" readonly>
-            </div>
             <div class="data-item" id="gjkzl">
                 <input type="checkbox" class="item-select" checked>
                 <div class="item-label">BB攻修</div>
                 <input type="text" class="item-value" id="gjkzl_value">
                 <input type="text" class="item-cost" id="gjkzl_cost" readonly>
+                <input type="text" class="item-cost" id="gjkzl_ratio_cost" style=" display: none " readonly>
+            </div>
+
+            <div class="data-item" id="fskzl">
+                <input type="checkbox" class="item-select" checked>
+                <div class="item-label">BB法修</div>
+                <input type="text" class="item-value" id="fskzl_value">
+                <input type="text" class="item-cost" id="fskzl_cost" readonly>
+                <input type="text" class="item-cost" id="fskzl_ratio_cost" style=" display: none " readonly>
+            </div>
+
+            <div class="data-item" id="fykzl">
+                <input type="checkbox" class="item-select" checked>
+                <div class="item-label">BB防修</div>
+                <input type="text" class="item-value" id="fykzl_value">
+                <input type="text" class="item-cost" id="fykzl_cost" readonly>
+                <input type="text" class="item-cost" id="fykzl_ratio_cost" style=" display: none " readonly>
+            </div>
+
+            <div class="data-item" id="kfkzl">
+                <input type="checkbox" class="item-select" checked>
+                <div class="item-label">BB法防</div>
+                <input type="text" class="item-value" id="kfkzl_value">
+                <input type="text" class="item-cost" id="kfkzl_cost" readonly>
+                <input type="text" class="item-cost" id="kfkzl_ratio_cost" style=" display: none " readonly>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="card">
+        <div class="data-item">
+            <div class="item-label">此类消耗游戏币计算比例</div>
+            <input type="text" class="item-value" id="xiulian_ratio" value="1">
+        </div>
+
+        <div class="data-grid" id="xiulian_data">
+            <div class="data-item" id="qyd">
+                <input type="checkbox" class="item-select" checked>
+                <div class="item-label">乾元丹</div>
+                <input type="text" class="item-value" id="qyd_value">
+                <input type="text" class="item-cost" id="qyd_cost" readonly>
+                <input type="text" class="item-cost" id="qyd_ratio_cost" style=" display: none " readonly>
+            </div>
+            <div class="data-item" id="gjxl">
+                <input type="checkbox" class="item-select" checked>
+                <div class="item-label">攻修</div>
+                <input type="text" class="item-value" id="gjxl_value">
+                <input type="text" class="item-cost" id="gjxl_cost" readonly>
+                <input type="text" class="item-cost" id="gjxl_ratio_cost" style=" display: none " readonly>
             </div>
             <div class="data-item" id="fsxl">
                 <input type="checkbox" class="item-select" checked>
                 <div class="item-label">法修</div>
                 <input type="text" class="item-value" id="fsxl_value">
                 <input type="text" class="item-cost" id="fsxl_cost" readonly>
-            </div>
-            <div class="data-item" id="fskzl">
-                <input type="checkbox" class="item-select" checked>
-                <div class="item-label">BB法修</div>
-                <input type="text" class="item-value" id="fskzl_value">
-                <input type="text" class="item-cost" id="fskzl_cost" readonly>
+                <input type="text" class="item-cost" id="fsxl_ratio_cost" style=" display: none " readonly>
             </div>
             <div class="data-item" id="fyxl">
                 <input type="checkbox" class="item-select" checked>
                 <div class="item-label">防修</div>
                 <input type="text" class="item-value" id="fyxl_value">
                 <input type="text" class="item-cost" id="fyxl_cost" readonly>
-            </div>
-            <div class="data-item" id="fykzl">
-                <input type="checkbox" class="item-select" checked>
-                <div class="item-label">BB防修</div>
-                <input type="text" class="item-value" id="fykzl_value">
-                <input type="text" class="item-cost" id="fykzl_cost" readonly>
+                <input type="text" class="item-cost" id="fyxl_ratio_cost" style=" display: none " readonly>
             </div>
             <div class="data-item" id="kfxl">
                 <input type="checkbox" class="item-select" checked>
                 <div class="item-label">法抗</div>
                 <input type="text" class="item-value" id="kfxl_value">
                 <input type="text" class="item-cost" id="kfxl_cost" readonly>
-            </div>
-            <div class="data-item" id="kfkzl">
-                <input type="checkbox" class="item-select" checked>
-                <div class="item-label">BB法防</div>
-                <input type="text" class="item-value" id="kfkzl_value">
-                <input type="text" class="item-cost" id="kfkzl_cost" readonly>
+                <input type="text" class="item-cost" id="kfxl_ratio_cost" style=" display: none " readonly>
             </div>
         </div>
     </div>
 
 
     <div class="card">
-
+        <div class="data-item">
+            <div class="item-label">此类消耗游戏币计算比例</div>
+            <input type="text" class="item-value" id="school_skill_ratio" value="1">
+        </div>
         <div class="columns-container" id="school_skill_data">
             <div class="column">
                 <div class="data-grid">
@@ -473,42 +561,49 @@
                         <div class="item-label">技能1</div>
                         <input type="text" class="item-value" id="skill_0_value">
                         <input type="text" class="item-cost" id="skill_0_cost" readonly>
+                        <input type="text" class="item-cost" id="skill_0_ratio_cost" style=" display: none " readonly>
                     </div>
                     <div class="data-item" id="skill_1">
                         <input type="checkbox" class="item-select" checked>
                         <div class="item-label">技能2</div>
                         <input type="text" class="item-value" id="skill_1_value">
                         <input type="text" class="item-cost" id="skill_1_cost" readonly>
+                        <input type="text" class="item-cost" id="skill_1_ratio_cost" style=" display: none " readonly>
                     </div>
                     <div class="data-item" id="skill_2">
                         <input type="checkbox" class="item-select" checked>
                         <div class="item-label">技能3</div>
                         <input type="text" class="item-value" id="skill_2_value">
                         <input type="text" class="item-cost" id="skill_2_cost" readonly>
+                        <input type="text" class="item-cost" id="skill_2_ratio_cost" style=" display: none " readonly>
                     </div>
                     <div class="data-item" id="skill_3">
                         <input type="checkbox" class="item-select" checked>
                         <div class="item-label">技能4</div>
                         <input type="text" class="item-value" id="skill_3_value">
                         <input type="text" class="item-cost" id="skill_3_cost" readonly>
+                        <input type="text" class="item-cost" id="skill_3_ratio_cost" style=" display: none " readonly>
                     </div>
                     <div class="data-item" id="skill_4">
                         <input type="checkbox" class="item-select" checked>
                         <div class="item-label">技能5</div>
                         <input type="text" class="item-value" id="skill_4_value">
                         <input type="text" class="item-cost" id="skill_4_cost" readonly>
+                        <input type="text" class="item-cost" id="skill_4_ratio_cost" style=" display: none " readonly>
                     </div>
                     <div class="data-item" id="skill_5">
                         <input type="checkbox" class="item-select" checked>
                         <div class="item-label">技能6</div>
                         <input type="text" class="item-value" id="skill_5_value">
                         <input type="text" class="item-cost" id="skill_5_cost" readonly>
+                        <input type="text" class="item-cost" id="skill_5_ratio_cost" style=" display: none " readonly>
                     </div>
                     <div class="data-item" id="skill_6">
                         <input type="checkbox" class="item-select" checked>
                         <div class="item-label">技能7</div>
                         <input type="text" class="item-value" id="skill_6_value">
                         <input type="text" class="item-cost" id="skill_6_cost" readonly>
+                        <input type="text" class="item-cost" id="skill_6_ratio_cost" style=" display: none " readonly>
                     </div>
                 </div>
             </div>
@@ -517,6 +612,10 @@
     </div>
 
     <div class="card">
+        <div class="data-item">
+            <div class="item-label">此类消耗游戏币计算比例</div>
+            <input type="text" class="item-value" id="life_skill_data_ratio" value="1">
+        </div>
         <div class="columns-container" id="life_skill_data">
 
             <div class="column">
@@ -527,12 +626,14 @@
                         <div class="item-label">强身</div>
                         <input type="text" class="item-value" id="qs_value">
                         <input type="text" class="item-cost" id="qs_cost" readonly>
+                        <input type="text" class="item-cost" id="qs_ratio_cost" style=" display: none " readonly>
                     </div>
                     <div class="data-item" id="mx">
                         <input type="checkbox" class="item-select" checked>
                         <div class="item-label">冥想</div>
                         <input type="text" class="item-value" id="mx_value">
                         <input type="text" class="item-cost" id="mx_cost" readonly>
+                        <input type="text" class="item-cost" id="mx_ratio_cost" style=" display: none " readonly>
                     </div>
 
                     <div class="data-item" id="speed">
@@ -540,48 +641,56 @@
                         <div class="item-label">神速</div>
                         <input type="text" class="item-value" id="speed_value">
                         <input type="text" class="item-cost" id="speed_cost" readonly>
+                        <input type="text" class="item-cost" id="speed_ratio_cost" style=" display: none " readonly>
                     </div>
                     <div class="data-item" id="strong">
                         <input type="checkbox" class="item-select" checked>
                         <div class="item-label">强壮</div>
                         <input type="text" class="item-value" id="strong_value">
                         <input type="text" class="item-cost" id="strong_cost" readonly>
+                        <input type="text" class="item-cost" id="strong_ratio_cost" style=" display: none " readonly>
                     </div>
                     <div class="data-item" id="cWeapon">
                         <input type="checkbox" class="item-select">
                         <div class="item-label">暗器</div>
                         <input type="text" class="item-value" id="cWeapon_value">
                         <input type="text" class="item-cost" id="cWeapon_cost" readonly>
+                        <input type="text" class="item-cost" id="cWeapon_ratio_cost" style=" display: none " readonly>
                     </div>
                     <div class="data-item" id="cook">
                         <input type="checkbox" class="item-select">
                         <div class="item-label">烹饪</div>
                         <input type="text" class="item-value" id="cook_value">
                         <input type="text" class="item-cost" id="cook_cost" readonly>
+                        <input type="text" class="item-cost" id="cook_ratio_cost" style=" display: none " readonly>
                     </div>
                     <div class="data-item" id="ys">
                         <input type="checkbox" class="item-select">
                         <div class="item-label">养生之道</div>
                         <input type="text" class="item-value" id="ys_value">
                         <input type="text" class="item-cost" id="ys_cost" readonly>
+                        <input type="text" class="item-cost" id="ys_ratio_cost" style=" display: none " readonly>
                     </div>
                     <div class="data-item" id="js">
                         <input type="checkbox" class="item-select">
                         <div class="item-label">健身</div>
                         <input type="text" class="item-value" id="js_value">
                         <input type="text" class="item-cost" id="js_cost" readonly>
+                        <input type="text" class="item-cost" id="js_ratio_cost" style=" display: none " readonly>
                     </div>
                     <div class="data-item" id="qj">
                         <input type="checkbox" class="item-select">
                         <div class="item-label">巧匠</div>
                         <input type="text" class="item-value" id="qj_value">
                         <input type="text" class="item-cost" id="qj_cost" readonly>
+                        <input type="text" class="item-cost" id="qj_ratio_cost" style=" display: none " readonly>
                     </div>
                     <div class="data-item" id="zy">
                         <input type="checkbox" class="item-select">
                         <div class="item-label">中药</div>
                         <input type="text" class="item-value" id="zy_value">
                         <input type="text" class="item-cost" id="zy_cost" readonly>
+                        <input type="text" class="item-cost" id="zy_ratio_cost" style=" display: none " readonly>
                     </div>
                 </div>
             </div>
