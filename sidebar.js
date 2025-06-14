@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const life_skill_data = document.getElementById('life_skill_data');
     const calculate = document.getElementById('calculate');
     const calculate_data = document.getElementById('calculate_data');
-    let guoziPrice = {};
+    let guoziPrice = parseFloat(document.getElementById('guoziPrice_value').value);
 
 
     function setCost(element, item_id, type, level, ratio = 1) {
@@ -70,6 +70,7 @@ document.addEventListener('DOMContentLoaded', function () {
     function calculator() {
         let priceOnWeb = calculate_data.querySelector('#price_value').value
         let yxbPrice = parseFloat(document.getElementById('yxbPrice_value').value);
+        guoziPrice = parseFloat(document.getElementById('guoziPrice_value').value);
         if (!yxbPrice) {
             alert("先输入游戏币价格比例，如0.086");
         } else {
@@ -245,7 +246,7 @@ document.addEventListener('DOMContentLoaded', function () {
     find_data.addEventListener('click', function () {
 
         let yxbPrice = parseFloat(document.getElementById('yxbPrice_value').value);
-        guoziPrice = parseFloat(document.getElementById('guoziPrice_value').value);
+
         if (!yxbPrice || !guoziPrice) {
             alert("先输入游戏币价格和修炼果价格")
         } else {
