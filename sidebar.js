@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', function () {
     let guoziPrice = parseFloat(document.getElementById('guoziPrice_value').value);
 
 
-    function setCost(element, item_id, type, level, ratio = 1) {
+    function setCost(element, item_id, type, level, ratio = 1, upper = 0) {
 
         if (!level) level = 0;
         if (type === "bbxiu") {
@@ -36,17 +36,26 @@ document.addEventListener('DOMContentLoaded', function () {
                 let costId = item_id + "_cost"
                 let ratioCostId = item_id + "_ratio_cost"
                 element.querySelector(`#${costId}`).value = cost || 0;
-                element.querySelector(`#${ratioCostId}`).value = cost * ratio || 0;
+                element.querySelector(`#${ratioCostId}`).value = (cost * ratio).toFixed(0) || 0;
             } catch (err) {
                 alert("等级[" + level + "]超过限制，请修正");
             }
         } else {
             try {
                 let cost = globalCostData[type][level.toString()]["totalcost"]
+                if (upper !== 0 && upper>20) {
+
+                    let xiu_upper_times = globalCostData["xiulianshangxian"][upper.toString()]["times"]
+                    if (type === "fangxiu") {
+                        cost += xiu_upper_times * 2
+                    } else {
+                        cost += xiu_upper_times * 3
+                    }
+                }
                 let costId = item_id + "_cost"
                 let ratioCostId = item_id + "_ratio_cost"
                 element.querySelector(`#${costId}`).value = cost || 0;
-                element.querySelector(`#${ratioCostId}`).value = cost * ratio || 0;
+                element.querySelector(`#${ratioCostId}`).value = (cost * ratio).toFixed(0) || 0;
             } catch (err) {
                 alert("等级[" + level + "]超过限制，请修正");
             }
@@ -79,7 +88,7 @@ document.addEventListener('DOMContentLoaded', function () {
             let item_id = "";
             let type = "qianyuandan";
             let ratio = 1;
-
+            let upper = 0;
 
             ratio = document.getElementById('xiulian_ratio').value
 
@@ -91,25 +100,29 @@ document.addEventListener('DOMContentLoaded', function () {
             type = "gongxiu";
             item_id = "gjxl";
             level = xiulian_data.querySelector('#gjxl_value').value;
-            setCost(xiulian_data, item_id, type, level, ratio);
+            upper = xiulian_data.querySelector('#gjxl_upper').value;
+            setCost(xiulian_data, item_id, type, level, ratio, upper);
             addItem(xiulian_data, item_id, total_cost);
 
 
             item_id = "fsxl";
             level = xiulian_data.querySelector('#fsxl_value').value;
-            setCost(xiulian_data, item_id, type, level, ratio);
+            upper = xiulian_data.querySelector('#fsxl_upper').value;
+            setCost(xiulian_data, item_id, type, level, ratio, upper);
             addItem(xiulian_data, item_id, total_cost);
 
 
             type = "fangxiu";
             item_id = "fyxl";
             level = xiulian_data.querySelector('#fyxl_value').value;
-            setCost(xiulian_data, item_id, type, level, ratio);
+            upper = xiulian_data.querySelector('#fyxl_upper').value;
+            setCost(xiulian_data, item_id, type, level, ratio, upper);
             addItem(xiulian_data, item_id, total_cost);
 
             item_id = "kfxl";
             level = xiulian_data.querySelector('#kfxl_value').value;
-            setCost(xiulian_data, item_id, type, level, ratio);
+            upper = xiulian_data.querySelector('#kfxl_upper').value;
+            setCost(xiulian_data, item_id, type, level, ratio, upper);
             addItem(xiulian_data, item_id, total_cost);
 
             ratio = document.getElementById('bbxiu_ratio').value
@@ -257,23 +270,32 @@ document.addEventListener('DOMContentLoaded', function () {
                     //乾元丹
                     console.log("接收到的数据：", request.data)
                     let level = request.data.qyd || 0;
+                    let upper = 0;
                     xiulian_data.querySelector('#qyd_value').value = level;
 
                     //攻修
                     level = request.data.gjxl || 0;
                     xiulian_data.querySelector('#gjxl_value').value = level;
+                    upper = request.data.gjxlUpper || 0;
+                    xiulian_data.querySelector('#gjxl_upper').value = upper;
 
                     //防修
                     level = request.data.fyxl || 0;
                     xiulian_data.querySelector('#fyxl_value').value = level;
+                    upper = request.data.fyxlUpper || 0;
+                    xiulian_data.querySelector('#fyxl_upper').value = upper;
 
                     //法修
                     level = request.data.fsxl || 0;
                     xiulian_data.querySelector('#fsxl_value').value = level;
+                    upper = request.data.fsxlUpper || 0;
+                    xiulian_data.querySelector('#fsxl_upper').value = upper;
 
                     //法抗
                     level = request.data.kfxl || 0;
                     xiulian_data.querySelector('#kfxl_value').value = level;
+                    upper = request.data.kfxlUpper || 0;
+                    xiulian_data.querySelector('#kfxl_upper').value = upper;
 
                     //BB攻修
                     level = request.data.gjkzl || 0;

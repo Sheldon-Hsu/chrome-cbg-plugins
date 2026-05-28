@@ -369,6 +369,23 @@
       "totalcost": 20325
     }
   },
+  "xiulianshangxian":{
+    "21": {
+      "times": 429
+    },
+    "22": {
+      "times": 900
+    },
+    "23": {
+      "times": 1415
+    },
+    "24": {
+      "times": 1976
+    },
+    "25": {
+      "times": 2585
+    }
+  },
   "qianyuandan": {
     "0": {
       "exp": 0,

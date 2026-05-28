@@ -52,9 +52,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                     let array = Array.from(priceBox.querySelectorAll('span'));
                     for (let i = 0; i < array.length; i++) {
                         let li = array[i]
-                        console.log(li.textContent)
+                        // console.log(li.textContent)
                         if (li.textContent.includes('元')) {
-                            console.log(li.textContent)
+                            // console.log(li.textContent)
                             data.price = li.textContent.replace(/\s/g, '').split('￥')[1].split("（元）")[0].trim();
                             break;
                         }
@@ -77,25 +77,25 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                             const valueCell = th.nextElementSibling;
                             const gjxlAndupper = valueCell.textContent.trim();
                             data.gjxl = gjxlAndupper.split("/")[0]
-                            const gjxlUpper = gjxlAndupper.split("/")[1]
+                            data.gjxlUpper = gjxlAndupper.split("/")[1]
                         }
                         if (th.textContent.includes('防御修炼')) {
                             const valueCell = th.nextElementSibling;
                             const fyxlAndupper = valueCell.textContent.trim();
                             data.fyxl = fyxlAndupper.split("/")[0]
-                            const gjxlUpper = fyxlAndupper.split("/")[1]
+                            data.fyxlUpper = fyxlAndupper.split("/")[1]
                         }
                         if (th.textContent.includes('法术修炼')) {
                             const valueCell = th.nextElementSibling
                             const fsxlAndupper = valueCell.textContent.trim();
                             data.fsxl = fsxlAndupper.split("/")[0]
-                            const fsxlUpper = fsxlAndupper.split("/")[1]
+                            data.fsxlUpper = fsxlAndupper.split("/")[1]
                         }
                         if (th.textContent.includes('抗法修炼')) {
                             const valueCell = th.nextElementSibling;
                             const kfxlAndupper = valueCell.textContent.trim();
                             data.kfxl = kfxlAndupper.split("/")[0]
-                            const kfxlUpper = kfxlAndupper.split("/")[1]
+                            data.kfxlUpper = kfxlAndupper.split("/")[1]
                         }
                         if (th.textContent.includes('攻击控制力')) {
                             const valueCell = th.nextElementSibling;
