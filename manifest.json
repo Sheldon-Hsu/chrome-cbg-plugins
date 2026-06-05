@@ -4,7 +4,7 @@
   "minimum_chrome_version": "114",
   "name": "__MSG_extName__",
   "description": "__MSG_extDesc__",
-  "version": "1.2",
+  "version": "2.0",
 
   "background": {
     "service_worker": "background.js"
@@ -29,7 +29,7 @@
   },
 
   "side_panel": {
-    "default_path": "sidebar.html"
+    "default_path": "index.html"
   },
   "permissions": [ "scripting","sidePanel"],
   "host_permissions": [

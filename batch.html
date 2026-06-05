@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>批量计算</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            background-attachment: fixed;
+            color: #333;
+            padding: 8px;
+            min-height: 100vh;
+            font-size: 13px;
+        }
+
+        .app-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .app-header {
+            text-align: center;
+            margin-bottom: 5px;
+            padding: 8px 0;
+            color: white;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .app-header h1 {
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .app-header p {
+            font-size: 0.75rem;
+            opacity: 0.9;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .card-title {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            color: #2980b9;
+            margin-bottom: 4px;
+            padding-bottom: 3px;
+            border-bottom: 1px solid #eee;
+            font-size: 0.5rem;
+        }
+
+        .card-title i {
+            font-size: 0.7rem;
+        }
+
+        .input-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .input-field {
+            flex: 1;
+            min-width: 140px;
+        }
+
+        .input-field label {
+            display: block;
+            margin-bottom: 3px;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 0.8rem;
+        }
+
+        .input-field input {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+
+        .input-field input:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+            outline: none;
+        }
+
+        .btn {
+            flex: 1;
+            min-width: 100px;
+            padding: 8px 10px;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-weight: 650;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            transition: all 0.2s;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f39c12, #d35400);
+            color: white;
+        }
+
+        .btn-back {
+            background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 3px 5px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        .btn.pulse {
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+            100% { transform: scale(1); }
+        }
+
+        .data-item {
+            display: flex;
+            align-items: center;
+            padding: 6px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 4px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        .item-label {
+            flex: 1;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .item-value {
+            width: 40px;
+            padding: 4px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            text-align: center;
+            font-weight: 600;
+            background: white;
+            font-size: 0.75rem;
+        }
+
+        .price-set {
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 6px 0;
+        }
+
+        .section-header button {
+            flex: 1;
+            min-width: 0;
+            margin: 0 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .batch-table-wrap {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 6px;
+        }
+
+        .batch-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.75rem;
+            background: white;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .batch-table th {
+            background: #2980b9;
+            color: white;
+            padding: 5px 4px;
+            text-align: center;
+            font-size: 0.7rem;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        .batch-table td {
+            padding: 4px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+            font-size: 0.7rem;
+        }
+
+        .batch-table tr:hover {
+            background: #e8f4fd;
+        }
+
+        .batch-table tr.discount-good {
+            background: #d4edda;
+        }
+
+        .batch-table tr.discount-mid {
+            background: #fff3cd;
+        }
+
+        .batch-table tr.discount-bad {
+            background: #f8d7da;
+        }
+
+        .batch-table a {
+            color: inherit;
+            text-decoration: none;
+            display: block;
+        }
+
+        .batch-summary {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 8px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .batch-progress {
+            text-align: center;
+            padding: 10px;
+            color: #666;
+            font-size: 0.8rem;
+        }
+
+        .legal-section {
+            margin-top: 10px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.7rem;
+            padding: 5px;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 10px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.7rem;
+            padding: 5px;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 6px;
+            }
+
+            .input-group {
+                flex-direction: column;
+                gap: 6px;
+            }
+
+            .btn {
+                min-width: 100%;
+                padding: 7px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <header class="app-header">
+        <h1><i class="fas fa-dragon"></i>批量计算</h1>
+        <p>从列表页批量计算所有角色的折扣</p>
+    </header>
+
+    <div class="section-header">
+        <button id="back_btn" class="btn btn-back">
+            <i class="fas fa-arrow-left"></i> 返回
+        </button>
+        <button id="batch_data" class="btn btn-warning pulse">
+            <i class="fas fa-list"></i> 批量计算
+        </button>
+    </div>
+
+    <div class="card">
+        <div class="card-title">
+            <i class="fas fa-coins"></i>
+            <h2>请设置</h2>
+        </div>
+
+        <div class="input-group price-set">
+            <div class="data-item">
+                <div class="input-field">
+                    <label for="yxbPrice_value"><i class="fas fa-money-bill-wave"></i> 金价（元/万两）</label>
+                    <input type="text" id="yxbPrice_value" placeholder="输入金价" value="0.0716">
+                </div>
+
+                <div class="input-field" style="margin-left: 10px;">
+                    <label for="guoziPrice_value"><i class="fas fa-apple-alt"></i> 修炼果价格（万两）</label>
+                    <input type="text" id="guoziPrice_value" placeholder="输入修炼果价格" value="85">
+                </div>
+            </div>
+        </div>
+
+        <div class="data-item">
+            <div class="item-label">宠修计算比例</div>
+            <input type="text" class="item-value" id="bbxiu_ratio" value="1">
+            <div class="item-label" style="margin-left:8px">修炼计算比例</div>
+            <input type="text" class="item-value" id="xiulian_ratio" value="1">
+        </div>
+        <div class="data-item" style="margin-top:4px">
+            <div class="item-label">师门技能比例</div>
+            <input type="text" class="item-value" id="school_skill_ratio" value="1">
+            <div class="item-label" style="margin-left:8px">生活技能比例</div>
+            <input type="text" class="item-value" id="life_skill_data_ratio" value="1">
+        </div>
+    </div>
+
+    <div id="batch_results" style="display:none">
+        <div class="card">
+            <div class="card-title">
+                <i class="fas fa-table"></i>
+                <h2>批量计算结果</h2>
+            </div>
+            <div id="batch_summary" class="batch-summary"></div>
+            <div id="batch_progress" class="batch-progress" style="display:none"></div>
+            <div class="batch-table-wrap">
+                <table class="batch-table">
+                    <thead>
+                        <tr>
+                            <th>门派</th>
+                            <th>等级</th>
+                            <th>页面价</th>
+                            <th>计算值</th>
+                            <th>折扣</th>
+                        </tr>
+                    </thead>
+                    <tbody id="batch_tbody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="legal-section">
+        <p>本插件仅读取当前页面的公开数据，不会存储、上传任何用户数据</p>
+        <p>计算结果仅供参考，实际游戏消耗以官方数据为准</p>
+        <p>本插件与任何游戏公司无任何关联，非官方出品</p>
+        <p>使用本插件即表示您同意自行承担所有风险</p>
+    </div>
+    <div class="footer">
+        <p>游戏数据计算工具 &copy; 2025 | 为玩家提供便捷的数据计算</p>
+    </div>
+</div>
+<script src="batch.js"></script>
+</body>
+</html>

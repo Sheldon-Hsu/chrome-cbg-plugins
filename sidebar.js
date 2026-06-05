@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const life_skill_data = document.getElementById('life_skill_data');
     const calculate = document.getElementById('calculate');
     const calculate_data = document.getElementById('calculate_data');
+    const back_btn = document.getElementById('back_btn');
     let guoziPrice = parseFloat(document.getElementById('guoziPrice_value').value);
 
 
@@ -255,6 +256,10 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    // 返回按钮
+    back_btn.addEventListener('click', function () {
+        chrome.runtime.sendMessage({action: "switchPage", page: "index.html"});
+    });
 
     find_data.addEventListener('click', function () {
 

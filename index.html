@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>游戏角色数据工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            background-attachment: fixed;
+            color: #333;
+            padding: 8px;
+            min-height: 100vh;
+            font-size: 13px;
+        }
+
+        .app-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .app-header {
+            text-align: center;
+            margin-bottom: 5px;
+            padding: 8px 0;
+            color: white;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .app-header h1 {
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .app-header p {
+            font-size: 0.75rem;
+            opacity: 0.9;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .card-title {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            color: #2980b9;
+            margin-bottom: 4px;
+            padding-bottom: 3px;
+            border-bottom: 1px solid #eee;
+            font-size: 0.5rem;
+        }
+
+        .card-title i {
+            font-size: 0.7rem;
+        }
+
+        .input-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .input-field {
+            flex: 1;
+            min-width: 140px;
+        }
+
+        .input-field label {
+            display: block;
+            margin-bottom: 3px;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 0.8rem;
+        }
+
+        .input-field input {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+
+        .input-field input:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+            outline: none;
+        }
+
+        .data-item {
+            display: flex;
+            align-items: center;
+            padding: 6px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 4px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        .price-set {
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin: 16px 0;
+        }
+
+        .nav-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 20px 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border: 2px solid transparent;
+        }
+
+        .nav-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        .nav-card:active {
+            transform: translateY(1px);
+        }
+
+        .nav-card-single {
+            border-color: #3498db;
+        }
+
+        .nav-card-single:hover {
+            background: linear-gradient(135deg, rgba(52, 152, 219, 0.1), rgba(41, 128, 185, 0.1));
+        }
+
+        .nav-card-batch {
+            border-color: #f39c12;
+        }
+
+        .nav-card-batch:hover {
+            background: linear-gradient(135deg, rgba(243, 156, 18, 0.1), rgba(211, 84, 0, 0.1));
+        }
+
+        .nav-icon {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        .nav-card-single .nav-icon {
+            color: #3498db;
+        }
+
+        .nav-card-batch .nav-icon {
+            color: #f39c12;
+        }
+
+        .nav-title {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+            color: #2c3e50;
+        }
+
+        .nav-desc {
+            font-size: 0.75rem;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        .legal-section {
+            margin-top: 10px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.7rem;
+            padding: 5px;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 10px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.7rem;
+            padding: 5px;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 6px;
+            }
+
+            .input-group {
+                flex-direction: column;
+                gap: 6px;
+            }
+
+            .nav-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <header class="app-header">
+        <h1><i class="fas fa-dragon"></i>游戏角色数据工具</h1>
+        <p>快速计算角色修炼、技能数据所需要消耗的游戏币</p>
+    </header>
+
+    <div class="card">
+        <div class="card-title">
+            <i class="fas fa-coins"></i>
+            <h2>请设置</h2>
+        </div>
+
+        <div class="input-group price-set">
+            <div class="data-item">
+                <div class="input-field">
+                    <label for="yxbPrice_value"><i class="fas fa-money-bill-wave"></i> 金价（元/万两）</label>
+                    <input type="text" id="yxbPrice_value" placeholder="输入金价" value="0.0716">
+                </div>
+
+                <div class="input-field" style="margin-left: 10px;">
+                    <label for="guoziPrice_value"><i class="fas fa-apple-alt"></i> 修炼果价格（万两）</label>
+                    <input type="text" id="guoziPrice_value" placeholder="输入修炼果价格" value="85">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="nav-grid">
+        <div class="nav-card nav-card-single" id="go_single">
+            <div class="nav-icon"><i class="fas fa-calculator"></i></div>
+            <div class="nav-title">单个计算</div>
+            <div class="nav-desc">从详情页读取角色数据并计算价值</div>
+        </div>
+
+        <div class="nav-card nav-card-batch" id="go_batch">
+            <div class="nav-icon"><i class="fas fa-list"></i></div>
+            <div class="nav-title">批量计算</div>
+            <div class="nav-desc">从列表页批量计算所有角色的折扣</div>
+        </div>
+    </div>
+
+    <div class="legal-section">
+        <p>本插件仅读取当前页面的公开数据，不会存储、上传任何用户数据</p>
+        <p>计算结果仅供参考，实际游戏消耗以官方数据为准</p>
+        <p>本插件与任何游戏公司无任何关联，非官方出品</p>
+        <p>使用本插件即表示您同意自行承担所有风险</p>
+    </div>
+    <div class="footer">
+        <p>游戏数据计算工具 &copy; 2025 | 为玩家提供便捷的数据计算</p>
+    </div>
+</div>
+<script src="index.js"></script>
+</body>
+</html>

@@ -20,6 +20,11 @@ chrome.runtime.onInstalled.addListener(() => {
 
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.action === "switchPage") {
+        chrome.sidePanel.setOptions({ path: request.page });
+        return true;
+    }
+
     if (request.action === "fetchData") {
         chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
 
@@ -179,6 +184,154 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             });
         });
         return true; // 保持消息通道开放:ml-citation{ref="5" data="citationList"}
+    }
+
+    // 批量计算：从列表页提取所有角色数据
+    if (request.action === "batchFetchData") {
+        chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
+            chrome.scripting.executeScript({
+                target: {tabId: tabs[0].id},
+                function: () => {
+                    const LIFE_SKILL_IDS = new Set(["201","202","203","206","208","211","212","216","230","237"]);
+                    const LIFE_SKILL_MAP = {
+                        "201": "qs", "202": "mx", "203": "cWeapon", "206": "zy",
+                        "208": "cook", "211": "ys", "212": "js", "216": "qj",
+                        "230": "strong", "237": "speed"
+                    };
+                    const SCHOOL_NAMES = {
+                        1:"大唐官府",2:"化生寺",3:"方寸山",4:"狮驼岭",5:"魔王寨",
+                        6:"女儿村",7:"普陀山",8:"盘丝洞",9:"地府",10:"龙宫",
+                        11:"天宫",12:"五庄观",13:"凌波城",14:"无底洞",15:"女魃墓",
+                        16:"花果山",17:"东海渊",18:"鬼市",19:"天机城",20:"神木林"
+                    };
+
+                    function upperLimit(val) {
+                        if (!val) return 0;
+                        let v = parseInt(val);
+                        return v > 180 ? 180 : v;
+                    }
+
+                    const results = [];
+                    const textareas = document.querySelectorAll('textarea[id^="other_info_"]');
+
+                    textareas.forEach(textarea => {
+                        try {
+                            const ordersn = textarea.id.replace('other_info_', '');
+                            const info = JSON.parse(textarea.value.trim());
+
+                            // 找到对应的表格行
+                            const link = document.querySelector('a[data_game_ordersn="' + ordersn + '"]');
+                            if (!link) return;
+                            const row = link.closest('tr');
+                            if (!row) return;
+
+                            // 价格
+                            const priceSpan = row.querySelector('span.p100000');
+                            let price = 0;
+                            if (priceSpan) {
+                                const priceText = priceSpan.textContent.replace(/[^\d.]/g, '');
+                                price = parseFloat(priceText) || 0;
+                            }
+
+                            // 门派名
+                            const schoolSpan = row.querySelector('span.vertical-middle');
+                            const schoolName = schoolSpan ? schoolSpan.textContent.trim() : (SCHOOL_NAMES[info.iSchool] || '未知');
+
+                            // 详情页链接
+                            const detailUrl = link.href || '';
+
+                            // 修炼数据
+                            const gjxl = info.iExptSki1 || 0;
+                            const gjxlUpper = info.iMaxExpt1 || 0;
+                            const fsxl = info.iExptSki2 || 0;
+                            const fsxlUpper = info.iMaxExpt2 || 0;
+                            const fyxl = info.iExptSki3 || 0;
+                            const fyxlUpper = info.iMaxExpt3 || 0;
+                            const kfxl = info.iExptSki4 || 0;
+                            const kfxlUpper = info.iMaxExpt4 || 0;
+                            const qyd = info.iExptSki5 || 0;
+
+                            // 宠修
+                            const gjkzl = info.iBeastSki1 || 0;
+                            const fskzl = info.iBeastSki2 || 0;
+                            const fykzl = info.iBeastSki3 || 0;
+                            const kfkzl = info.iBeastSki4 || 0;
+
+                            // 从 all_skills 中提取技能
+                            const allSkills = info.all_skills || {};
+                            const lifeSkills = {};
+                            const schoolSkillCandidates = [];
+
+                            for (const [id, level] of Object.entries(allSkills)) {
+                                if (LIFE_SKILL_IDS.has(id)) {
+                                    lifeSkills[LIFE_SKILL_MAP[id]] = level;
+                                } else if (level > 100 && parseInt(id) < 200) {
+                                    schoolSkillCandidates.push({id: parseInt(id), level: level});
+                                }
+                            }
+
+                            // 取等级最高的7个作为师门技能
+                            schoolSkillCandidates.sort((a, b) => b.level - a.level);
+                            const schoolSkills = [];
+                            for (let i = 0; i < 7 && i < schoolSkillCandidates.length; i++) {
+                                schoolSkills.push(upperLimit(schoolSkillCandidates[i].level));
+                            }
+                            while (schoolSkills.length < 7) schoolSkills.push(0);
+
+                            results.push({
+                                ordersn: ordersn,
+                                name: info.cName || '',
+                                level: info.iGrade || 0,
+                                school: schoolName,
+                                schoolCode: info.iSchool || 0,
+                                price: price,
+                                detailUrl: detailUrl,
+                                qyd: qyd,
+                                gjxl: gjxl, gjxlUpper: gjxlUpper,
+                                fsxl: fsxl, fsxlUpper: fsxlUpper,
+                                fyxl: fyxl, fyxlUpper: fyxlUpper,
+                                kfxl: kfxl, kfxlUpper: kfxlUpper,
+                                gjkzl: gjkzl, fskzl: fskzl, fykzl: fykzl, kfkzl: kfkzl,
+                                skill_0: schoolSkills[0], skill_1: schoolSkills[1],
+                                skill_2: schoolSkills[2], skill_3: schoolSkills[3],
+                                skill_4: schoolSkills[4], skill_5: schoolSkills[5],
+                                skill_6: schoolSkills[6],
+                                qs: lifeSkills.qs || 0, mx: lifeSkills.mx || 0,
+                                cWeapon: lifeSkills.cWeapon || 0, cook: lifeSkills.cook || 0,
+                                zy: lifeSkills.zy || 0, ys: lifeSkills.ys || 0,
+                                js: lifeSkills.js || 0, qj: lifeSkills.qj || 0,
+                                strong: lifeSkills.strong || 0, speed: lifeSkills.speed || 0
+                            });
+                        } catch (e) {
+                            console.warn('批量解析角色数据失败:', e);
+                        }
+                    });
+
+                    return results;
+                }
+            }, (injectionResults) => {
+                if (chrome.runtime.lastError || !injectionResults || !injectionResults[0]) {
+                    chrome.runtime.sendMessage({
+                        action: "batchUpdateData",
+                        error: "页面数据提取失败，请确保当前页面是角色列表页"
+                    });
+                    return;
+                }
+                const results = injectionResults[0].result;
+                if (!results || results.length === 0) {
+                    chrome.runtime.sendMessage({
+                        action: "batchUpdateData",
+                        error: "当前页面未找到角色数据"
+                    });
+                    return;
+                }
+                chrome.runtime.sendMessage({
+                    action: "batchUpdateData",
+                    results: results
+                });
+            });
+        });
+        return true;
     }
 });
 
