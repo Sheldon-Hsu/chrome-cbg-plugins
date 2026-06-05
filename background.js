@@ -226,7 +226,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                             if (!row) return;
 
                             // 价格
-                            const priceSpan = row.querySelector('span.p100000');
+                            const priceSpan = row.querySelector('span.p1000, span.p10000, span.p100000, span.p1000000');
                             let price = 0;
                             if (priceSpan) {
                                 const priceText = priceSpan.textContent.replace(/[^\d.]/g, '');
