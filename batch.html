@@ -139,6 +139,11 @@
             color: white;
         }
 
+        .btn-next {
+            background: linear-gradient(135deg, #27ae60, #1e8449);
+            color: white;
+        }
+
         .btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 3px 5px rgba(0, 0, 0, 0.15);
@@ -283,6 +288,127 @@
             font-size: 0.8rem;
         }
 
+        .batch-table tr.detail-row:hover {
+            background: transparent;
+        }
+
+        .detail-panel {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .detail-panel .dp-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+            padding-bottom: 4px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .detail-panel .dp-header strong {
+            color: #2980b9;
+            font-size: 0.8rem;
+        }
+
+        .dp-close {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            color: #999;
+            padding: 0 4px;
+        }
+
+        .dp-close:hover { color: #333; }
+
+        .dp-section {
+            margin-bottom: 6px;
+        }
+
+        .dp-section-title {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 3px;
+        }
+
+        .dp-fields {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 4px;
+        }
+
+        .dp-field label {
+            display: block;
+            font-size: 0.6rem;
+            color: #888;
+            margin-bottom: 2px;
+        }
+
+        .dp-input-row {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .dp-input-row input[type="checkbox"] {
+            flex: none;
+            width: 14px;
+            height: 14px;
+            margin: 0;
+            cursor: pointer;
+        }
+
+        .dp-input-row input[data-key] {
+            flex: 1;
+            min-width: 0;
+            padding: 2px 3px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            font-size: 0.7rem;
+            text-align: center;
+        }
+
+        .dp-input-row input[data-key][placeholder] {
+            flex: 0 0 28px;
+        }
+
+        .dp-field input:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+
+        .dp-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 6px;
+        }
+
+        .dp-actions .btn {
+            flex: none;
+            min-width: 80px;
+            padding: 4px 10px;
+            font-size: 0.75rem;
+        }
+
+        .dp-result {
+            font-size: 0.75rem;
+            color: #2c3e50;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .dp-result .dp-discount {
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+
         .legal-section {
             margin-top: 10px;
             color: rgba(255, 255, 255, 0.7);
@@ -326,8 +452,11 @@
         <button id="back_btn" class="btn btn-back">
             <i class="fas fa-arrow-left"></i> 返回
         </button>
+        <button id="first_page_btn" class="btn btn-next" style="display:none">
+            <i class="fas fa-home"></i> 首页
+        </button>
         <button id="batch_data" class="btn btn-warning pulse">
-            <i class="fas fa-list"></i> 批量计算
+            <i class="fas fa-list"></i> 批量计算5页
         </button>
     </div>
 
@@ -362,6 +491,12 @@
             <input type="text" class="item-value" id="school_skill_ratio" value="1">
             <div class="item-label" style="margin-left:8px">生活技能比例</div>
             <input type="text" class="item-value" id="life_skill_data_ratio" value="1">
+        </div>
+        <div class="data-item" style="margin-top:4px">
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:0.8rem">
+                <input type="checkbox" id="ignore_huanian" checked style="width:16px;height:16px;cursor:pointer">
+                <span>忽略花样年华</span>
+            </label>
         </div>
     </div>
 

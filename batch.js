@@ -100,15 +100,151 @@ function calculateFromData(charData, costData, yxbPrice, guoziPriceVal, ratios) 
     };
 }
 
+function buildDetailPanelHTML(char) {
+    function fv(val) { return val || 0; }
+    // 带复选框的字段
+    function field(label, checkId, inputs) {
+        return '<div class="dp-field"><label>' + label + '</label><div class="dp-input-row">'
+            + '<input type="checkbox" checked data-check="' + checkId + '">'
+            + inputs + '</div></div>';
+    }
+    // 无复选框的字段
+    function fieldNoChk(label, inputs) {
+        return '<div class="dp-field"><label>' + label + '</label><div class="dp-input-row">'
+            + inputs + '</div></div>';
+    }
+    function inp(key, val, extra) {
+        return '<input data-key="' + key + '" value="' + fv(val) + '"' + (extra || '') + '>';
+    }
+
+    return '<div class="detail-panel">'
+        + '<div class="dp-header"><strong>' + char.school + ' Lv.' + char.level + ' — ￥' + char.price + '</strong>'
+        + '<button class="dp-close" title="关闭">&times;</button></div>'
+
+        + '<div class="dp-section"><div class="dp-section-title">修炼</div><div class="dp-fields">'
+        + field('乾元丹', 'qyd', inp('qyd', char.qyd))
+        + field('攻修', 'gjxl', inp('gjxl', char.gjxl) + inp('gjxlUpper', char.gjxlUpper, ' placeholder="上限"'))
+        + field('法修', 'fsxl', inp('fsxl', char.fsxl) + inp('fsxlUpper', char.fsxlUpper, ' placeholder="上限"'))
+        + field('防修', 'fyxl', inp('fyxl', char.fyxl) + inp('fyxlUpper', char.fyxlUpper, ' placeholder="上限"'))
+        + field('法抗', 'kfxl', inp('kfxl', char.kfxl) + inp('kfxlUpper', char.kfxlUpper, ' placeholder="上限"'))
+        + '</div></div>'
+
+        + '<div class="dp-section"><div class="dp-section-title">宠修</div><div class="dp-fields">'
+        + field('BB攻修', 'gjkzl', inp('gjkzl', char.gjkzl))
+        + field('BB法修', 'fskzl', inp('fskzl', char.fskzl))
+        + field('BB防修', 'fykzl', inp('fykzl', char.fykzl))
+        + field('BB法抗', 'kfkzl', inp('kfkzl', char.kfkzl))
+        + '</div></div>'
+
+        + '<div class="dp-section"><div class="dp-section-title">师门技能</div><div class="dp-fields">'
+        + field('技能1', 'skill_0', inp('skill_0', char.skill_0))
+        + field('技能2', 'skill_1', inp('skill_1', char.skill_1))
+        + field('技能3', 'skill_2', inp('skill_2', char.skill_2))
+        + field('技能4', 'skill_3', inp('skill_3', char.skill_3))
+        + field('技能5', 'skill_4', inp('skill_4', char.skill_4))
+        + field('技能6', 'skill_5', inp('skill_5', char.skill_5))
+        + field('技能7', 'skill_6', inp('skill_6', char.skill_6))
+        + '</div></div>'
+
+        + '<div class="dp-section"><div class="dp-section-title">生活技能</div><div class="dp-fields">'
+        + field('强身', 'qs', inp('qs', char.qs))
+        + field('冥想', 'mx', inp('mx', char.mx))
+        + field('暗器', 'cWeapon', inp('cWeapon', char.cWeapon))
+        + field('烹饪', 'cook', inp('cook', char.cook))
+        + field('中药', 'zy', inp('zy', char.zy))
+        + field('养生', 'ys', inp('ys', char.ys))
+        + field('健身', 'js', inp('js', char.js))
+        + field('巧匠', 'qj', inp('qj', char.qj))
+        + field('神速', 'speed', inp('speed', char.speed))
+        + field('强壮', 'strong', inp('strong', char.strong))
+        + '</div></div>'
+
+        + '<div class="dp-section"><div class="dp-section-title">页面售价</div><div class="dp-fields">'
+        + fieldNoChk('价格（元）', inp('price', char.price))
+        + '</div></div>'
+
+        + '<div class="dp-actions">'
+        + '<button class="btn btn-primary dp-calc-btn"><i class="fas fa-calculator"></i> 重新计算</button>'
+        + '<div class="dp-result"><span>计算值: ￥<span class="dp-rmb">—</span></span>'
+        + '<span>折扣: <span class="dp-discount">—</span></span></div>'
+        + '</div>'
+
+        + '</div>';
+}
+
+function bindDetailPanelEvents(panel, char) {
+    panel.querySelector('.dp-close').addEventListener('click', function () {
+        panel.closest('.detail-row').remove();
+    });
+
+    panel.querySelector('.dp-calc-btn').addEventListener('click', function () {
+        let yxbPrice = parseFloat(document.getElementById('yxbPrice_value').value);
+        let guoziPrice = parseFloat(document.getElementById('guoziPrice_value').value);
+        if (!yxbPrice || !guoziPrice) {
+            alert("先输入游戏币价格和修炼果价格");
+            return;
+        }
+
+        const ratios = {
+            xiulian: parseFloat(document.getElementById('xiulian_ratio').value) || 1,
+            bbxiu: parseFloat(document.getElementById('bbxiu_ratio').value) || 1,
+            school_skill: parseFloat(document.getElementById('school_skill_ratio').value) || 1,
+            life_skill: parseFloat(document.getElementById('life_skill_data_ratio').value) || 1
+        };
+
+        // 构建 checkbox 映射：key -> 是否勾选
+        const checked = {};
+        panel.querySelectorAll('input[data-check]').forEach(cb => {
+            checked[cb.dataset.check] = cb.checked;
+        });
+
+        // 读取字段值，未勾选的项置 0
+        const edited = {};
+        panel.querySelectorAll('input[data-key]').forEach(input => {
+            const key = input.dataset.key;
+            // 查找对应 checkbox：精确匹配或去掉 Upper 后缀匹配
+            const cbKey = checked[key] !== undefined ? key : key.replace(/Upper$/, '');
+            const isEnabled = checked[cbKey] !== undefined ? checked[cbKey] : true;
+            edited[key] = isEnabled ? (parseFloat(input.value) || 0) : 0;
+        });
+
+        const calc = calculateFromData(edited, globalCostData, yxbPrice, guoziPrice, ratios);
+        panel.querySelector('.dp-rmb').textContent = '￥' + calc.rmbOrigin;
+        const d = parseFloat(calc.discount);
+        const discountEl = panel.querySelector('.dp-discount');
+        discountEl.textContent = calc.discount === '—' ? '—' : calc.discount + '折';
+        discountEl.style.color = (d > 0 && d <= 5) ? '#28a745' : (d > 5 && d <= 6.5) ? '#e67e22' : '#e74c3c';
+    });
+}
+
 document.addEventListener('DOMContentLoaded', async function () {
     await loadJSON();
 
     const batchBtn = document.getElementById('batch_data');
     const backBtn = document.getElementById('back_btn');
+    const firstPageBtn = document.getElementById('first_page_btn');
 
     // 返回按钮
     backBtn.addEventListener('click', function () {
         chrome.runtime.sendMessage({action: "switchPage", page: "index.html"});
+    });
+
+    // 首页按钮
+    firstPageBtn.addEventListener('click', function () {
+        chrome.runtime.sendMessage({action: "goToFirstPage"}, function (response) {
+            if (chrome.runtime.lastError) {
+                alert("跳转失败: " + chrome.runtime.lastError.message);
+                return;
+            }
+            if (response && response.success) {
+                firstPageBtn.textContent = "已回到首页";
+                setTimeout(() => {
+                    firstPageBtn.innerHTML = '<i class="fas fa-home"></i> 首页';
+                }, 1500);
+            } else {
+                alert(response ? response.error : "跳转失败，请确保当前页面是藏宝阁列表页");
+            }
+        });
     });
 
     // 批量计算按钮
@@ -132,6 +268,12 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     // 监听批量数据返回
     chrome.runtime.onMessage.addListener((request) => {
+        if (request.action === "batchProgress") {
+            const progressEl = document.getElementById('batch_progress');
+            progressEl.style.display = 'block';
+            progressEl.textContent = '正在提取第' + request.page + '页，已获取' + request.total + '个角色...';
+        }
+
         if (request.action === "batchUpdateData") {
             const progressEl = document.getElementById('batch_progress');
             const tbodyEl = document.getElementById('batch_tbody');
@@ -155,10 +297,19 @@ document.addEventListener('DOMContentLoaded', async function () {
                 life_skill: parseFloat(document.getElementById('life_skill_data_ratio').value) || 1
             };
 
+            // 检查是否忽略花样年华
+            const ignoreHuanian = document.getElementById('ignore_huanian').checked;
+
             // 计算每个角色
             let calcResults = [];
             let errorCount = 0;
+            let huanianCount = 0;
             results.forEach(charData => {
+                // 如果勾选了忽略花样年华，且服务器是"时光-花样年华"则跳过
+                if (ignoreHuanian && charData.server && charData.server.indexOf('花样年华') !== -1) {
+                    huanianCount++;
+                    return;
+                }
                 try {
                     let calc = calculateFromData(charData, globalCostData, yxbPrice, guoziPrice, ratios);
                     calcResults.push({...charData, ...calc});
@@ -181,8 +332,8 @@ document.addEventListener('DOMContentLoaded', async function () {
             calcResults.forEach(r => {
                 let d = parseFloat(r.discount) || 0;
                 let rowClass = '';
-                if (d > 0 && d <= 7) { rowClass = 'discount-good'; goodCount++; }
-                else if (d > 7 && d <= 9) { rowClass = 'discount-mid'; midCount++; }
+                if (d > 0 && d <= 5) { rowClass = 'discount-good'; goodCount++; }
+                else if (d > 5 && d <= 6.5) { rowClass = 'discount-mid'; midCount++; }
                 else { rowClass = 'discount-bad'; badCount++; }
 
                 let discountText = r.discount === '—' ? '—' : r.discount + '折';
@@ -196,8 +347,45 @@ document.addEventListener('DOMContentLoaded', async function () {
             });
             tbodyEl.innerHTML = tbodyHtml;
 
+            // 点击行：新标签页打开角色页面 + 展开详情面板
+            const rows = tbodyEl.querySelectorAll('tr');
+            rows.forEach((row, idx) => {
+                row.style.cursor = 'pointer';
+                row.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    // 切换详情面板
+                    const existing = tbodyEl.querySelector('.detail-row');
+                    if (existing && existing.dataset.index == idx) {
+                        const char = calcResults[idx];
+                        // 检查当前活动标签页是否是该角色的售卖页，如果是则关闭
+                        chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
+                            if (tabs[0] && char.detailUrl && tabs[0].url === char.detailUrl) {
+                                chrome.tabs.remove(tabs[0].id);
+                            }
+                        });
+                        existing.remove();
+                        return;
+                    }
+                    // 新标签页打开角色详情（仅展开时跳转，折叠时不跳转）
+                    const link = row.querySelector('a');
+                    if (link && link.href) window.open(link.href, '_blank');
+                    if (existing) existing.remove();
+                    const char = calcResults[idx];
+                    const detailTr = document.createElement('tr');
+                    detailTr.className = 'detail-row';
+                    detailTr.dataset.index = idx;
+                    const td = document.createElement('td');
+                    td.colSpan = 5;
+                    td.innerHTML = buildDetailPanelHTML(char);
+                    detailTr.appendChild(td);
+                    row.after(detailTr);
+                    bindDetailPanelEvents(detailTr, char);
+                });
+            });
+
             // 汇总
             summaryEl.innerHTML = '共 ' + results.length + ' 个角色'
+                + (huanianCount > 0 ? '（忽略花样年华: ' + huanianCount + '个）' : '')
                 + (errorCount > 0 ? '（' + errorCount + '个解析失败）' : '')
                 + ' | <span style="color:#d4edda">捡漏: ' + goodCount + '</span>'
                 + ' <span style="color:#fff3cd">适中: ' + midCount + '</span>'

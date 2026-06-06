@@ -186,150 +186,320 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         return true; // 保持消息通道开放:ml-citation{ref="5" data="citationList"}
     }
 
-    // 批量计算：从列表页提取所有角色数据
-    if (request.action === "batchFetchData") {
-        chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
+    // 跳转到首页：调用页面的 goto(1)
+    if (request.action === "goToFirstPage") {
+        chrome.tabs.query({url: "*://xyq.cbg.163.com/*"}, (tabs) => {
+            if (!tabs || tabs.length === 0) {
+                sendResponse({success: false, error: "未找到藏宝阁页面，请先打开藏宝阁"});
+                return;
+            }
+            const tab = tabs.find(t => t.active) || tabs[0];
+            const tabId = tab.id;
             chrome.scripting.executeScript({
-                target: {tabId: tabs[0].id},
+                target: {tabId},
+                world: "MAIN",
                 function: () => {
-                    const LIFE_SKILL_IDS = new Set(["201","202","203","206","208","211","212","216","230","237"]);
-                    const LIFE_SKILL_MAP = {
-                        "201": "qs", "202": "mx", "203": "cWeapon", "206": "zy",
-                        "208": "cook", "211": "ys", "212": "js", "216": "qj",
-                        "230": "strong", "237": "speed"
-                    };
-                    const SCHOOL_NAMES = {
-                        1:"大唐官府",2:"化生寺",3:"方寸山",4:"狮驼岭",5:"魔王寨",
-                        6:"女儿村",7:"普陀山",8:"盘丝洞",9:"地府",10:"龙宫",
-                        11:"天宫",12:"五庄观",13:"凌波城",14:"无底洞",15:"女魃墓",
-                        16:"花果山",17:"东海渊",18:"鬼市",19:"天机城",20:"神木林"
-                    };
-
-                    function upperLimit(val) {
-                        if (!val) return 0;
-                        let v = parseInt(val);
-                        return v > 180 ? 180 : v;
+                    if (typeof window.goto === 'function') {
+                        window.goto(1);
+                        return {success: true, page: 1};
                     }
-
-                    const results = [];
-                    const textareas = document.querySelectorAll('textarea[id^="other_info_"]');
-
-                    textareas.forEach(textarea => {
-                        try {
-                            const ordersn = textarea.id.replace('other_info_', '');
-                            const info = JSON.parse(textarea.value.trim());
-
-                            // 找到对应的表格行
-                            const link = document.querySelector('a[data_game_ordersn="' + ordersn + '"]');
-                            if (!link) return;
-                            const row = link.closest('tr');
-                            if (!row) return;
-
-                            // 价格
-                            const priceSpan = row.querySelector('span.p1000, span.p10000, span.p100000, span.p1000000');
-                            let price = 0;
-                            if (priceSpan) {
-                                const priceText = priceSpan.textContent.replace(/[^\d.]/g, '');
-                                price = parseFloat(priceText) || 0;
-                            }
-
-                            // 门派名
-                            const schoolSpan = row.querySelector('span.vertical-middle');
-                            const schoolName = schoolSpan ? schoolSpan.textContent.trim() : (SCHOOL_NAMES[info.iSchool] || '未知');
-
-                            // 详情页链接
-                            const detailUrl = link.href || '';
-
-                            // 修炼数据
-                            const gjxl = info.iExptSki1 || 0;
-                            const gjxlUpper = info.iMaxExpt1 || 0;
-                            const fsxl = info.iExptSki2 || 0;
-                            const fsxlUpper = info.iMaxExpt2 || 0;
-                            const fyxl = info.iExptSki3 || 0;
-                            const fyxlUpper = info.iMaxExpt3 || 0;
-                            const kfxl = info.iExptSki4 || 0;
-                            const kfxlUpper = info.iMaxExpt4 || 0;
-                            const qyd = info.iExptSki5 || 0;
-
-                            // 宠修
-                            const gjkzl = info.iBeastSki1 || 0;
-                            const fskzl = info.iBeastSki2 || 0;
-                            const fykzl = info.iBeastSki3 || 0;
-                            const kfkzl = info.iBeastSki4 || 0;
-
-                            // 从 all_skills 中提取技能
-                            const allSkills = info.all_skills || {};
-                            const lifeSkills = {};
-                            const schoolSkillCandidates = [];
-
-                            for (const [id, level] of Object.entries(allSkills)) {
-                                if (LIFE_SKILL_IDS.has(id)) {
-                                    lifeSkills[LIFE_SKILL_MAP[id]] = level;
-                                } else if (level > 100 && parseInt(id) < 200) {
-                                    schoolSkillCandidates.push({id: parseInt(id), level: level});
-                                }
-                            }
-
-                            // 取等级最高的7个作为师门技能
-                            schoolSkillCandidates.sort((a, b) => b.level - a.level);
-                            const schoolSkills = [];
-                            for (let i = 0; i < 7 && i < schoolSkillCandidates.length; i++) {
-                                schoolSkills.push(upperLimit(schoolSkillCandidates[i].level));
-                            }
-                            while (schoolSkills.length < 7) schoolSkills.push(0);
-
-                            results.push({
-                                ordersn: ordersn,
-                                name: info.cName || '',
-                                level: info.iGrade || 0,
-                                school: schoolName,
-                                schoolCode: info.iSchool || 0,
-                                price: price,
-                                detailUrl: detailUrl,
-                                qyd: qyd,
-                                gjxl: gjxl, gjxlUpper: gjxlUpper,
-                                fsxl: fsxl, fsxlUpper: fsxlUpper,
-                                fyxl: fyxl, fyxlUpper: fyxlUpper,
-                                kfxl: kfxl, kfxlUpper: kfxlUpper,
-                                gjkzl: gjkzl, fskzl: fskzl, fykzl: fykzl, kfkzl: kfkzl,
-                                skill_0: schoolSkills[0], skill_1: schoolSkills[1],
-                                skill_2: schoolSkills[2], skill_3: schoolSkills[3],
-                                skill_4: schoolSkills[4], skill_5: schoolSkills[5],
-                                skill_6: schoolSkills[6],
-                                qs: lifeSkills.qs || 0, mx: lifeSkills.mx || 0,
-                                cWeapon: lifeSkills.cWeapon || 0, cook: lifeSkills.cook || 0,
-                                zy: lifeSkills.zy || 0, ys: lifeSkills.ys || 0,
-                                js: lifeSkills.js || 0, qj: lifeSkills.qj || 0,
-                                strong: lifeSkills.strong || 0, speed: lifeSkills.speed || 0
-                            });
-                        } catch (e) {
-                            console.warn('批量解析角色数据失败:', e);
-                        }
-                    });
-
-                    return results;
+                    return {success: false, error: "页面无 goto 函数"};
                 }
-            }, (injectionResults) => {
-                if (chrome.runtime.lastError || !injectionResults || !injectionResults[0]) {
-                    chrome.runtime.sendMessage({
-                        action: "batchUpdateData",
-                        error: "页面数据提取失败，请确保当前页面是角色列表页"
-                    });
+            }, (results) => {
+                if (chrome.runtime.lastError) {
+                    sendResponse({success: false, error: "脚本注入失败: " + chrome.runtime.lastError.message});
                     return;
                 }
-                const results = injectionResults[0].result;
-                if (!results || results.length === 0) {
-                    chrome.runtime.sendMessage({
-                        action: "batchUpdateData",
-                        error: "当前页面未找到角色数据"
-                    });
+                if (!results || !results[0]) {
+                    sendResponse({success: false, error: "脚本未返回结果"});
                     return;
                 }
-                chrome.runtime.sendMessage({
-                    action: "batchUpdateData",
-                    results: results
+                sendResponse(results[0].result);
+            });
+        });
+        return true;
+    }
+
+    // 批量计算：连续提取多页角色数据
+    if (request.action === "batchFetchData") {
+        const BATCH_PAGE_COUNT = 5;
+        const PAGE_LOAD_TIMEOUT = 8000;
+
+        // 将 executeScript 包装为 Promise
+        function execScript(tabId, opts) {
+            return new Promise((resolve, reject) => {
+                chrome.scripting.executeScript(Object.assign({target: {tabId}}, opts), (results) => {
+                    if (chrome.runtime.lastError) return reject(new Error(chrome.runtime.lastError.message));
+                    if (!results || !results[0]) return reject(new Error("脚本未返回结果"));
+                    resolve(results[0].result);
                 });
             });
+        }
+
+        // 延迟函数
+        function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+        // 随机延迟：在 [min, max] 毫秒之间随机等待
+        function randomDelay(min, max) {
+            const ms = Math.floor(Math.random() * (max - min + 1)) + min;
+            return delay(ms);
+        }
+
+        // 模拟人类滚动：随机方向和距离，触发懒加载等页面行为
+        function simulateScroll() {
+            const direction = Math.random() > 0.3 ? 1 : -1; // 70% 向下，30% 向上
+            const distance = Math.floor(Math.random() * 300) + 100; // 100~400px
+            window.scrollBy({top: direction * distance, behavior: 'smooth'});
+        }
+
+        // 提取当前页面的角色数据（ISOLATED world，仅读 DOM）
+        function extractPageData() {
+            const LIFE_SKILL_IDS = new Set(["201","202","203","206","208","211","212","216","230","237"]);
+            const LIFE_SKILL_MAP = {
+                "201": "qs", "202": "mx", "203": "cWeapon", "206": "zy",
+                "208": "cook", "211": "ys", "212": "js", "216": "qj",
+                "230": "strong", "237": "speed"
+            };
+            const SCHOOL_NAMES = {
+                1:"大唐官府",2:"化生寺",3:"方寸山",4:"狮驼岭",5:"魔王寨",
+                6:"女儿村",7:"普陀山",8:"盘丝洞",9:"地府",10:"龙宫",
+                11:"天宫",12:"五庄观",13:"凌波城",14:"无底洞",15:"女魃墓",
+                16:"花果山",17:"东海渊",18:"鬼市",19:"天机城",20:"神木林"
+            };
+            function upperLimit(val) {
+                if (!val) return 0;
+                let v = parseInt(val);
+                return v > 180 ? 180 : v;
+            }
+            const results = [];
+            const textareas = document.querySelectorAll('textarea[id^="other_info_"]');
+            textareas.forEach(textarea => {
+                try {
+                    const ordersn = textarea.id.replace('other_info_', '');
+                    const info = JSON.parse(textarea.value.trim());
+                    const link = document.querySelector('a[data_game_ordersn="' + ordersn + '"]');
+                    if (!link) return;
+                    const row = link.closest('tr');
+                    if (!row) return;
+                    const priceSpan = row.querySelector('span.p1000, span.p10000, span.p100000, span.p1000000');
+                    let price = 0;
+                    if (priceSpan) {
+                        const priceText = priceSpan.textContent.replace(/[^\d.]/g, '');
+                        price = parseFloat(priceText) || 0;
+                    }
+                    const schoolSpan = row.querySelector('span.vertical-middle');
+                    const schoolName = schoolSpan ? schoolSpan.textContent.trim() : (SCHOOL_NAMES[info.iSchool] || '未知');
+                    const detailUrl = link.href || '';
+                    const tds = row.querySelectorAll('td');
+                    let serverName = '';
+                    if (tds.length >= 2) {
+                        const serverTd = tds[tds.length - 2];
+                        const childNodes = serverTd.childNodes;
+                        for (let i = 0; i < childNodes.length; i++) {
+                            const node = childNodes[i];
+                            if (node.nodeType === Node.TEXT_NODE) {
+                                const text = node.textContent.trim();
+                                if (text && !text.includes('限时服务器')) { serverName = text; break; }
+                            } else if (node.tagName === 'BR') { break; }
+                        }
+                    }
+                    const gjxl = info.iExptSki1 || 0;
+                    const gjxlUpper = info.iMaxExpt1 || 0;
+                    const fsxl = info.iExptSki2 || 0;
+                    const fsxlUpper = info.iMaxExpt2 || 0;
+                    const fyxl = info.iExptSki3 || 0;
+                    const fyxlUpper = info.iMaxExpt3 || 0;
+                    const kfxl = info.iExptSki4 || 0;
+                    const kfxlUpper = info.iMaxExpt4 || 0;
+                    const qyd = info.iExptSki5 || 0;
+                    const gjkzl = info.iBeastSki1 || 0;
+                    const fskzl = info.iBeastSki2 || 0;
+                    const fykzl = info.iBeastSki3 || 0;
+                    const kfkzl = info.iBeastSki4 || 0;
+                    const allSkills = info.all_skills || {};
+                    const lifeSkills = {};
+                    const schoolSkillCandidates = [];
+                    for (const [id, level] of Object.entries(allSkills)) {
+                        if (LIFE_SKILL_IDS.has(id)) {
+                            lifeSkills[LIFE_SKILL_MAP[id]] = level;
+                        } else if (level > 100 && parseInt(id) < 200) {
+                            schoolSkillCandidates.push({id: parseInt(id), level: level});
+                        }
+                    }
+                    schoolSkillCandidates.sort((a, b) => b.level - a.level);
+                    const schoolSkills = [];
+                    for (let i = 0; i < 7 && i < schoolSkillCandidates.length; i++) {
+                        schoolSkills.push(upperLimit(schoolSkillCandidates[i].level));
+                    }
+                    while (schoolSkills.length < 7) schoolSkills.push(0);
+                    results.push({
+                        ordersn, name: info.cName || '', level: info.iGrade || 0,
+                        school: schoolName, schoolCode: info.iSchool || 0,
+                        server: serverName,
+                        price, detailUrl, qyd,
+                        gjxl, gjxlUpper, fsxl, fsxlUpper, fyxl, fyxlUpper, kfxl, kfxlUpper,
+                        gjkzl, fskzl, fykzl, kfkzl,
+                        skill_0: schoolSkills[0], skill_1: schoolSkills[1],
+                        skill_2: schoolSkills[2], skill_3: schoolSkills[3],
+                        skill_4: schoolSkills[4], skill_5: schoolSkills[5],
+                        skill_6: schoolSkills[6],
+                        qs: lifeSkills.qs || 0, mx: lifeSkills.mx || 0,
+                        cWeapon: lifeSkills.cWeapon || 0, cook: lifeSkills.cook || 0,
+                        zy: lifeSkills.zy || 0, ys: lifeSkills.ys || 0,
+                        js: lifeSkills.js || 0, qj: lifeSkills.qj || 0,
+                        strong: lifeSkills.strong || 0, speed: lifeSkills.speed || 0
+                    });
+                } catch (e) {
+                    console.warn('批量解析角色数据失败:', e);
+                }
+            });
+            return results;
+        }
+
+        // 翻到下一页（MAIN world，调用页面的 goto 函数）
+        function navigateNextPage() {
+            const pageLinks = document.querySelectorAll('.pages a');
+            for (const link of pageLinks) {
+                const t = link.textContent;
+                if (t.charCodeAt(0) === 0x4e0b && t.charCodeAt(1) === 0x4e00 && t.charCodeAt(2) === 0x9875) {
+                    const match = link.getAttribute('href').match(/goto\((\d+)\)/);
+                    if (match && typeof window.goto === 'function') {
+                        const pageNum = parseInt(match[1]);
+                        window.goto(pageNum);
+                        return {success: true, page: pageNum};
+                    }
+                }
+            }
+            return {success: false};
+        }
+
+        // 读取当前分页状态（MAIN world）
+        function getPageState() {
+            const pagesDiv = document.querySelector('.pages');
+            return pagesDiv ? pagesDiv.textContent : '';
+        }
+
+        // 检测页面是否显示"系统繁忙"（MAIN world）
+        function isBusyPage() {
+            return document.body.textContent.includes('系统繁忙');
+        }
+
+        // 主流程：查找 tab → 循环提取+翻页
+        chrome.tabs.query({url: "*://xyq.cbg.163.com/*"}, async (tabs) => {
+            if (!tabs || tabs.length === 0) {
+                chrome.runtime.sendMessage({
+                    action: "batchUpdateData",
+                    error: "未找到藏宝阁页面，请先打开藏宝阁列表页"
+                });
+                return;
+            }
+            const tab = tabs.find(t => t.active) || tabs[0];
+            const tabId = tab.id;
+            const allResults = [];
+
+            try {
+                for (let page = 1; page <= BATCH_PAGE_COUNT; page++) {
+                    // 模拟人类行为：页面加载后先滚动浏览，再提取数据
+                    await execScript(tabId, {world: "MAIN", function: simulateScroll});
+                    await randomDelay(800, 2000);
+
+                    // 提取当前页数据
+                    const pageResults = await execScript(tabId, {function: extractPageData});
+                    if (pageResults && pageResults.length > 0) {
+                        allResults.push(...pageResults);
+                    }
+
+                    // 发送进度
+                    try {
+                        chrome.runtime.sendMessage({
+                            action: "batchProgress",
+                            page: page,
+                            total: allResults.length
+                        });
+                    } catch (e) { /* sidebar 可能未监听 */ }
+
+                    // 最后一页不再翻页
+                    if (page >= BATCH_PAGE_COUNT) break;
+
+                    // 模拟人类阅读：随机停留 3~7 秒，偶发长停顿（约 20% 概率停 8~15 秒）
+                    const isLongPause = Math.random() < 0.2;
+                    if (isLongPause) {
+                        await randomDelay(8000, 15000);
+                    } else {
+                        await randomDelay(3000, 7000);
+                    }
+
+                    // 翻到下一页，带繁忙检测和退避重试
+                    let navSuccess = false;
+                    for (let retry = 0; retry < 3; retry++) {
+                        // 记录当前分页文本
+                        const stateBefore = await execScript(tabId, {world: "MAIN", function: getPageState});
+
+                        // 翻页
+                        const navResult = await execScript(tabId, {world: "MAIN", function: navigateNextPage});
+                        if (!navResult || !navResult.success) break;
+
+                        // 等待页面加载完成
+                        const timeout = Date.now() + PAGE_LOAD_TIMEOUT;
+                        let confirmed = false;
+                        while (Date.now() < timeout) {
+                            await randomDelay(250, 500);
+                            const stateNow = await execScript(tabId, {world: "MAIN", function: getPageState});
+                            if (stateNow !== stateBefore) {
+                                confirmed = true;
+                                break;
+                            }
+                        }
+                        if (!confirmed) {
+                            await randomDelay(800, 1500);
+                        }
+
+                        // 检测是否触发了"系统繁忙"
+                        const busy = await execScript(tabId, {world: "MAIN", function: isBusyPage});
+                        if (!busy) {
+                            navSuccess = true;
+                            break;
+                        }
+
+                        // 触发限流：退避等待（第1次 15~25秒，第2次 30~50秒，第3次 60~90秒）
+                        const backoffMin = [15000, 30000, 60000][retry];
+                        const backoffMax = [25000, 50000, 90000][retry];
+                        await randomDelay(backoffMin, backoffMax);
+
+                        // 重试前先刷新回当前页（goto 同一页刷新内容）
+                        await execScript(tabId, {world: "MAIN", function: () => {
+                            if (typeof window.goto === 'function') {
+                                const pagesDiv = document.querySelector('.pages');
+                                const current = pagesDiv ? pagesDiv.querySelector('a.on') : null;
+                                if (current) {
+                                    const m = current.getAttribute('href') && current.getAttribute('href').match(/goto\((\d+)\)/);
+                                    if (m) { window.goto(parseInt(m[1])); return; }
+                                }
+                                window.goto(1);
+                            }
+                        }});
+                        await randomDelay(3000, 5000);
+                    }
+                    if (!navSuccess) break;
+                }
+
+                if (allResults.length === 0) {
+                    chrome.runtime.sendMessage({
+                        action: "batchUpdateData",
+                        error: "未找到角色数据"
+                    });
+                } else {
+                    chrome.runtime.sendMessage({
+                        action: "batchUpdateData",
+                        results: allResults
+                    });
+                }
+            } catch (e) {
+                chrome.runtime.sendMessage({
+                    action: "batchUpdateData",
+                    error: "批量提取失败: " + e.message
+                });
+            }
         });
         return true;
     }
