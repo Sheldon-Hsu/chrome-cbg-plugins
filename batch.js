@@ -222,29 +222,60 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     const batchBtn = document.getElementById('batch_data');
     const backBtn = document.getElementById('back_btn');
-    const firstPageBtn = document.getElementById('first_page_btn');
+    // const firstPageBtn = document.getElementById('first_page_btn');
+    const addToCompareCheckbox = document.getElementById('addToCompare');
+    const clearCacheBtn = document.getElementById('clearCacheBtn');
+    const cacheStatusEl = document.getElementById('cacheStatus');
+
+    // 缓存结果（按 ordersn 去重）
+    let cachedResults = [];
+
+    function updateCacheStatus() {
+        if (cachedResults.length > 0) {
+            cacheStatusEl.textContent = '已缓存 ' + cachedResults.length + ' 个角色';
+            clearCacheBtn.style.display = 'inline-block';
+        } else {
+            cacheStatusEl.textContent = '';
+            clearCacheBtn.style.display = 'none';
+        }
+    }
+
+    function mergeResults(newResults) {
+        const map = {};
+        cachedResults.forEach(r => { map[r.ordersn] = r; });
+        newResults.forEach(r => { map[r.ordersn] = r; });
+        return Object.values(map);
+    }
 
     // 返回按钮
     backBtn.addEventListener('click', function () {
         chrome.runtime.sendMessage({action: "switchPage", page: "index.html"});
     });
 
-    // 首页按钮
-    firstPageBtn.addEventListener('click', function () {
-        chrome.runtime.sendMessage({action: "goToFirstPage"}, function (response) {
-            if (chrome.runtime.lastError) {
-                alert("跳转失败: " + chrome.runtime.lastError.message);
-                return;
-            }
-            if (response && response.success) {
-                firstPageBtn.textContent = "已回到首页";
-                setTimeout(() => {
-                    firstPageBtn.innerHTML = '<i class="fas fa-home"></i> 首页';
-                }, 1500);
-            } else {
-                alert(response ? response.error : "跳转失败，请确保当前页面是藏宝阁列表页");
-            }
-        });
+    // // 首页按钮
+    // firstPageBtn.addEventListener('click', function () {
+    //     chrome.runtime.sendMessage({action: "goToFirstPage"}, function (response) {
+    //         if (chrome.runtime.lastError) {
+    //             alert("跳转失败: " + chrome.runtime.lastError.message);
+    //             return;
+    //         }
+    //         if (response && response.success) {
+    //             firstPageBtn.textContent = "已回到首页";
+    //             setTimeout(() => {
+    //                 firstPageBtn.innerHTML = '<i class="fas fa-home"></i> 首页';
+    //             }, 1500);
+    //         } else {
+    //             alert(response ? response.error : "跳转失败，请确保当前页面是藏宝阁列表页");
+    //         }
+    //     });
+    // });
+
+    // 清空缓存按钮
+    clearCacheBtn.addEventListener('click', function () {
+        cachedResults = [];
+        updateCacheStatus();
+        document.getElementById('batch_tbody').innerHTML = '';
+        document.getElementById('batch_summary').innerHTML = '';
     });
 
     // 批量计算按钮
@@ -260,20 +291,17 @@ document.addEventListener('DOMContentLoaded', async function () {
         document.getElementById('batch_results').style.display = 'block';
         document.getElementById('batch_progress').style.display = 'block';
         document.getElementById('batch_progress').textContent = '正在提取数据...';
-        document.getElementById('batch_tbody').innerHTML = '';
-        document.getElementById('batch_summary').innerHTML = '';
+        // 未勾选比对时清空表格，勾选时保留已有结果
+        if (!addToCompareCheckbox.checked) {
+            document.getElementById('batch_tbody').innerHTML = '';
+            document.getElementById('batch_summary').innerHTML = '';
+        }
 
         chrome.runtime.sendMessage({action: "batchFetchData"});
     });
 
     // 监听批量数据返回
     chrome.runtime.onMessage.addListener((request) => {
-        if (request.action === "batchProgress") {
-            const progressEl = document.getElementById('batch_progress');
-            progressEl.style.display = 'block';
-            progressEl.textContent = '正在提取第' + request.page + '页，已获取' + request.total + '个角色...';
-        }
-
         if (request.action === "batchUpdateData") {
             const progressEl = document.getElementById('batch_progress');
             const tbodyEl = document.getElementById('batch_tbody');
@@ -284,7 +312,26 @@ document.addEventListener('DOMContentLoaded', async function () {
                 return;
             }
 
-            const results = request.results;
+            let newResults = request.results;
+
+            // 根据 checkbox 决定是否合并缓存
+            let resultsToRender;
+            if (addToCompareCheckbox.checked) {
+                // 找出本次新增的角色（不在缓存中的）
+                const cachedIds = new Set(cachedResults.map(r => r.ordersn));
+                const trulyNew = newResults.filter(r => !cachedIds.has(r.ordersn));
+                // 合并到缓存
+                resultsToRender = mergeResults(newResults);
+                cachedResults = resultsToRender;
+                updateCacheStatus();
+                // 只渲染新增部分
+                resultsToRender = trulyNew;
+            } else {
+                cachedResults = [];
+                updateCacheStatus();
+                resultsToRender = newResults;
+            }
+
             progressEl.style.display = 'none';
 
             let yxbPrice = parseFloat(document.getElementById('yxbPrice_value').value);
@@ -304,7 +351,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             let calcResults = [];
             let errorCount = 0;
             let huanianCount = 0;
-            results.forEach(charData => {
+            resultsToRender.forEach(charData => {
                 // 如果勾选了忽略花样年华，且服务器是"时光-花样年华"则跳过
                 if (ignoreHuanian && charData.server && charData.server.indexOf('花样年华') !== -1) {
                     huanianCount++;
@@ -326,7 +373,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                 return da - db;
             });
 
-            // 渲染结果
+            // 渲染结果（追加或替换）
             let goodCount = 0, midCount = 0, badCount = 0;
             let tbodyHtml = '';
             calcResults.forEach(r => {
@@ -345,21 +392,44 @@ document.addEventListener('DOMContentLoaded', async function () {
                     + '<td><a href="' + r.detailUrl + '" target="_blank">' + discountText + '</a></td>'
                     + '</tr>';
             });
-            tbodyEl.innerHTML = tbodyHtml;
+
+            if (addToCompareCheckbox.checked) {
+                // 追加到现有表格
+                tbodyEl.insertAdjacentHTML('beforeend', tbodyHtml);
+            } else {
+                // 替换整个表格
+                tbodyEl.innerHTML = tbodyHtml;
+            }
+
+            // 按折扣重新排序所有行
+            const allDataRows = Array.from(tbodyEl.querySelectorAll('tr:not(.detail-row)'));
+            allDataRows.sort((a, b) => {
+                const getDiscount = (row) => {
+                    const text = row.lastElementChild ? row.lastElementChild.textContent : '';
+                    const match = text.match(/([\d.]+)折/);
+                    return match ? parseFloat(match[1]) : 999;
+                };
+                return getDiscount(a) - getDiscount(b);
+            });
+            // 移除所有行（包括详情面板），按排序后顺序重新插入
+            const detailRows = tbodyEl.querySelectorAll('.detail-row');
+            detailRows.forEach(r => r.remove());
+            allDataRows.forEach(row => tbodyEl.appendChild(row));
 
             // 点击行：新标签页打开角色页面 + 展开详情面板
-            const rows = tbodyEl.querySelectorAll('tr');
-            rows.forEach((row, idx) => {
+            const sortedRows = tbodyEl.querySelectorAll('tr');
+            sortedRows.forEach((row, idx) => {
                 row.style.cursor = 'pointer';
                 row.addEventListener('click', function (e) {
                     e.preventDefault();
                     // 切换详情面板
                     const existing = tbodyEl.querySelector('.detail-row');
                     if (existing && existing.dataset.index == idx) {
-                        const char = calcResults[idx];
                         // 检查当前活动标签页是否是该角色的售卖页，如果是则关闭
+                        const link = row.querySelector('a');
+                        const detailUrl = link ? link.href : '';
                         chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
-                            if (tabs[0] && char.detailUrl && tabs[0].url === char.detailUrl) {
+                            if (tabs[0] && detailUrl && tabs[0].url === detailUrl) {
                                 chrome.tabs.remove(tabs[0].id);
                             }
                         });
@@ -370,26 +440,70 @@ document.addEventListener('DOMContentLoaded', async function () {
                     const link = row.querySelector('a');
                     if (link && link.href) window.open(link.href, '_blank');
                     if (existing) existing.remove();
-                    const char = calcResults[idx];
+                    // 从行中提取数据构建详情面板
+                    const cells = row.querySelectorAll('td');
+                    const charData = {
+                        school: cells[0] ? cells[0].textContent.trim() : '',
+                        level: cells[1] ? cells[1].textContent.trim() : '',
+                        price: cells[2] ? cells[2].textContent.replace('￥', '').trim() : '',
+                        rmbOrigin: cells[3] ? cells[3].textContent.replace('￥', '').trim() : '',
+                        discount: cells[4] ? cells[4].textContent.replace('折', '').trim() : '—',
+                        detailUrl: link ? link.href : ''
+                    };
                     const detailTr = document.createElement('tr');
                     detailTr.className = 'detail-row';
                     detailTr.dataset.index = idx;
                     const td = document.createElement('td');
                     td.colSpan = 5;
-                    td.innerHTML = buildDetailPanelHTML(char);
+                    td.innerHTML = buildDetailPanelHTML(charData);
                     detailTr.appendChild(td);
                     row.after(detailTr);
-                    bindDetailPanelEvents(detailTr, char);
+                    bindDetailPanelEvents(detailTr, charData);
                 });
             });
 
             // 汇总
-            summaryEl.innerHTML = '共 ' + results.length + ' 个角色'
-                + (huanianCount > 0 ? '（忽略花样年华: ' + huanianCount + '个）' : '')
-                + (errorCount > 0 ? '（' + errorCount + '个解析失败）' : '')
-                + ' | <span style="color:#d4edda">捡漏: ' + goodCount + '</span>'
-                + ' <span style="color:#fff3cd">适中: ' + midCount + '</span>'
-                + ' <span style="color:#f8d7da">偏贵: ' + badCount + '</span>';
+            if (addToCompareCheckbox.checked) {
+                // 追加模式：更新现有汇总
+                const existingSummary = summaryEl.innerHTML;
+                if (existingSummary) {
+                    // 解析现有汇总中的数字并累加
+                    const totalMatch = existingSummary.match(/共 (\d+) 个角色/);
+                    const goodMatch = existingSummary.match(/捡漏: (\d+)/);
+                    const midMatch = existingSummary.match(/适中: (\d+)/);
+                    const badMatch = existingSummary.match(/偏贵: (\d+)/);
+                    const errorMatch = existingSummary.match(/(\d+)个解析失败/);
+                    const huanianMatch = existingSummary.match(/忽略花样年华: (\d+)个/);
+
+                    const prevTotal = totalMatch ? parseInt(totalMatch[1]) : 0;
+                    const prevGood = goodMatch ? parseInt(goodMatch[1]) : 0;
+                    const prevMid = midMatch ? parseInt(midMatch[1]) : 0;
+                    const prevBad = badMatch ? parseInt(badMatch[1]) : 0;
+                    const prevError = errorMatch ? parseInt(errorMatch[1]) : 0;
+                    const prevHuanian = huanianMatch ? parseInt(huanianMatch[1]) : 0;
+
+                    summaryEl.innerHTML = '共 ' + (prevTotal + calcResults.length) + ' 个角色'
+                        + ((prevHuanian + huanianCount) > 0 ? '（忽略花样年华: ' + (prevHuanian + huanianCount) + '个）' : '')
+                        + ((prevError + errorCount) > 0 ? '（' + (prevError + errorCount) + '个解析失败）' : '')
+                        + ' | <span style="color:#d4edda">捡漏: ' + (prevGood + goodCount) + '</span>'
+                        + ' <span style="color:#fff3cd">适中: ' + (prevMid + midCount) + '</span>'
+                        + ' <span style="color:#f8d7da">偏贵: ' + (prevBad + badCount) + '</span>';
+                } else {
+                    summaryEl.innerHTML = '共 ' + calcResults.length + ' 个角色'
+                        + (huanianCount > 0 ? '（忽略花样年华: ' + huanianCount + '个）' : '')
+                        + (errorCount > 0 ? '（' + errorCount + '个解析失败）' : '')
+                        + ' | <span style="color:#d4edda">捡漏: ' + goodCount + '</span>'
+                        + ' <span style="color:#fff3cd">适中: ' + midCount + '</span>'
+                        + ' <span style="color:#f8d7da">偏贵: ' + badCount + '</span>';
+                }
+            } else {
+                summaryEl.innerHTML = '共 ' + calcResults.length + ' 个角色'
+                    + (huanianCount > 0 ? '（忽略花样年华: ' + huanianCount + '个）' : '')
+                    + (errorCount > 0 ? '（' + errorCount + '个解析失败）' : '')
+                    + ' | <span style="color:#d4edda">捡漏: ' + goodCount + '</span>'
+                    + ' <span style="color:#fff3cd">适中: ' + midCount + '</span>'
+                    + ' <span style="color:#f8d7da">偏贵: ' + badCount + '</span>';
+            }
         }
     });
 });

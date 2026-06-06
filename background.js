@@ -186,45 +186,42 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         return true; // 保持消息通道开放:ml-citation{ref="5" data="citationList"}
     }
 
-    // 跳转到首页：调用页面的 goto(1)
-    if (request.action === "goToFirstPage") {
-        chrome.tabs.query({url: "*://xyq.cbg.163.com/*"}, (tabs) => {
-            if (!tabs || tabs.length === 0) {
-                sendResponse({success: false, error: "未找到藏宝阁页面，请先打开藏宝阁"});
-                return;
-            }
-            const tab = tabs.find(t => t.active) || tabs[0];
-            const tabId = tab.id;
-            chrome.scripting.executeScript({
-                target: {tabId},
-                world: "MAIN",
-                function: () => {
-                    if (typeof window.goto === 'function') {
-                        window.goto(1);
-                        return {success: true, page: 1};
-                    }
-                    return {success: false, error: "页面无 goto 函数"};
-                }
-            }, (results) => {
-                if (chrome.runtime.lastError) {
-                    sendResponse({success: false, error: "脚本注入失败: " + chrome.runtime.lastError.message});
-                    return;
-                }
-                if (!results || !results[0]) {
-                    sendResponse({success: false, error: "脚本未返回结果"});
-                    return;
-                }
-                sendResponse(results[0].result);
-            });
-        });
-        return true;
-    }
+    // // 跳转到首页：调用页面的 goto(1)
+    // if (request.action === "goToFirstPage") {
+    //     chrome.tabs.query({url: "*://xyq.cbg.163.com/*"}, (tabs) => {
+    //         if (!tabs || tabs.length === 0) {
+    //             sendResponse({success: false, error: "未找到藏宝阁页面，请先打开藏宝阁"});
+    //             return;
+    //         }
+    //         const tab = tabs.find(t => t.active) || tabs[0];
+    //         const tabId = tab.id;
+    //         chrome.scripting.executeScript({
+    //             target: {tabId},
+    //             world: "MAIN",
+    //             function: () => {
+    //                 if (typeof window.goto === 'function') {
+    //                     window.goto(1);
+    //                     return {success: true, page: 1};
+    //                 }
+    //                 return {success: false, error: "页面无 goto 函数"};
+    //             }
+    //         }, (results) => {
+    //             if (chrome.runtime.lastError) {
+    //                 sendResponse({success: false, error: "脚本注入失败: " + chrome.runtime.lastError.message});
+    //                 return;
+    //             }
+    //             if (!results || !results[0]) {
+    //                 sendResponse({success: false, error: "脚本未返回结果"});
+    //                 return;
+    //             }
+    //             sendResponse(results[0].result);
+    //         });
+    //     });
+    //     return true;
+    // }
 
     // 批量计算：连续提取多页角色数据
     if (request.action === "batchFetchData") {
-        const BATCH_PAGE_COUNT = 5;
-        const PAGE_LOAD_TIMEOUT = 8000;
-
         // 将 executeScript 包装为 Promise
         function execScript(tabId, opts) {
             return new Promise((resolve, reject) => {
@@ -239,17 +236,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         // 延迟函数
         function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
 
-        // 随机延迟：在 [min, max] 毫秒之间随机等待
-        function randomDelay(min, max) {
-            const ms = Math.floor(Math.random() * (max - min + 1)) + min;
-            return delay(ms);
-        }
-
-        // 模拟人类滚动：随机方向和距离，触发懒加载等页面行为
-        function simulateScroll() {
-            const direction = Math.random() > 0.3 ? 1 : -1; // 70% 向下，30% 向上
-            const distance = Math.floor(Math.random() * 300) + 100; // 100~400px
-            window.scrollBy({top: direction * distance, behavior: 'smooth'});
+        // 滚动到页面底部，触发懒加载等页面行为
+        function scrollToBottom() {
+            window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'});
         }
 
         // 提取当前页面的角色数据（ISOLATED world，仅读 DOM）
@@ -350,41 +339,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                         strong: lifeSkills.strong || 0, speed: lifeSkills.speed || 0
                     });
                 } catch (e) {
-                    console.warn('批量解析角色数据失败:', e);
+                    console.warn('解析角色数据失败:', e);
                 }
             });
             return results;
         }
 
-        // 翻到下一页（MAIN world，调用页面的 goto 函数）
-        function navigateNextPage() {
-            const pageLinks = document.querySelectorAll('.pages a');
-            for (const link of pageLinks) {
-                const t = link.textContent;
-                if (t.charCodeAt(0) === 0x4e0b && t.charCodeAt(1) === 0x4e00 && t.charCodeAt(2) === 0x9875) {
-                    const match = link.getAttribute('href').match(/goto\((\d+)\)/);
-                    if (match && typeof window.goto === 'function') {
-                        const pageNum = parseInt(match[1]);
-                        window.goto(pageNum);
-                        return {success: true, page: pageNum};
-                    }
-                }
-            }
-            return {success: false};
-        }
-
-        // 读取当前分页状态（MAIN world）
-        function getPageState() {
-            const pagesDiv = document.querySelector('.pages');
-            return pagesDiv ? pagesDiv.textContent : '';
-        }
-
-        // 检测页面是否显示"系统繁忙"（MAIN world）
-        function isBusyPage() {
-            return document.body.textContent.includes('系统繁忙');
-        }
-
-        // 主流程：查找 tab → 循环提取+翻页
+        // 主流程：查找 tab → 提取当前页数据
         chrome.tabs.query({url: "*://xyq.cbg.163.com/*"}, async (tabs) => {
             if (!tabs || tabs.length === 0) {
                 chrome.runtime.sendMessage({
@@ -395,95 +356,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             }
             const tab = tabs.find(t => t.active) || tabs[0];
             const tabId = tab.id;
-            const allResults = [];
 
             try {
-                for (let page = 1; page <= BATCH_PAGE_COUNT; page++) {
-                    // 模拟人类行为：页面加载后先滚动浏览，再提取数据
-                    await execScript(tabId, {world: "MAIN", function: simulateScroll});
-                    await randomDelay(800, 2000);
+                // 滚动到底部触发懒加载，等待加载完成后提取数据
+                await execScript(tabId, {world: "MAIN", function: scrollToBottom});
+                await delay(1500);
 
-                    // 提取当前页数据
-                    const pageResults = await execScript(tabId, {function: extractPageData});
-                    if (pageResults && pageResults.length > 0) {
-                        allResults.push(...pageResults);
-                    }
+                const results = await execScript(tabId, {function: extractPageData});
 
-                    // 发送进度
-                    try {
-                        chrome.runtime.sendMessage({
-                            action: "batchProgress",
-                            page: page,
-                            total: allResults.length
-                        });
-                    } catch (e) { /* sidebar 可能未监听 */ }
-
-                    // 最后一页不再翻页
-                    if (page >= BATCH_PAGE_COUNT) break;
-
-                    // 模拟人类阅读：随机停留 3~7 秒，偶发长停顿（约 20% 概率停 8~15 秒）
-                    const isLongPause = Math.random() < 0.2;
-                    if (isLongPause) {
-                        await randomDelay(8000, 15000);
-                    } else {
-                        await randomDelay(3000, 7000);
-                    }
-
-                    // 翻到下一页，带繁忙检测和退避重试
-                    let navSuccess = false;
-                    for (let retry = 0; retry < 3; retry++) {
-                        // 记录当前分页文本
-                        const stateBefore = await execScript(tabId, {world: "MAIN", function: getPageState});
-
-                        // 翻页
-                        const navResult = await execScript(tabId, {world: "MAIN", function: navigateNextPage});
-                        if (!navResult || !navResult.success) break;
-
-                        // 等待页面加载完成
-                        const timeout = Date.now() + PAGE_LOAD_TIMEOUT;
-                        let confirmed = false;
-                        while (Date.now() < timeout) {
-                            await randomDelay(250, 500);
-                            const stateNow = await execScript(tabId, {world: "MAIN", function: getPageState});
-                            if (stateNow !== stateBefore) {
-                                confirmed = true;
-                                break;
-                            }
-                        }
-                        if (!confirmed) {
-                            await randomDelay(800, 1500);
-                        }
-
-                        // 检测是否触发了"系统繁忙"
-                        const busy = await execScript(tabId, {world: "MAIN", function: isBusyPage});
-                        if (!busy) {
-                            navSuccess = true;
-                            break;
-                        }
-
-                        // 触发限流：退避等待（第1次 15~25秒，第2次 30~50秒，第3次 60~90秒）
-                        const backoffMin = [15000, 30000, 60000][retry];
-                        const backoffMax = [25000, 50000, 90000][retry];
-                        await randomDelay(backoffMin, backoffMax);
-
-                        // 重试前先刷新回当前页（goto 同一页刷新内容）
-                        await execScript(tabId, {world: "MAIN", function: () => {
-                            if (typeof window.goto === 'function') {
-                                const pagesDiv = document.querySelector('.pages');
-                                const current = pagesDiv ? pagesDiv.querySelector('a.on') : null;
-                                if (current) {
-                                    const m = current.getAttribute('href') && current.getAttribute('href').match(/goto\((\d+)\)/);
-                                    if (m) { window.goto(parseInt(m[1])); return; }
-                                }
-                                window.goto(1);
-                            }
-                        }});
-                        await randomDelay(3000, 5000);
-                    }
-                    if (!navSuccess) break;
-                }
-
-                if (allResults.length === 0) {
+                if (!results || results.length === 0) {
                     chrome.runtime.sendMessage({
                         action: "batchUpdateData",
                         error: "未找到角色数据"
@@ -491,13 +372,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 } else {
                     chrome.runtime.sendMessage({
                         action: "batchUpdateData",
-                        results: allResults
+                        results: results
                     });
                 }
             } catch (e) {
                 chrome.runtime.sendMessage({
                     action: "batchUpdateData",
-                    error: "批量提取失败: " + e.message
+                    error: "提取失败: " + e.message
                 });
             }
         });

@@ -452,11 +452,11 @@
         <button id="back_btn" class="btn btn-back">
             <i class="fas fa-arrow-left"></i> 返回
         </button>
-        <button id="first_page_btn" class="btn btn-next" style="display:none">
+        <!-- <button id="first_page_btn" class="btn btn-next" style="display:none">
             <i class="fas fa-home"></i> 首页
-        </button>
+        </button> -->
         <button id="batch_data" class="btn btn-warning pulse">
-            <i class="fas fa-list"></i> 批量计算5页
+            <i class="fas fa-list"></i> 计算当前页面所有角色
         </button>
     </div>
 
@@ -497,6 +497,16 @@
                 <input type="checkbox" id="ignore_huanian" checked style="width:16px;height:16px;cursor:pointer">
                 <span>忽略花样年华</span>
             </label>
+        </div>
+        <div class="data-item" style="margin-top:4px">
+            <div class="compare-option" style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem; flex-wrap: nowrap;">
+                <label style="display: flex; align-items: center; gap: 4px; cursor: pointer; color: #333; white-space: nowrap;">
+                    <input type="checkbox" id="addToCompare" checked style="width:16px;height:16px;cursor:pointer">
+                    <span>把当前所有角色加入比对</span>
+                </label>
+                <button id="clearCacheBtn" class="btn btn-small" style="display:none; font-size: 0.75rem; padding: 0 2px; white-space: nowrap; flex: 0 0 auto; width: 33%; min-width: 0;">清空</button>
+                <span id="cacheStatus" style="color: #666; font-size: 0.75rem; white-space: nowrap;"></span>
+            </div>
         </div>
     </div>
 
