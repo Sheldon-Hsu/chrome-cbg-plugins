@@ -455,8 +455,11 @@
         <button id="first_page_btn" class="btn btn-next">
             <i class="fas fa-home"></i> 首页
         </button>
-        <button id="batch_data" class="btn btn-warning pulse">
-            <i class="fas fa-list"></i> 计算当前页面所有角色
+        <button id="batch_data" class="btn btn-warning">
+            <i class="fas fa-list"></i> 当前页
+        </button>
+        <button id="auto_batch_btn" class="btn btn-primary pulse">
+            <i class="fas fa-forward"></i> 自动计算
         </button>
     </div>
 
@@ -497,6 +500,10 @@
                 <input type="checkbox" id="ignore_huanian" checked style="width:16px;height:16px;cursor:pointer">
                 <span>忽略花样年华</span>
             </label>
+            <div style="margin-left:auto;display:flex;align-items:center;gap:4px;font-size:0.8rem">
+                <span>自动翻页数</span>
+                <input type="number" id="page_count" value="10" min="1" max="999" style="width:45px;padding:3px;border:1px solid #ddd;border-radius:3px;text-align:center;font-size:0.8rem">
+            </div>
         </div>
         <div class="data-item" style="margin-top:4px">
             <div class="compare-option" style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem; flex-wrap: nowrap;">

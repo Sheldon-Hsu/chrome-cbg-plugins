@@ -243,9 +243,14 @@ document.addEventListener('DOMContentLoaded', async function () {
     const batchBtn = document.getElementById('batch_data');
     const backBtn = document.getElementById('back_btn');
     const firstPageBtn = document.getElementById('first_page_btn');
+    const autoBatchBtn = document.getElementById('auto_batch_btn');
+    const pageCountInput = document.getElementById('page_count');
     const addToCompareCheckbox = document.getElementById('addToCompare');
     const clearCacheBtn = document.getElementById('clearCacheBtn');
     const cacheStatusEl = document.getElementById('cacheStatus');
+
+    // 自动计算状态标记
+    let isAutoBatching = false;
 
     // 缓存原始数据和计算结果（按 ordersn 去重）
     let cachedRawData = [];
@@ -367,6 +372,41 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
 
         chrome.runtime.sendMessage({action: "batchFetchData"});
+    });
+
+    // 自动翻页批量计算按钮
+    autoBatchBtn.addEventListener('click', function () {
+        let yxbPrice = parseFloat(document.getElementById('yxbPrice_value').value);
+        let guoziPrice = parseFloat(document.getElementById('guoziPrice_value').value);
+
+        if (!yxbPrice || !guoziPrice) {
+            alert("先输入游戏币价格和修炼果价格");
+            return;
+        }
+
+        let totalPages = parseInt(pageCountInput.value) || 10;
+        if (totalPages < 1) totalPages = 1;
+
+        isAutoBatching = true;
+        autoBatchBtn.disabled = true;
+        autoBatchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 计算中...';
+        autoBatchBtn.classList.remove('pulse');
+
+        document.getElementById('batch_results').style.display = 'block';
+        document.getElementById('batch_progress').style.display = 'block';
+        document.getElementById('batch_progress').textContent = '正在准备自动翻页计算...';
+
+        // 未勾选比对时清空表格
+        if (!addToCompareCheckbox.checked) {
+            document.getElementById('batch_tbody').innerHTML = '';
+            document.getElementById('batch_summary').innerHTML = '';
+            cachedRawData = [];
+            cachedCalcResults = [];
+            charDataMap = {};
+            updateCacheStatus();
+        }
+
+        chrome.runtime.sendMessage({action: "autoBatchFetch", totalPages: totalPages});
     });
 
     // 监听批量数据返回
@@ -583,6 +623,163 @@ document.addEventListener('DOMContentLoaded', async function () {
                     + ' | <span style="color:#d4edda">捡漏: ' + goodCount + '</span>'
                     + ' <span style="color:#fff3cd">适中: ' + midCount + '</span>'
                     + ' <span style="color:#f8d7da">偏贵: ' + badCount + '</span>';
+            }
+        }
+    });
+
+    // 监听自动翻页批量计算进度
+    chrome.runtime.onMessage.addListener((request) => {
+        if (request.action === "autoBatchProgress") {
+            const progressEl = document.getElementById('batch_progress');
+
+            // 错误处理
+            if (request.error) {
+                progressEl.textContent = request.error;
+                isAutoBatching = false;
+                autoBatchBtn.disabled = false;
+                autoBatchBtn.innerHTML = '<i class="fas fa-forward"></i> 自动计算';
+                autoBatchBtn.classList.add('pulse');
+                return;
+            }
+
+            // 提取中：更新进度文字
+            if (request.status === "extracting") {
+                progressEl.textContent = '正在计算第 ' + request.currentPage + '/' + request.totalPages + ' 页...';
+                return;
+            }
+
+            // 单页完成：将数据交给 batchUpdateData 的逻辑处理
+            if (request.status === "pageDone" && request.results && request.results.length > 0) {
+                progressEl.textContent = '第 ' + request.currentPage + '/' + request.totalPages + ' 页完成，'
+                    + '已获取 ' + request.results.length + ' 个角色';
+
+                // 复用 batchUpdateData 的处理逻辑
+                let yxbPrice = parseFloat(document.getElementById('yxbPrice_value').value);
+                let guoziPrice = parseFloat(document.getElementById('guoziPrice_value').value);
+                const tbodyEl = document.getElementById('batch_tbody');
+                const summaryEl = document.getElementById('batch_summary');
+
+                const ratios = {
+                    xiulian: parseRatio(document.getElementById('xiulian_ratio').value),
+                    bbxiu: parseRatio(document.getElementById('bbxiu_ratio').value),
+                    school_skill: parseRatio(document.getElementById('school_skill_ratio').value),
+                    life_skill: parseRatio(document.getElementById('life_skill_data_ratio').value)
+                };
+                const ignoreHuanian = document.getElementById('ignore_huanian').checked;
+
+                let newResults = request.results;
+                let rawDataToCalc;
+                let trulyNewRaw = [];
+
+                // 自动模式始终合并缓存
+                const cachedIds = new Set(cachedRawData.map(r => r.ordersn));
+                trulyNewRaw = newResults.filter(r => !cachedIds.has(r.ordersn));
+                const mergedMap = {};
+                cachedRawData.forEach(r => { mergedMap[r.ordersn] = r; });
+                newResults.forEach(r => { mergedMap[r.ordersn] = r; });
+                cachedRawData = Object.values(mergedMap);
+                updateCacheStatus();
+                rawDataToCalc = cachedRawData;
+
+                let {calcResults, errorCount, huanianCount} = recalculateAll(rawDataToCalc, yxbPrice, guoziPrice, ratios, ignoreHuanian);
+
+                let goodCount = 0, midCount = 0, badCount = 0;
+
+                // 更新已有行的显示值
+                updateCachedRows(tbodyEl, calcResults);
+                cachedCalcResults = calcResults;
+
+                // 只渲染新增部分
+                let newCalcResults = calcResults.filter(r => {
+                    return trulyNewRaw.some(n => n.ordersn === r.ordersn);
+                });
+
+                let tbodyHtml = '';
+                newCalcResults.forEach(r => {
+                    let d = parseFloat(r.discount) || 0;
+                    let rowClass = '';
+                    if (d > 0 && d <= 5) { rowClass = 'discount-good'; goodCount++; }
+                    else if (d > 5 && d <= 6.5) { rowClass = 'discount-mid'; midCount++; }
+                    else { rowClass = 'discount-bad'; badCount++; }
+
+                    let discountText = r.discount === '—' ? '—' : r.discount + '折';
+                    charDataMap[r.ordersn] = r;
+                    tbodyHtml += '<tr class="' + rowClass + '" data-ordersn="' + r.ordersn + '">'
+                        + '<td><a href="' + r.detailUrl + '" target="_blank">' + r.school + '</a></td>'
+                        + '<td><a href="' + r.detailUrl + '" target="_blank">' + r.level + '</a></td>'
+                        + '<td><a href="' + r.detailUrl + '" target="_blank">￥' + r.price + '</a></td>'
+                        + '<td><a href="' + r.detailUrl + '" target="_blank">￥' + r.rmbDiscount + '</a></td>'
+                        + '<td><a href="' + r.detailUrl + '" target="_blank">' + discountText + '</a></td>'
+                        + '</tr>';
+                });
+                tbodyEl.insertAdjacentHTML('beforeend', tbodyHtml);
+
+                // 按折扣重新排序所有行
+                const allDataRows = Array.from(tbodyEl.querySelectorAll('tr:not(.detail-row)'));
+                allDataRows.sort((a, b) => {
+                    const getDiscount = (row) => {
+                        const text = row.lastElementChild ? row.lastElementChild.textContent : '';
+                        const match = text.match(/([\d.]+)折/);
+                        return match ? parseFloat(match[1]) : 999;
+                    };
+                    return getDiscount(a) - getDiscount(b);
+                });
+                const detailRows = tbodyEl.querySelectorAll('.detail-row');
+                detailRows.forEach(r => r.remove());
+                allDataRows.forEach(row => tbodyEl.appendChild(row));
+
+                // 为每行存储 detailUrl
+                const sortedRows = tbodyEl.querySelectorAll('tr:not(.detail-row)');
+                sortedRows.forEach(row => {
+                    row.style.cursor = 'pointer';
+                    const link = row.querySelector('a');
+                    if (link) row.dataset.detailUrl = link.href;
+                });
+
+                // 汇总（追加模式）
+                const existingSummary = summaryEl.innerHTML;
+                if (existingSummary) {
+                    const totalMatch = existingSummary.match(/共 (\d+) 个角色/);
+                    const goodMatch = existingSummary.match(/捡漏: (\d+)/);
+                    const midMatch = existingSummary.match(/适中: (\d+)/);
+                    const badMatch = existingSummary.match(/偏贵: (\d+)/);
+                    const errorMatch = existingSummary.match(/(\d+)个解析失败/);
+                    const huanianMatch = existingSummary.match(/忽略花样年华: (\d+)个/);
+
+                    const prevTotal = totalMatch ? parseInt(totalMatch[1]) : 0;
+                    const prevGood = goodMatch ? parseInt(goodMatch[1]) : 0;
+                    const prevMid = midMatch ? parseInt(midMatch[1]) : 0;
+                    const prevBad = badMatch ? parseInt(badMatch[1]) : 0;
+                    const prevError = errorMatch ? parseInt(errorMatch[1]) : 0;
+                    const prevHuanian = huanianMatch ? parseInt(huanianMatch[1]) : 0;
+
+                    summaryEl.innerHTML = '共 ' + (prevTotal + newCalcResults.length) + ' 个角色'
+                        + ((prevHuanian + huanianCount) > 0 ? '（忽略花样年华: ' + (prevHuanian + huanianCount) + '个）' : '')
+                        + ((prevError + errorCount) > 0 ? '（' + (prevError + errorCount) + '个解析失败）' : '')
+                        + ' | <span style="color:#d4edda">捡漏: ' + (prevGood + goodCount) + '</span>'
+                        + ' <span style="color:#fff3cd">适中: ' + (prevMid + midCount) + '</span>'
+                        + ' <span style="color:#f8d7da">偏贵: ' + (prevBad + badCount) + '</span>';
+                } else {
+                    summaryEl.innerHTML = '共 ' + newCalcResults.length + ' 个角色'
+                        + (huanianCount > 0 ? '（忽略花样年华: ' + huanianCount + '个）' : '')
+                        + (errorCount > 0 ? '（' + errorCount + '个解析失败）' : '')
+                        + ' | <span style="color:#d4edda">捡漏: ' + goodCount + '</span>'
+                        + ' <span style="color:#fff3cd">适中: ' + midCount + '</span>'
+                        + ' <span style="color:#f8d7da">偏贵: ' + badCount + '</span>';
+                }
+                return;
+            }
+
+            // 全部完成或结束
+            if (request.status === "done" || request.status === "end") {
+                let msg = '自动计算完成！共 ' + request.currentPage + ' 页';
+                if (request.reason) msg += '（' + request.reason + '）';
+                progressEl.textContent = msg;
+                isAutoBatching = false;
+                autoBatchBtn.disabled = false;
+                autoBatchBtn.innerHTML = '<i class="fas fa-forward"></i> 自动计算';
+                autoBatchBtn.classList.add('pulse');
+                return;
             }
         }
     });
