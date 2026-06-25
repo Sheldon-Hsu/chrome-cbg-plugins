@@ -194,39 +194,39 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         return true; // 保持消息通道开放:ml-citation{ref="5" data="citationList"}
     }
 
-    // // 跳转到首页：调用页面的 goto(1)
-    // if (request.action === "goToFirstPage") {
-    //     chrome.tabs.query({url: "*://xyq.cbg.163.com/*"}, (tabs) => {
-    //         if (!tabs || tabs.length === 0) {
-    //             sendResponse({success: false, error: "未找到藏宝阁页面，请先打开藏宝阁"});
-    //             return;
-    //         }
-    //         const tab = tabs.find(t => t.active) || tabs[0];
-    //         const tabId = tab.id;
-    //         chrome.scripting.executeScript({
-    //             target: {tabId},
-    //             world: "MAIN",
-    //             function: () => {
-    //                 if (typeof window.goto === 'function') {
-    //                     window.goto(1);
-    //                     return {success: true, page: 1};
-    //                 }
-    //                 return {success: false, error: "页面无 goto 函数"};
-    //             }
-    //         }, (results) => {
-    //             if (chrome.runtime.lastError) {
-    //                 sendResponse({success: false, error: "脚本注入失败: " + chrome.runtime.lastError.message});
-    //                 return;
-    //             }
-    //             if (!results || !results[0]) {
-    //                 sendResponse({success: false, error: "脚本未返回结果"});
-    //                 return;
-    //             }
-    //             sendResponse(results[0].result);
-    //         });
-    //     });
-    //     return true;
-    // }
+    // 跳转到首页：调用页面的 goto(1)
+    if (request.action === "goToFirstPage") {
+        chrome.tabs.query({url: "*://xyq.cbg.163.com/*"}, (tabs) => {
+            if (!tabs || tabs.length === 0) {
+                sendResponse({success: false, error: "未找到藏宝阁页面，请先打开藏宝阁"});
+                return;
+            }
+            const tab = tabs.find(t => t.active) || tabs[0];
+            const tabId = tab.id;
+            chrome.scripting.executeScript({
+                target: {tabId},
+                world: "MAIN",
+                function: () => {
+                    if (typeof window.goto === 'function') {
+                        window.goto(1);
+                        return {success: true, page: 1};
+                    }
+                    return {success: false, error: "页面无 goto 函数"};
+                }
+            }, (results) => {
+                if (chrome.runtime.lastError) {
+                    sendResponse({success: false, error: "脚本注入失败: " + chrome.runtime.lastError.message});
+                    return;
+                }
+                if (!results || !results[0]) {
+                    sendResponse({success: false, error: "脚本未返回结果"});
+                    return;
+                }
+                sendResponse(results[0].result);
+            });
+        });
+        return true;
+    }
 
     // 批量计算：连续提取多页角色数据
     if (request.action === "batchFetchData") {

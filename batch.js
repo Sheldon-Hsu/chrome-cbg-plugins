@@ -242,7 +242,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     const batchBtn = document.getElementById('batch_data');
     const backBtn = document.getElementById('back_btn');
-    // const firstPageBtn = document.getElementById('first_page_btn');
+    const firstPageBtn = document.getElementById('first_page_btn');
     const addToCompareCheckbox = document.getElementById('addToCompare');
     const clearCacheBtn = document.getElementById('clearCacheBtn');
     const cacheStatusEl = document.getElementById('cacheStatus');
@@ -319,23 +319,23 @@ document.addEventListener('DOMContentLoaded', async function () {
         chrome.runtime.sendMessage({action: "switchPage", page: "index.html"});
     });
 
-    // // 首页按钮
-    // firstPageBtn.addEventListener('click', function () {
-    //     chrome.runtime.sendMessage({action: "goToFirstPage"}, function (response) {
-    //         if (chrome.runtime.lastError) {
-    //             alert("跳转失败: " + chrome.runtime.lastError.message);
-    //             return;
-    //         }
-    //         if (response && response.success) {
-    //             firstPageBtn.textContent = "已回到首页";
-    //             setTimeout(() => {
-    //                 firstPageBtn.innerHTML = '<i class="fas fa-home"></i> 首页';
-    //             }, 1500);
-    //         } else {
-    //             alert(response ? response.error : "跳转失败，请确保当前页面是藏宝阁列表页");
-    //         }
-    //     });
-    // });
+    // 首页按钮
+    firstPageBtn.addEventListener('click', function () {
+        chrome.runtime.sendMessage({action: "goToFirstPage"}, function (response) {
+            if (chrome.runtime.lastError) {
+                alert("跳转失败: " + chrome.runtime.lastError.message);
+                return;
+            }
+            if (response && response.success) {
+                firstPageBtn.textContent = "已回到首页";
+                setTimeout(() => {
+                    firstPageBtn.innerHTML = '<i class="fas fa-home"></i> 首页';
+                }, 1500);
+            } else {
+                alert(response ? response.error : "跳转失败，请确保当前页面是藏宝阁列表页");
+            }
+        });
+    });
 
     // 清空缓存按钮
     clearCacheBtn.addEventListener('click', function () {
