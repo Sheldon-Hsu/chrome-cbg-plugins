@@ -243,6 +243,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
             let priceByCal = (parseFloat(total_cost.origin) * yxbPrice).toFixed(0) || '0'
             let discountPriceByCal = (parseFloat(total_cost.discount) * yxbPrice).toFixed(0) || '0'
+
+            // 机缘加成：若 (最大-当前) <= 3，加500RMB
+            let jyCur = parseInt(xiulian_data.querySelector('#jyCur_value').value) || 0;
+            let jyMax = parseInt(xiulian_data.querySelector('#jyMax_value').value) || 0;
+            let jyCheckbox = xiulian_data.querySelector('#jy .item-select');
+            if (jyCheckbox && jyCheckbox.checked && jyMax > 0 && jyMax - jyCur <= 3) {
+                priceByCal = (parseFloat(priceByCal) + 500).toFixed(0);
+                discountPriceByCal = (parseFloat(discountPriceByCal) + 500).toFixed(0);
+            }
+
             calculate_data.querySelector('#totalCost_value').textContent = total_cost.origin || '0'
             calculate_data.querySelector('#totalCost_ratio_value').textContent = total_cost.discount || '0'
             calculate_data.querySelector('#totalCost_rmb').textContent = priceByCal
@@ -277,6 +287,10 @@ document.addEventListener('DOMContentLoaded', function () {
                     let level = request.data.qyd || 0;
                     let upper = 0;
                     xiulian_data.querySelector('#qyd_value').value = level;
+
+                    //机缘
+                    xiulian_data.querySelector('#jyCur_value').value = request.data.jyCur || 0;
+                    xiulian_data.querySelector('#jyMax_value').value = request.data.jyMax || 0;
 
                     //攻修
                     level = request.data.gjxl || 0;

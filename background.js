@@ -74,6 +74,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                         if (td.textContent.includes('新版乾元丹数量')) {
                             data.qyd = td.textContent.split('：')[1].trim();
                         }
+                        if (td.textContent.includes('月饼粽子机缘')) {
+                            let jyStr = td.textContent.split('：')[1].trim();
+                            if (jyStr && jyStr.includes('/')) {
+                                let parts = jyStr.split('/');
+                                data.jyCur = parseInt(parts[0]) || 0;
+                                data.jyMax = parseInt(parts[1]) || 0;
+                            }
+                        }
                     });
 
                     // 防御修炼数据提取（兼容方案）
@@ -300,7 +308,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                     const fyxlUpper = info.iMaxExpt3 || 0;
                     const kfxl = info.iExptSki4 || 0;
                     const kfxlUpper = info.iMaxExpt4 || 0;
-                    const qyd = info.iExptSki5 || 0;
+                    // 列表页无法读取乾元丹信息，固定为0
+                    const qyd = 0;
                     const gjkzl = info.iBeastSki1 || 0;
                     const fskzl = info.iBeastSki2 || 0;
                     const fykzl = info.iBeastSki3 || 0;
@@ -382,6 +391,66 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 });
             }
         });
+        return true;
+    }
+
+    // 批量计算：从已打开的角色详情页读取乾元丹
+    if (request.action === "fetchQydFromDetail" && request.detailUrl) {
+        const detailUrl = request.detailUrl;
+        // 等待详情页加载完成后注入脚本读取乾元丹
+        setTimeout(() => {
+            chrome.tabs.query({url: detailUrl}, (tabs) => {
+                if (!tabs || tabs.length === 0) {
+                    chrome.runtime.sendMessage({
+                        action: "qydFetched",
+                        detailUrl: detailUrl,
+                        qyd: 0
+                    });
+                    return;
+                }
+                const tabId = tabs[0].id;
+                chrome.scripting.executeScript({
+                    target: {tabId: tabId},
+                    function: () => {
+                        const roleBox = document.getElementById('role_info_box');
+                        if (!roleBox) return {qyd: 0, jyCur: 0, jyMax: 0};
+                        let qyd = 0;
+                        let jyCur = 0;
+                        let jyMax = 0;
+                        Array.from(roleBox.querySelectorAll('td')).forEach(td => {
+                            if (td.textContent.includes('新版乾元丹数量')) {
+                                qyd = td.textContent.split('：')[1].trim();
+                            }
+                            if (td.textContent.includes('月饼粽子机缘')) {
+                                let jyStr = td.textContent.split('：')[1].trim();
+                                if (jyStr && jyStr.includes('/')) {
+                                    let parts = jyStr.split('/');
+                                    jyCur = parseInt(parts[0]) || 0;
+                                    jyMax = parseInt(parts[1]) || 0;
+                                }
+                            }
+                        });
+                        return {qyd, jyCur, jyMax};
+                    }
+                }, (results) => {
+                    let qyd = 0;
+                    let jyCur = 0;
+                    let jyMax = 0;
+                    if (!chrome.runtime.lastError && results && results[0]) {
+                        qyd = results[0].result ? results[0].result.qyd : 0;
+                        jyCur = results[0].result ? results[0].result.jyCur : 0;
+                        jyMax = results[0].result ? results[0].result.jyMax : 0;
+                    }
+                    chrome.runtime.sendMessage({
+                        action: "qydFetched",
+                        detailUrl: detailUrl,
+                        qyd: qyd,
+                        jyCur: jyCur,
+                        jyMax: jyMax
+                    });
+                });
+            });
+        }, 3000);
         return true;
     }
 });
