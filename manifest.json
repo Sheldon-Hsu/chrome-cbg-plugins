@@ -31,7 +31,7 @@
   "side_panel": {
     "default_path": "index.html"
   },
-  "permissions": [ "scripting","sidePanel","tabs"],
+  "permissions": [ "scripting","sidePanel","tabs","webNavigation"],
   "host_permissions": [
     "*://xyq.cbg.163.com/*",
     "file:///*/*"

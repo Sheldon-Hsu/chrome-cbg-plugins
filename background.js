@@ -308,6 +308,40 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             return {success: false, error: "页面无 goto 函数"};
         }
 
+        // 等待页面翻页完成（goto 可能导致页面重新加载）
+        // 使用 chrome.webNavigation 检测页面加载完成
+        function waitForNavComplete(tabId, timeout) {
+            return new Promise((resolve) => {
+                let resolved = false;
+                function onDone() {
+                    if (resolved) return;
+                    resolved = true;
+                    chrome.webNavigation.onCompleted.removeListener(onDone);
+                    resolve(true);
+                }
+                chrome.webNavigation.onCompleted.addListener(onDone, {tabId: tabId});
+                // 超时兜底
+                setTimeout(() => {
+                    if (!resolved) {
+                        resolved = true;
+                        chrome.webNavigation.onCompleted.removeListener(onDone);
+                        resolve(false);
+                    }
+                }, timeout);
+            });
+        }
+
+        // 注入脚本检查当前页码是否为目标页码
+        function checkPageReady(targetPage) {
+            try {
+                return typeof pager === 'object'
+                    && pager.cur_page === targetPage
+                    && document.querySelectorAll('textarea[id^="other_info_"]').length > 0;
+            } catch (e) {
+                return false;
+            }
+        }
+
         // 提取当前页面的角色数据（与 batchFetchData 共用同一逻辑）
         function extractPageData() {
             const LIFE_SKILL_IDS = new Set(["201","202","203","206","208","211","212","216","230","237"]);
@@ -438,7 +472,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                         status: "extracting"
                     });
 
-                    // 滚动到底部 + 等待加载
+                    // 滚动到底部触发懒加载，等待加载完成
                     await execScript(tabId, {world: "MAIN", function: scrollToBottom});
                     await delay(1500);
 
@@ -456,6 +490,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
                     // 如果不是最后一页，翻到下一页
                     if (i < actualTotal - 1) {
+                        // 获取当前页码
+                        const curPageInfo = await execScript(tabId, {world: "MAIN", function: getPageInfo});
+                        const targetPage = curPageInfo.curPage + 1;
+
+                        // 先注册页面加载监听，再触发翻页
+                        const navDonePromise = waitForNavComplete(tabId, 15000);
+
                         const navResult = await execScript(tabId, {world: "MAIN", function: gotoNextPage});
                         if (!navResult || !navResult.success) {
                             chrome.runtime.sendMessage({
@@ -467,8 +508,25 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                             });
                             break;
                         }
-                        // 等待页面加载
-                        await delay(2500);
+
+                        // 等待页面加载完成
+                        const navDone = await navDonePromise;
+                        if (!navDone) {
+                            // 超时兜底，额外等待
+                            await delay(3000);
+                        }
+
+                        // 确认页面已加载到目标页码（最多重试 5 次）
+                        let ready = false;
+                        for (let retry = 0; retry < 5; retry++) {
+                            await delay(500);
+                            try {
+                                ready = await execScript(tabId, {world: "MAIN", function: checkPageReady, args: [targetPage]});
+                            } catch (e) {
+                                // 页面还在加载
+                            }
+                            if (ready) break;
+                        }
                     }
                 }
 
