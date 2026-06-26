@@ -328,6 +328,60 @@ document.addEventListener('DOMContentLoaded', async function () {
         sortTableRows();
     });
 
+    // 点击行：展开详情面板（事件委托，只绑定一次）
+    document.getElementById('batch_tbody').addEventListener('click', function (e) {
+        const link = e.target.closest('a');
+        if (link) e.preventDefault();
+
+        const tbodyEl = this;
+        const row = e.target.closest('tr');
+        if (!row || row.classList.contains('detail-row') || row.parentElement !== tbodyEl) return;
+
+        const detailUrl = row.dataset.detailUrl || '';
+
+        // 切换详情面板
+        const existing = tbodyEl.querySelector('.detail-row');
+        if (existing && existing.previousElementSibling === row) {
+            if (detailUrl) {
+                chrome.tabs.query({url: detailUrl}, function (tabs) {
+                    tabs.forEach(t => chrome.tabs.remove(t.id));
+                });
+            }
+            existing.remove();
+            return;
+        }
+
+        // 展开：新标签页打开角色详情，并从详情页读取乾元丹
+        if (detailUrl) {
+            window.open(detailUrl, '_blank');
+            chrome.runtime.sendMessage({action: "fetchQydFromDetail", detailUrl: detailUrl});
+        }
+        if (existing) existing.remove();
+
+        // 从 charDataMap 读取完整角色数据构建详情面板
+        const ordersn = row.dataset.ordersn;
+        let charData = ordersn ? charDataMap[ordersn] : null;
+        if (!charData) {
+            const cells = row.querySelectorAll('td');
+            charData = {
+                school: cells[0] ? cells[0].textContent.trim() : '',
+                level: cells[1] ? cells[1].textContent.trim() : '',
+                price: cells[2] ? cells[2].textContent.replace('￥', '').trim() : '',
+                rmbOrigin: cells[3] ? cells[3].textContent.replace('￥', '').trim() : '',
+                discount: cells[4] ? cells[4].textContent.replace('折', '').trim() : '—',
+                detailUrl: detailUrl
+            };
+        }
+        const detailTr = document.createElement('tr');
+        detailTr.className = 'detail-row';
+        const td = document.createElement('td');
+        td.colSpan = 6;
+        td.innerHTML = buildDetailPanelHTML(charData);
+        detailTr.appendChild(td);
+        row.after(detailTr);
+        bindDetailPanelEvents(detailTr, charData);
+    });
+
     // 用当前比例重新计算所有缓存数据
     function recalculateAll(rawData, yxbPrice, guoziPrice, ratios, ignoreHuanian) {
         let calcResults = [];
@@ -590,62 +644,6 @@ document.addEventListener('DOMContentLoaded', async function () {
             sortTableRows();
 
             // 点击行：新标签页打开角色页面 + 展开详情面板
-            // 使用事件委托，避免重复绑定监听器
-            if (!tbodyEl._delegated) {
-                tbodyEl._delegated = true;
-                tbodyEl.addEventListener('click', function (e) {
-                    const link = e.target.closest('a');
-                    if (link) e.preventDefault(); // 阻止 <a> 标签的默认跳转
-
-                    const row = e.target.closest('tr');
-                    if (!row || row.classList.contains('detail-row') || row.parentElement !== tbodyEl) return;
-
-                    const detailUrl = row.dataset.detailUrl || '';
-
-                    // 切换详情面板
-                    const existing = tbodyEl.querySelector('.detail-row');
-                    if (existing && existing.previousElementSibling === row) {
-                        // 当前行已展开 → 折叠：关闭对应标签页
-                        if (detailUrl) {
-                            chrome.tabs.query({url: detailUrl}, function (tabs) {
-                                tabs.forEach(t => chrome.tabs.remove(t.id));
-                            });
-                        }
-                        existing.remove();
-                        return;
-                    }
-
-                    // 展开：新标签页打开角色详情，并从详情页读取乾元丹
-                    if (detailUrl) {
-                        window.open(detailUrl, '_blank');
-                        chrome.runtime.sendMessage({action: "fetchQydFromDetail", detailUrl: detailUrl});
-                    }
-                    if (existing) existing.remove();
-
-                    // 从 charDataMap 读取完整角色数据构建详情面板
-                    const ordersn = row.dataset.ordersn;
-                    let charData = ordersn ? charDataMap[ordersn] : null;
-                    if (!charData) {
-                        const cells = row.querySelectorAll('td');
-                        charData = {
-                            school: cells[0] ? cells[0].textContent.trim() : '',
-                            level: cells[1] ? cells[1].textContent.trim() : '',
-                            price: cells[2] ? cells[2].textContent.replace('￥', '').trim() : '',
-                            rmbOrigin: cells[3] ? cells[3].textContent.replace('￥', '').trim() : '',
-                            discount: cells[4] ? cells[4].textContent.replace('折', '').trim() : '—',
-                            detailUrl: detailUrl
-                        };
-                    }
-                    const detailTr = document.createElement('tr');
-                    detailTr.className = 'detail-row';
-                    const td = document.createElement('td');
-                    td.colSpan = 6;
-                    td.innerHTML = buildDetailPanelHTML(charData);
-                    detailTr.appendChild(td);
-                    row.after(detailTr);
-                    bindDetailPanelEvents(detailTr, charData);
-                });
-            }
 
             // 为每行存储 detailUrl 到 data 属性，供事件委托使用
             const sortedRows = tbodyEl.querySelectorAll('tr:not(.detail-row)');
