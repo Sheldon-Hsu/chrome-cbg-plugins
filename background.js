@@ -1084,6 +1084,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             for (let i = 0; i < listItems.length; i++) {
                 const item = listItems[i];
 
+                // 发送进度更新
+                chrome.runtime.sendMessage({
+                    action: "autoBatchProgress",
+                    currentPage: i + 1,
+                    totalPages: listItems.length,
+                    status: "extracting"
+                });
+
                 // 将列表项滚动到视口中间，然后点击进入详情页
                 const clickResult = await execScript(tabId, {function: (idx) => {
                     const items = document.querySelectorAll('.list-item-link.product-item.js_product_item');
@@ -1253,7 +1261,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 const attrParts = item.attr.split(/\s+/);
                 const school = attrParts[0] || '';
 
-                results.push({
+                const charData = {
                     ordersn: `pocket_${i}_${Date.now()}`,
                     name: item.name,
                     level,
@@ -1263,16 +1271,33 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                     price,
                     detailUrl: '',
                     ...(detailData || {})
+                };
+
+                results.push(charData);
+
+                // 每处理完一个角色就发送结果，实现实时显示
+                chrome.runtime.sendMessage({
+                    action: "autoBatchProgress",
+                    currentPage: i + 1,
+                    totalPages: listItems.length,
+                    results: [charData],
+                    status: "pageDone"
                 });
             }
 
-            return results;
+            // 全部完成
+            chrome.runtime.sendMessage({
+                action: "autoBatchProgress",
+                currentPage: listItems.length,
+                totalPages: listItems.length,
+                status: "done"
+            });
         }
 
         chrome.tabs.query({active: true, currentWindow: true}, async (tabs) => {
             if (!tabs || tabs.length === 0) {
                 chrome.runtime.sendMessage({
-                    action: "batchUpdateData",
+                    action: "autoBatchProgress",
                     error: "未找到口袋版页面"
                 });
                 return;
@@ -1281,22 +1306,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             const tabId = tab.id;
 
             try {
-                const results = await extractPocketBatchWithDetail(tabId);
-
-                if (!results || results.length === 0) {
-                    chrome.runtime.sendMessage({
-                        action: "batchUpdateData",
-                        error: "未找到角色数据"
-                    });
-                } else {
-                    chrome.runtime.sendMessage({
-                        action: "batchUpdateData",
-                        results: results
-                    });
-                }
+                await extractPocketBatchWithDetail(tabId);
             } catch (e) {
                 chrome.runtime.sendMessage({
-                    action: "batchUpdateData",
+                    action: "autoBatchProgress",
                     error: "提取失败: " + e.message
                 });
             }
