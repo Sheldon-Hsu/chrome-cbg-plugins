@@ -1084,12 +1084,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             for (let i = 0; i < listItems.length; i++) {
                 const item = listItems[i];
 
-                // 点击列表项进入详情页
+                // 将列表项滚动到视口中间，然后点击进入详情页
                 const clickResult = await execScript(tabId, {function: (idx) => {
                     const items = document.querySelectorAll('.list-item-link.product-item.js_product_item');
                     if (!items || items.length === 0) return false;
                     const item = items[idx];
                     if (!item) return false;
+                    // 将列表项滚动到视口中间
+                    item.scrollIntoView({block: 'center', behavior: 'smooth'});
                     // 点击列表项
                     item.click();
                     return true;
@@ -1279,12 +1281,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             const tabId = tab.id;
 
             try {
-                // 先滚动到底部触发懒加载
-                await execScript(tabId, {function: () => {
-                    window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'});
-                }});
-                await delay(1000);
-
                 const results = await extractPocketBatchWithDetail(tabId);
 
                 if (!results || results.length === 0) {
@@ -1514,12 +1510,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                             status: "extracting"
                         });
 
-                        // 点击进入详情页
+                        // 将列表项滚动到视口中间，然后点击进入详情页
                         const clickResult = await execScript(tabId, {function: (idx) => {
                             const items = document.querySelectorAll('.list-item-link.product-item.js_product_item');
                             if (!items || items.length === 0) return false;
                             const item = items[idx];
                             if (!item) return false;
+                            // 将列表项滚动到视口中间
+                            item.scrollIntoView({block: 'center', behavior: 'smooth'});
                             // 点击列表项
                             item.click();
                             return true;
