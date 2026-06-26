@@ -284,9 +284,13 @@ document.addEventListener('DOMContentLoaded', async function () {
     const clearCacheBtn = document.getElementById('clearCacheBtn');
     const cacheStatusEl = document.getElementById('cacheStatus');
     const nextPageBtn = document.getElementById('next_page_btn');
+    const pauseBtn = document.getElementById('pause_btn');
+    const stopBtn = document.getElementById('stop_btn');
+    const pauseButtons = document.getElementById('pause_buttons');
 
     // 自动计算状态标记
     let isAutoBatching = false;
+    let isPaused = false;
 
     // 缓存原始数据和计算结果（按 ordersn 去重）
     let cachedRawData = [];
@@ -563,9 +567,16 @@ document.addEventListener('DOMContentLoaded', async function () {
         if (totalPages < 1) totalPages = 1;
 
         isAutoBatching = true;
+        isPaused = false;
         autoBatchBtn.disabled = true;
         autoBatchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 计算中...';
         autoBatchBtn.classList.remove('pulse');
+
+        // 显示暂停/停止按钮
+        if (pauseButtons) pauseButtons.style.display = 'flex';
+        pauseBtn.innerHTML = '<i class="fas fa-pause"></i> 暂停';
+        pauseBtn.classList.remove('btn-warning');
+        pauseBtn.classList.add('btn-secondary');
 
         document.getElementById('batch_results').style.display = 'block';
         document.getElementById('batch_progress').style.display = 'block';
@@ -602,9 +613,16 @@ document.addEventListener('DOMContentLoaded', async function () {
         if (totalItems < 1) totalItems = 1;
 
         isAutoBatching = true;
+        isPaused = false;
         pocketBatchBtn.disabled = true;
         pocketBatchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 计算中...';
         pocketBatchBtn.classList.remove('pulse');
+
+        // 显示暂停/停止按钮
+        if (pauseButtons) pauseButtons.style.display = 'flex';
+        pauseBtn.innerHTML = '<i class="fas fa-pause"></i> 暂停';
+        pauseBtn.classList.remove('btn-warning');
+        pauseBtn.classList.add('btn-secondary');
 
         document.getElementById('batch_results').style.display = 'block';
         document.getElementById('batch_progress').style.display = 'block';
@@ -621,6 +639,43 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
 
         chrome.runtime.sendMessage({action: "autoBatchPocketFetch", totalItems: totalItems});
+    });
+
+    // 暂停按钮
+    pauseBtn.addEventListener('click', function () {
+        if (isPaused) {
+            // 继续计算
+            isPaused = false;
+            pauseBtn.innerHTML = '<i class="fas fa-pause"></i> 暂停';
+            pauseBtn.classList.remove('btn-warning');
+            pauseBtn.classList.add('btn-secondary');
+            chrome.runtime.sendMessage({action: "resumeBatchCalc"});
+        } else {
+            // 暂停计算
+            isPaused = true;
+            pauseBtn.innerHTML = '<i class="fas fa-play"></i> 继续';
+            pauseBtn.classList.remove('btn-secondary');
+            pauseBtn.classList.add('btn-warning');
+            chrome.runtime.sendMessage({action: "pauseBatchCalc"});
+        }
+    });
+
+    // 停止按钮
+    stopBtn.addEventListener('click', function () {
+        isAutoBatching = false;
+        isPaused = false;
+        if (pauseButtons) pauseButtons.style.display = 'none';
+        // 恢复电脑版按钮
+        autoBatchBtn.disabled = false;
+        autoBatchBtn.innerHTML = '<i class="fas fa-forward"></i> 自动计算';
+        autoBatchBtn.classList.add('pulse');
+        // 恢复口袋版按钮
+        pocketBatchBtn.disabled = false;
+        pocketBatchBtn.innerHTML = '<i class="fas fa-calculator"></i> 计算多个角色';
+        pocketBatchBtn.classList.add('pulse');
+        // 发送停止消息
+        chrome.runtime.sendMessage({action: "stopBatchCalc"});
+        document.getElementById('batch_progress').textContent = '已停止计算';
     });
 
     // 监听批量数据返回
@@ -785,6 +840,9 @@ document.addEventListener('DOMContentLoaded', async function () {
             if (request.error) {
                 progressEl.textContent = request.error;
                 isAutoBatching = false;
+                isPaused = false;
+                // 隐藏暂停/停止按钮
+                if (pauseButtons) pauseButtons.style.display = 'none';
                 // 恢复电脑版按钮
                 autoBatchBtn.disabled = false;
                 autoBatchBtn.innerHTML = '<i class="fas fa-forward"></i> 自动计算';
@@ -928,6 +986,9 @@ document.addEventListener('DOMContentLoaded', async function () {
                 if (request.reason) msg += '（' + request.reason + '）';
                 progressEl.textContent = msg;
                 isAutoBatching = false;
+                isPaused = false;
+                // 隐藏暂停/停止按钮
+                if (pauseButtons) pauseButtons.style.display = 'none';
                 // 恢复电脑版按钮
                 autoBatchBtn.disabled = false;
                 autoBatchBtn.innerHTML = '<i class="fas fa-forward"></i> 自动计算';

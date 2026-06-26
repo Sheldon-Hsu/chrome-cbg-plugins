@@ -10,6 +10,17 @@ chrome.action.onClicked.addListener(() => {
 
 let globalCostData = null;
 
+// 批量计算暂停/停止状态
+let isBatchPaused = false;
+let isBatchStopped = false;
+
+// 检查是否暂停的辅助函数
+async function checkPauseState() {
+    while (isBatchPaused && !isBatchStopped) {
+        await new Promise(r => setTimeout(r, 200));
+    }
+    return !isBatchStopped;
+}
 
 // 确保侧边栏可用
 chrome.runtime.onInstalled.addListener(() => {
@@ -22,6 +33,25 @@ chrome.runtime.onInstalled.addListener(() => {
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "switchPage") {
         chrome.sidePanel.setOptions({ path: request.page });
+        return;
+    }
+
+    // 暂停批量计算
+    if (request.action === "pauseBatchCalc") {
+        isBatchPaused = true;
+        return;
+    }
+
+    // 继续批量计算
+    if (request.action === "resumeBatchCalc") {
+        isBatchPaused = false;
+        return;
+    }
+
+    // 停止批量计算
+    if (request.action === "stopBatchCalc") {
+        isBatchPaused = false;
+        isBatchStopped = true;
         return;
     }
 
@@ -506,7 +536,24 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                     status: "start"
                 });
 
+                // 重置状态
+                isBatchPaused = false;
+                isBatchStopped = false;
+
                 for (let i = 0; i < actualTotal; i++) {
+                    // 检查是否暂停或停止
+                    const shouldContinue = await checkPauseState();
+                    if (!shouldContinue) {
+                        chrome.runtime.sendMessage({
+                            action: "autoBatchProgress",
+                            currentPage: i,
+                            totalPages: actualTotal,
+                            status: "end",
+                            reason: "用户停止"
+                        });
+                        return;
+                    }
+
                     // 通知前端当前进度
                     chrome.runtime.sendMessage({
                         action: "autoBatchProgress",
@@ -1466,6 +1513,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 let consecutiveFailures = 0;
                 const MAX_FAILURES = 3;
 
+                // 重置状态
+                isBatchPaused = false;
+                isBatchStopped = false;
+
                 chrome.runtime.sendMessage({
                     action: "autoBatchProgress",
                     currentPage: 0,
@@ -1474,6 +1525,18 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 });
 
                 while (processedCount < totalItems && consecutiveFailures < MAX_FAILURES) {
+                    // 检查是否暂停或停止
+                    const shouldContinue = await checkPauseState();
+                    if (!shouldContinue) {
+                        chrome.runtime.sendMessage({
+                            action: "autoBatchProgress",
+                            currentPage: processedCount,
+                            totalPages: totalItems,
+                            status: "end",
+                            reason: "用户停止"
+                        });
+                        return;
+                    }
                     // 获取当前列表项
                     const listItems = await execScript(tabId, {function: () => {
                         const items = document.querySelectorAll('.list-item-link.product-item.js_product_item');
@@ -1522,6 +1585,19 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                     const batchSize = Math.min(listItems.length - startIndex, totalItems - processedCount);
 
                     for (let i = 0; i < batchSize; i++) {
+                        // 检查是否暂停或停止
+                        const shouldContinue = await checkPauseState();
+                        if (!shouldContinue) {
+                            chrome.runtime.sendMessage({
+                                action: "autoBatchProgress",
+                                currentPage: processedCount,
+                                totalPages: totalItems,
+                                status: "end",
+                                reason: "用户停止"
+                            });
+                            return;
+                        }
+
                         const itemIdx = startIndex + i;
                         const item = listItems[itemIdx];
 
