@@ -1063,7 +1063,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         async function extractPocketBatchWithDetail(tabId) {
             // 1. 先获取列表中所有角色的基本信息
             const listItems = await execScript(tabId, {function: () => {
-                const items = document.querySelectorAll('.extend-product-item.list-item');
+                const items = document.querySelectorAll('.list-item-link.product-item.js_product_item');
                 return Array.from(items).map((item, index) => {
                     const name = item.querySelector('.name')?.textContent?.trim() || '';
                     const levelText = item.querySelector('.level')?.textContent?.trim() || '';
@@ -1086,12 +1086,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
                 // 点击列表项进入详情页
                 const clickResult = await execScript(tabId, {function: (idx) => {
-                    const items = document.querySelectorAll('.extend-product-item.list-item');
+                    const items = document.querySelectorAll('.list-item-link.product-item.js_product_item');
+                    if (!items || items.length === 0) return false;
                     const item = items[idx];
                     if (!item) return false;
-                    const link = item.querySelector('.list-item-link');
-                    if (!link) return false;
-                    link.click();
+                    // 点击列表项
+                    item.click();
                     return true;
                 }, args: [i]});
 
@@ -1235,7 +1235,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
                 // 检测列表页是否加载完成
                 const listLoaded = await execScript(tabId, {function: () => {
-                    return document.querySelectorAll('.extend-product-item.list-item').length > 0;
+                    return document.querySelectorAll('.list-item-link.product-item.js_product_item').length > 0;
                 }});
 
                 if (!listLoaded) {
@@ -1458,7 +1458,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 while (processedCount < totalItems && consecutiveFailures < MAX_FAILURES) {
                     // 获取当前列表项
                     const listItems = await execScript(tabId, {function: () => {
-                        const items = document.querySelectorAll('.extend-product-item.list-item');
+                        const items = document.querySelectorAll('.list-item-link.product-item.js_product_item');
                         return Array.from(items).map((item, index) => {
                             const name = item.querySelector('.name')?.textContent?.trim() || '';
                             const levelText = item.querySelector('.level')?.textContent?.trim() || '';
@@ -1490,7 +1490,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
                         // 检查是否有新数据加载
                         const newCount = await execScript(tabId, {function: () => {
-                            return document.querySelectorAll('.extend-product-item.list-item').length;
+                            return document.querySelectorAll('.list-item-link.product-item.js_product_item').length;
                         }});
                         if (newCount <= listItems.length) {
                             consecutiveFailures++;
@@ -1516,12 +1516,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
                         // 点击进入详情页
                         const clickResult = await execScript(tabId, {function: (idx) => {
-                            const items = document.querySelectorAll('.extend-product-item.list-item');
+                            const items = document.querySelectorAll('.list-item-link.product-item.js_product_item');
+                            if (!items || items.length === 0) return false;
                             const item = items[idx];
                             if (!item) return false;
-                            const link = item.querySelector('.list-item-link');
-                            if (!link) return false;
-                            link.click();
+                            // 点击列表项
+                            item.click();
                             return true;
                         }, args: [itemIdx]});
 
