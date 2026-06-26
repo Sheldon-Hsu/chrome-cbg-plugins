@@ -1164,6 +1164,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 // 从详情页提取数据和URL
                 const detailData = await execScript(tabId, {function: async () => {
                     const data = {
+                        price: 0,
                         qyd: 0, jyCur: 0, jyMax: 0,
                         gjxl: 0, gjxlUpper: 0, fsxl: 0, fsxlUpper: 0,
                         fyxl: 0, fyxlUpper: 0, kfxl: 0, kfxlUpper: 0,
@@ -1176,6 +1177,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                     };
 
                     const delay = ms => new Promise(r => setTimeout(r, ms));
+
+                    // 从详情页提取价格
+                    const priceEl = document.querySelector('.price');
+                    if (priceEl) {
+                        data.price = parseFloat(priceEl.textContent.replace(/[^\d.]/g, '')) || 0;
+                    }
 
                     // 从当前页面提取基础数据
                     const bodyText = document.body.innerText;
@@ -1309,10 +1316,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 // 组合数据
                 const levelMatch = item.levelText.match(/(\d+)/);
                 const level = levelMatch ? parseInt(levelMatch[1]) : 0;
-                const price = parseFloat(item.priceText.replace(/[^\d.]/g, '')) || 0;
+                const listPrice = parseFloat(item.priceText.replace(/[^\d.]/g, '')) || 0;
 
                 // 门派从 .name 元素读取（如"神木林"）
                 const school = item.name || '';
+
+                // 优先使用详情页价格，如果为0则使用列表页价格
+                const price = (detailData && detailData.price > 0) ? detailData.price : listPrice;
 
                 const charData = {
                     ordersn: `pocket_${i}_${Date.now()}`,
@@ -1388,6 +1398,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         // 从详情页提取数据的通用函数
         async function extractDetailDataFromPage() {
             const data = {
+                price: 0,
                 qyd: 0, jyCur: 0, jyMax: 0,
                 gjxl: 0, gjxlUpper: 0, fsxl: 0, fsxlUpper: 0,
                 fyxl: 0, fyxlUpper: 0, kfxl: 0, kfxlUpper: 0,
@@ -1400,6 +1411,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             };
 
             const delay = ms => new Promise(r => setTimeout(r, ms));
+
+            // 从详情页提取价格
+            const priceEl = document.querySelector('.price');
+            if (priceEl) {
+                data.price = parseFloat(priceEl.textContent.replace(/[^\d.]/g, '')) || 0;
+            }
 
             // 找到所有tab
             const tabItems = document.querySelectorAll('.hair-tab .tabs .item');
@@ -1654,10 +1671,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                         // 组合数据
                         const levelMatch = item.levelText.match(/(\d+)/);
                         const level = levelMatch ? parseInt(levelMatch[1]) : 0;
-                        const price = parseFloat(item.priceText.replace(/[^\d.]/g, '')) || 0;
+                        const listPrice = parseFloat(item.priceText.replace(/[^\d.]/g, '')) || 0;
 
                         // 门派从 .name 元素读取（如"神木林"）
                         const school = item.name || '';
+
+                        // 优先使用详情页价格，如果为0则使用列表页价格
+                        const price = (detailData && detailData.price > 0) ? detailData.price : listPrice;
 
                         allResults.push({
                             ordersn: `pocket_${itemIdx}_${Date.now()}`,
