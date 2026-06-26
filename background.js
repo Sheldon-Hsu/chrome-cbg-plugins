@@ -1311,9 +1311,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 const level = levelMatch ? parseInt(levelMatch[1]) : 0;
                 const price = parseFloat(item.priceText.replace(/[^\d.]/g, '')) || 0;
 
-                // 解析门派（从attr中提取，如"化圣九 成就:3575 总修:76 总宠修:93"）
-                const attrParts = item.attr.split(/\s+/);
-                const school = attrParts[0] || '';
+                // 门派从 .name 元素读取（如"神木林"）
+                const school = item.name || '';
 
                 const charData = {
                     ordersn: `pocket_${i}_${Date.now()}`,
@@ -1656,8 +1655,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                         const levelMatch = item.levelText.match(/(\d+)/);
                         const level = levelMatch ? parseInt(levelMatch[1]) : 0;
                         const price = parseFloat(item.priceText.replace(/[^\d.]/g, '')) || 0;
-                        const attrParts = item.attr.split(/\s+/);
-                        const school = attrParts[0] || '';
+
+                        // 门派从 .name 元素读取（如"神木林"）
+                        const school = item.name || '';
 
                         allResults.push({
                             ordersn: `pocket_${itemIdx}_${Date.now()}`,
