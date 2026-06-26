@@ -904,20 +904,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                         }
                     }
 
-                    // 从当前页面提取基础数据（乾元丹、机缘在所有tab都可见）
-                    const bodyText = document.body.innerText;
-
-                    // 乾元丹数量
-                    const qydMatch = bodyText.match(/新版乾元丹数量[：:]\s*(\d+)/);
-                    if (qydMatch) data.qyd = parseInt(qydMatch[1]) || 0;
-
-                    // 月饼粽子机缘
-                    const jyMatch = bodyText.match(/月饼粽子机缘[：:]\s*(\d+)\s*\/\s*(\d+)/);
-                    if (jyMatch) {
-                        data.jyCur = parseInt(jyMatch[1]) || 0;
-                        data.jyMax = parseInt(jyMatch[2]) || 0;
-                    }
-
                     // 找到所有tab
                     const tabItems = document.querySelectorAll('.hair-tab .tabs .item');
                     let xiulianTab = null;
@@ -932,25 +918,33 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                         }
                     });
 
-                    // 点击"人物/修炼"tab并读取修炼数据
+                    // 点击"人物/修炼"tab并读取修炼数据和乾元丹、机缘
                     if (xiulianTab) {
-                        // 记录点击前的内容，用于检测变化
-                        const beforeText = document.body.innerText;
                         xiulianTab.click();
-                        // 等待tab切换和内容加载（最多等待2秒）
-                        for (let i = 0; i < 20; i++) {
+                        // 等待tab切换和内容加载（最多等待3秒）
+                        for (let i = 0; i < 30; i++) {
                             await delay(100);
                             const currentText = document.body.innerText;
-                            // 检测内容是否包含修炼数据
                             if (currentText.includes('攻击修炼') || currentText.includes('防御修炼')) {
                                 break;
                             }
                         }
                         // 额外等待确保数据完全加载
-                        await delay(200);
+                        await delay(500);
 
                         // 读取修炼数据
                         const xiulianText = document.body.innerText;
+
+                        // 乾元丹数量（在"人物/修炼"tab中）
+                        const qydMatch = xiulianText.match(/新版乾元丹数量[：:]\s*(\d+)/);
+                        if (qydMatch) data.qyd = parseInt(qydMatch[1]) || 0;
+
+                        // 月饼粽子机缘（在"人物/修炼"tab中）
+                        const jyMatch = xiulianText.match(/月饼粽子机缘[：:]\s*(\d+)\s*\/\s*(\d+)/);
+                        if (jyMatch) {
+                            data.jyCur = parseInt(jyMatch[1]) || 0;
+                            data.jyMax = parseInt(jyMatch[2]) || 0;
+                        }
 
                         // 人物修炼（前一列）
                         const gjxlMatch = xiulianText.match(/攻击修炼[：:]\s*(\d+)(?:\/(\d+))?/);
@@ -988,17 +982,16 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                     // 点击"技能"tab并读取师门技能和生活技能
                     if (skillTab) {
                         skillTab.click();
-                        // 等待tab切换和内容加载（最多等待2秒）
-                        for (let i = 0; i < 20; i++) {
+                        // 等待tab切换和内容加载（最多等待3秒）
+                        for (let i = 0; i < 30; i++) {
                             await delay(100);
                             const currentText = document.body.innerText;
-                            // 检测内容是否包含技能数据
                             if (currentText.includes('师门技能') || currentText.includes('强身术') || currentText.includes('冥想')) {
                                 break;
                             }
                         }
                         // 额外等待确保数据完全加载
-                        await delay(200);
+                        await delay(500);
 
                         // 读取技能数据
                         const skillText = document.body.innerText;
@@ -1121,7 +1114,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                     await delay(1500);
                 }
 
-                // 从详情页提取数据
+                // 从详情页提取数据和URL
                 const detailData = await execScript(tabId, {function: async () => {
                     const data = {
                         qyd: 0, jyCur: 0, jyMax: 0,
@@ -1131,20 +1124,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                         skill_0: 0, skill_1: 0, skill_2: 0, skill_3: 0,
                         skill_4: 0, skill_5: 0, skill_6: 0,
                         qs: 0, mx: 0, cWeapon: 0, cook: 0,
-                        zy: 0, ys: 0, js: 0, qj: 0, strong: 0, speed: 0
+                        zy: 0, ys: 0, js: 0, qj: 0, strong: 0, speed: 0,
+                        detailUrl: window.location.href
                     };
 
                     const delay = ms => new Promise(r => setTimeout(r, ms));
 
                     // 从当前页面提取基础数据
                     const bodyText = document.body.innerText;
-                    const qydMatch = bodyText.match(/新版乾元丹数量[：:]\s*(\d+)/);
-                    if (qydMatch) data.qyd = parseInt(qydMatch[1]) || 0;
-                    const jyMatch = bodyText.match(/月饼粽子机缘[：:]\s*(\d+)\s*\/\s*(\d+)/);
-                    if (jyMatch) {
-                        data.jyCur = parseInt(jyMatch[1]) || 0;
-                        data.jyMax = parseInt(jyMatch[2]) || 0;
-                    }
 
                     // 找到所有tab
                     const tabItems = document.querySelectorAll('.hair-tab .tabs .item');
@@ -1156,20 +1143,32 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                         if (text === '技能') skillTab = tab;
                     });
 
-                    // 点击"人物/修炼"tab并读取修炼数据
+                    // 点击"人物/修炼"tab并读取修炼数据和乾元丹、机缘
                     if (xiulianTab) {
                         xiulianTab.click();
-                        // 等待tab切换和内容加载（最多等待2秒）
-                        for (let i = 0; i < 20; i++) {
+                        // 等待tab切换和内容加载（最多等待3秒）
+                        for (let i = 0; i < 30; i++) {
                             await delay(100);
                             const currentText = document.body.innerText;
                             if (currentText.includes('攻击修炼') || currentText.includes('防御修炼')) {
                                 break;
                             }
                         }
-                        await delay(200);
+                        await delay(500);
 
                         const xiulianText = document.body.innerText;
+
+                        // 乾元丹数量（在"人物/修炼"tab中）
+                        const qydMatch = xiulianText.match(/新版乾元丹数量[：:]\s*(\d+)/);
+                        if (qydMatch) data.qyd = parseInt(qydMatch[1]) || 0;
+
+                        // 月饼粽子机缘（在"人物/修炼"tab中）
+                        const jyMatch = xiulianText.match(/月饼粽子机缘[：:]\s*(\d+)\s*\/\s*(\d+)/);
+                        if (jyMatch) {
+                            data.jyCur = parseInt(jyMatch[1]) || 0;
+                            data.jyMax = parseInt(jyMatch[2]) || 0;
+                        }
+
                         // 人物修炼
                         const gjxlMatch = xiulianText.match(/攻击修炼[：:]\s*(\d+)(?:\/(\d+))?/);
                         if (gjxlMatch) { data.gjxl = parseInt(gjxlMatch[1]) || 0; data.gjxlUpper = parseInt(gjxlMatch[2]) || 0; }
@@ -1193,15 +1192,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                     // 点击"技能"tab并读取师门技能和生活技能
                     if (skillTab) {
                         skillTab.click();
-                        // 等待tab切换和内容加载（最多等待2秒）
-                        for (let i = 0; i < 20; i++) {
+                        // 等待tab切换和内容加载（最多等待3秒）
+                        for (let i = 0; i < 30; i++) {
                             await delay(100);
                             const currentText = document.body.innerText;
                             if (currentText.includes('师门技能') || currentText.includes('强身术') || currentText.includes('冥想')) {
                                 break;
                             }
                         }
-                        await delay(200);
+                        await delay(500);
 
                         const skillText = document.body.innerText;
                         // 师门技能
@@ -1277,7 +1276,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                     schoolCode: 0,
                     server: item.server,
                     price,
-                    detailUrl: '',
+                    detailUrl: (detailData && detailData.detailUrl) || '',
                     ...(detailData || {})
                 };
 
@@ -1350,20 +1349,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 skill_0: 0, skill_1: 0, skill_2: 0, skill_3: 0,
                 skill_4: 0, skill_5: 0, skill_6: 0,
                 qs: 0, mx: 0, cWeapon: 0, cook: 0,
-                zy: 0, ys: 0, js: 0, qj: 0, strong: 0, speed: 0
+                zy: 0, ys: 0, js: 0, qj: 0, strong: 0, speed: 0,
+                detailUrl: window.location.href
             };
 
             const delay = ms => new Promise(r => setTimeout(r, ms));
-
-            // 从当前页面提取基础数据
-            const bodyText = document.body.innerText;
-            const qydMatch = bodyText.match(/新版乾元丹数量[：:]\s*(\d+)/);
-            if (qydMatch) data.qyd = parseInt(qydMatch[1]) || 0;
-            const jyMatch = bodyText.match(/月饼粽子机缘[：:]\s*(\d+)\s*\/\s*(\d+)/);
-            if (jyMatch) {
-                data.jyCur = parseInt(jyMatch[1]) || 0;
-                data.jyMax = parseInt(jyMatch[2]) || 0;
-            }
 
             // 找到所有tab
             const tabItems = document.querySelectorAll('.hair-tab .tabs .item');
@@ -1375,20 +1365,31 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 if (text === '技能') skillTab = tab;
             });
 
-            // 点击"人物/修炼"tab并读取修炼数据
+            // 点击"人物/修炼"tab并读取修炼数据和乾元丹、机缘
             if (xiulianTab) {
                 xiulianTab.click();
-                // 等待tab切换和内容加载（最多等待2秒）
-                for (let i = 0; i < 20; i++) {
+                // 等待tab切换和内容加载（最多等待3秒）
+                for (let i = 0; i < 30; i++) {
                     await delay(100);
                     const currentText = document.body.innerText;
                     if (currentText.includes('攻击修炼') || currentText.includes('防御修炼')) {
                         break;
                     }
                 }
-                await delay(200);
+                await delay(500);
 
                 const xiulianText = document.body.innerText;
+
+                // 乾元丹数量（在"人物/修炼"tab中）
+                const qydMatch = xiulianText.match(/新版乾元丹数量[：:]\s*(\d+)/);
+                if (qydMatch) data.qyd = parseInt(qydMatch[1]) || 0;
+
+                // 月饼粽子机缘（在"人物/修炼"tab中）
+                const jyMatch = xiulianText.match(/月饼粽子机缘[：:]\s*(\d+)\s*\/\s*(\d+)/);
+                if (jyMatch) {
+                    data.jyCur = parseInt(jyMatch[1]) || 0;
+                    data.jyMax = parseInt(jyMatch[2]) || 0;
+                }
                 // 人物修炼
                 const gjxlMatch = xiulianText.match(/攻击修炼[：:]\s*(\d+)(?:\/(\d+))?/);
                 if (gjxlMatch) { data.gjxl = parseInt(gjxlMatch[1]) || 0; data.gjxlUpper = parseInt(gjxlMatch[2]) || 0; }
@@ -1412,15 +1413,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             // 点击"技能"tab并读取师门技能和生活技能
             if (skillTab) {
                 skillTab.click();
-                // 等待tab切换和内容加载（最多等待2秒）
-                for (let i = 0; i < 20; i++) {
+                // 等待tab切换和内容加载（最多等待3秒）
+                for (let i = 0; i < 30; i++) {
                     await delay(100);
                     const currentText = document.body.innerText;
                     if (currentText.includes('师门技能') || currentText.includes('强身术') || currentText.includes('冥想')) {
                         break;
                     }
                 }
-                await delay(200);
+                await delay(500);
 
                 const skillText = document.body.innerText;
                 // 师门技能
@@ -1590,7 +1591,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                             schoolCode: 0,
                             server: item.server,
                             price,
-                            detailUrl: '',
+                            detailUrl: (detailData && detailData.detailUrl) || '',
                             ...(detailData || {})
                         });
 
