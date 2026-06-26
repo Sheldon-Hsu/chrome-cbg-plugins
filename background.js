@@ -22,7 +22,7 @@ chrome.runtime.onInstalled.addListener(() => {
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "switchPage") {
         chrome.sidePanel.setOptions({ path: request.page });
-        return true;
+        return;
     }
 
     if (request.action === "fetchData") {
@@ -191,7 +191,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 });
             });
         });
-        return true; // 保持消息通道开放:ml-citation{ref="5" data="citationList"}
     }
 
     // 跳转到首页：调用页面的 goto(1)
@@ -557,7 +556,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 });
             }
         });
-        return true;
     }
 
     // 批量计算：连续提取多页角色数据
@@ -723,7 +721,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 });
             }
         });
-        return true;
     }
 
     // 批量计算：从已打开的角色详情页读取乾元丹
@@ -783,7 +780,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 });
             });
         }, 3000);
-        return true;
     }
 });
 
