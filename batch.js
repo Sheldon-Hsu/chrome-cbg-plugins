@@ -311,8 +311,8 @@ document.addEventListener('DOMContentLoaded', async function () {
             if (cells[3]) cells[3].querySelector('a').textContent = '￥' + r.rmbDiscount;
             let discountText = r.discount === '—' ? '—' : r.discount + '折';
             if (cells[4]) cells[4].querySelector('a').textContent = discountText;
-            let diff = r.rmbDiscount - r.price;
-            let diffText = diff > 0 ? '+' + diff : String(diff);
+            let diff = parseFloat(r.rmbDiscount) - parseFloat(r.price);
+            let diffText = isNaN(diff) ? '—' : (diff > 0 ? '+' + diff : String(diff));
             if (cells[5]) cells[5].querySelector('a').textContent = diffText;
             // 更新行颜色
             let d = parseFloat(r.discount) || 0;
@@ -506,8 +506,8 @@ document.addEventListener('DOMContentLoaded', async function () {
                 else { rowClass = 'discount-bad'; badCount++; }
 
                 let discountText = r.discount === '—' ? '—' : r.discount + '折';
-                let diff = r.rmbDiscount - r.price;
-                let diffText = diff > 0 ? '+' + diff : String(diff);
+                let diff = parseFloat(r.rmbDiscount) - parseFloat(r.price);
+                let diffText = isNaN(diff) ? '—' : (diff > 0 ? '+' + diff : String(diff));
                 charDataMap[r.ordersn] = r;
                 tbodyHtml += '<tr class="' + rowClass + '" data-ordersn="' + r.ordersn + '">'
                     + '<td><a href="' + r.detailUrl + '" target="_blank">' + r.school + '</a></td>'
@@ -736,6 +736,8 @@ document.addEventListener('DOMContentLoaded', async function () {
                     else { rowClass = 'discount-bad'; badCount++; }
 
                     let discountText = r.discount === '—' ? '—' : r.discount + '折';
+                    let diff = parseFloat(r.rmbDiscount) - parseFloat(r.price);
+                    let diffText = isNaN(diff) ? '—' : (diff > 0 ? '+' + diff : String(diff));
                     charDataMap[r.ordersn] = r;
                     tbodyHtml += '<tr class="' + rowClass + '" data-ordersn="' + r.ordersn + '">'
                         + '<td><a href="' + r.detailUrl + '" target="_blank">' + r.school + '</a></td>'
@@ -743,6 +745,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                         + '<td><a href="' + r.detailUrl + '" target="_blank">￥' + r.price + '</a></td>'
                         + '<td><a href="' + r.detailUrl + '" target="_blank">￥' + r.rmbDiscount + '</a></td>'
                         + '<td><a href="' + r.detailUrl + '" target="_blank">' + discountText + '</a></td>'
+                        + '<td><a href="' + r.detailUrl + '" target="_blank">' + diffText + '</a></td>'
                         + '</tr>';
                 });
                 tbodyEl.insertAdjacentHTML('beforeend', tbodyHtml);
@@ -751,7 +754,8 @@ document.addEventListener('DOMContentLoaded', async function () {
                 const allDataRows = Array.from(tbodyEl.querySelectorAll('tr:not(.detail-row)'));
                 allDataRows.sort((a, b) => {
                     const getDiscount = (row) => {
-                        const text = row.lastElementChild ? row.lastElementChild.textContent : '';
+                        const cells = row.querySelectorAll('td');
+                        const text = cells[4] ? cells[4].textContent : '';
                         const match = text.match(/([\d.]+)折/);
                         return match ? parseFloat(match[1]) : 999;
                     };
