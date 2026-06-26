@@ -248,6 +248,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     const addToCompareCheckbox = document.getElementById('addToCompare');
     const clearCacheBtn = document.getElementById('clearCacheBtn');
     const cacheStatusEl = document.getElementById('cacheStatus');
+    const nextPageBtn = document.getElementById('next_page_btn');
 
     // 自动计算状态标记
     let isAutoBatching = false;
@@ -338,6 +339,25 @@ document.addEventListener('DOMContentLoaded', async function () {
                 }, 1500);
             } else {
                 alert(response ? response.error : "跳转失败，请确保当前页面是藏宝阁列表页");
+            }
+        });
+    });
+
+
+    // 下一页按钮
+    nextPageBtn.addEventListener('click', function () {
+        chrome.runtime.sendMessage({action: "goToNextPage"}, function (response) {
+            if (chrome.runtime.lastError) {
+                alert("翻页失败: " + chrome.runtime.lastError.message);
+                return;
+            }
+            if (response && response.success) {
+                nextPageBtn.textContent = "已翻到第" + response.page + "页";
+                setTimeout(() => {
+                    nextPageBtn.innerHTML = '<i class="fas fa-arrow-right"></i> 下一页';
+                }, 1500);
+            } else {
+                alert(response ? response.error : "翻页失败，请确保当前页面是藏宝阁列表页");
             }
         });
     });
@@ -639,6 +659,12 @@ document.addEventListener('DOMContentLoaded', async function () {
                 autoBatchBtn.disabled = false;
                 autoBatchBtn.innerHTML = '<i class="fas fa-forward"></i> 自动计算';
                 autoBatchBtn.classList.add('pulse');
+                return;
+            }
+
+            // 开始：显示总页数
+            if (request.status === "start") {
+                progressEl.textContent = '准备计算 ' + request.totalPages + ' 页...';
                 return;
             }
 

@@ -289,10 +289,21 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'});
         }
 
-        // 获取当前页码和总页数
+        // 获取当前页码和总页数（等待 pager 对象加载）
         function getPageInfo() {
-            if (typeof pager === 'object') {
-                return {curPage: pager.cur_page || 1, totalPage: pager.num_end || 1};
+            // 尝试从 pager 对象获取
+            if (typeof pager === 'object' && pager.cur_page) {
+                return {curPage: pager.cur_page, totalPage: pager.num_end || 1};
+            }
+            // 尝试从页面 DOM 解析（"第X页, 共Y页"）
+            const pagerBar = document.getElementById('pager_bar');
+            if (pagerBar) {
+                const text = pagerBar.textContent || '';
+                const curMatch = text.match(/第(\d+)页/);
+                const totalMatch = text.match(/共(\d+)页/);
+                if (curMatch && totalMatch) {
+                    return {curPage: parseInt(curMatch[1]), totalPage: parseInt(totalMatch[1])};
+                }
             }
             return {curPage: 1, totalPage: 1};
         }
@@ -445,7 +456,19 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             try {
                 // 获取页面信息
                 const pageInfo = await execScript(tabId, {world: "MAIN", function: getPageInfo});
-                const actualTotal = Math.min(totalPages, pageInfo.totalPage - pageInfo.curPage + 1);
+                const curPage = pageInfo.curPage;
+                const totalPage = pageInfo.totalPage;
+                // 实际计算页数 = 用户设置的页数 和 剩余页数 取较小值
+                const remainingPages = totalPage - curPage + 1;
+                const actualTotal = (remainingPages > 0) ? Math.min(totalPages, remainingPages) : totalPages;
+
+                // 通知前端实际计算页数
+                chrome.runtime.sendMessage({
+                    action: "autoBatchProgress",
+                    currentPage: 0,
+                    totalPages: actualTotal,
+                    status: "start"
+                });
 
                 for (let i = 0; i < actualTotal; i++) {
                     // 通知前端当前进度
