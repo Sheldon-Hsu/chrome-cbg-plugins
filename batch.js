@@ -1,4 +1,5 @@
 let globalCostData = null;
+let currentMode = 'pc'; // 'pc' | 'pocket'，由 index.js 通过 chrome.storage.local 设置
 
 // 解析比例值：空值默认1，允许0
 function parseRatio(val) {
@@ -240,10 +241,44 @@ function bindDetailPanelEvents(panel, char) {
 document.addEventListener('DOMContentLoaded', async function () {
     await loadJSON();
 
+    // 从存储中读取模式
+    chrome.storage.local.get('calcMode', function (result) {
+        currentMode = result.calcMode || 'pc';
+        const modeTag = document.getElementById('mode_tag');
+        if (modeTag) {
+            modeTag.textContent = currentMode === 'pocket' ? '口袋版' : '电脑版';
+        }
+
+        // 根据模式显示/隐藏对应的按钮和标签
+        const pcButtons = document.getElementById('pc_buttons');
+        const pocketButtons = document.getElementById('pocket_buttons');
+        const pageCountLabel = document.getElementById('page_count_label');
+        const firstPageBtn = document.getElementById('first_page_btn');
+        const nextPageBtn = document.getElementById('next_page_btn');
+
+        if (currentMode === 'pocket') {
+            // 口袋版模式
+            if (pcButtons) pcButtons.style.display = 'none';
+            if (pocketButtons) pocketButtons.style.display = 'flex';
+            if (pageCountLabel) pageCountLabel.textContent = '自动计算角色数';
+            // 隐藏首页和下一页按钮（口袋版不需要）
+            if (firstPageBtn) firstPageBtn.style.display = 'none';
+            if (nextPageBtn) nextPageBtn.style.display = 'none';
+        } else {
+            // 电脑版模式
+            if (pcButtons) pcButtons.style.display = 'flex';
+            if (pocketButtons) pocketButtons.style.display = 'none';
+            if (pageCountLabel) pageCountLabel.textContent = '自动翻页数';
+            if (firstPageBtn) firstPageBtn.style.display = '';
+            if (nextPageBtn) nextPageBtn.style.display = '';
+        }
+    });
+
     const batchBtn = document.getElementById('batch_data');
     const backBtn = document.getElementById('back_btn');
     const firstPageBtn = document.getElementById('first_page_btn');
     const autoBatchBtn = document.getElementById('auto_batch_btn');
+    const pocketBatchBtn = document.getElementById('pocket_batch_btn');
     const pageCountInput = document.getElementById('page_count');
     const addToCompareCheckbox = document.getElementById('addToCompare');
     const clearCacheBtn = document.getElementById('clearCacheBtn');
@@ -507,7 +542,11 @@ document.addEventListener('DOMContentLoaded', async function () {
             document.getElementById('batch_summary').innerHTML = '';
         }
 
-        chrome.runtime.sendMessage({action: "batchFetchData"});
+        if (currentMode === 'pocket') {
+            chrome.runtime.sendMessage({action: "batchFetchPocketData"});
+        } else {
+            chrome.runtime.sendMessage({action: "batchFetchData"});
+        }
     });
 
     // 自动翻页批量计算按钮
@@ -542,7 +581,46 @@ document.addEventListener('DOMContentLoaded', async function () {
             updateCacheStatus();
         }
 
-        chrome.runtime.sendMessage({action: "autoBatchFetch", totalPages: totalPages});
+        if (currentMode === 'pocket') {
+            chrome.runtime.sendMessage({action: "autoBatchPocketFetch", totalPages: totalPages});
+        } else {
+            chrome.runtime.sendMessage({action: "autoBatchFetch", totalPages: totalPages});
+        }
+    });
+
+    // 口袋版：计算多个角色按钮
+    pocketBatchBtn.addEventListener('click', function () {
+        let yxbPrice = parseFloat(document.getElementById('yxbPrice_value').value);
+        let guoziPrice = parseFloat(document.getElementById('guoziPrice_value').value);
+
+        if (!yxbPrice || !guoziPrice) {
+            alert("先输入游戏币价格和修炼果价格");
+            return;
+        }
+
+        let totalItems = parseInt(pageCountInput.value) || 10;
+        if (totalItems < 1) totalItems = 1;
+
+        isAutoBatching = true;
+        pocketBatchBtn.disabled = true;
+        pocketBatchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 计算中...';
+        pocketBatchBtn.classList.remove('pulse');
+
+        document.getElementById('batch_results').style.display = 'block';
+        document.getElementById('batch_progress').style.display = 'block';
+        document.getElementById('batch_progress').textContent = '正在准备计算 ' + totalItems + ' 个角色...';
+
+        // 未勾选比对时清空表格
+        if (!addToCompareCheckbox.checked) {
+            document.getElementById('batch_tbody').innerHTML = '';
+            document.getElementById('batch_summary').innerHTML = '';
+            cachedRawData = [];
+            cachedCalcResults = [];
+            charDataMap = {};
+            updateCacheStatus();
+        }
+
+        chrome.runtime.sendMessage({action: "autoBatchPocketFetch", totalItems: totalItems});
     });
 
     // 监听批量数据返回
@@ -707,9 +785,14 @@ document.addEventListener('DOMContentLoaded', async function () {
             if (request.error) {
                 progressEl.textContent = request.error;
                 isAutoBatching = false;
+                // 恢复电脑版按钮
                 autoBatchBtn.disabled = false;
                 autoBatchBtn.innerHTML = '<i class="fas fa-forward"></i> 自动计算';
                 autoBatchBtn.classList.add('pulse');
+                // 恢复口袋版按钮
+                pocketBatchBtn.disabled = false;
+                pocketBatchBtn.innerHTML = '<i class="fas fa-calculator"></i> 计算多个角色';
+                pocketBatchBtn.classList.add('pulse');
                 return;
             }
 
@@ -841,13 +924,18 @@ document.addEventListener('DOMContentLoaded', async function () {
 
             // 全部完成或结束
             if (request.status === "done" || request.status === "end") {
-                let msg = '自动计算完成！共 ' + request.currentPage + ' 页';
+                let msg = '自动计算完成！共 ' + request.currentPage + ' 个角色';
                 if (request.reason) msg += '（' + request.reason + '）';
                 progressEl.textContent = msg;
                 isAutoBatching = false;
+                // 恢复电脑版按钮
                 autoBatchBtn.disabled = false;
                 autoBatchBtn.innerHTML = '<i class="fas fa-forward"></i> 自动计算';
                 autoBatchBtn.classList.add('pulse');
+                // 恢复口袋版按钮
+                pocketBatchBtn.disabled = false;
+                pocketBatchBtn.innerHTML = '<i class="fas fa-calculator"></i> 计算多个角色';
+                pocketBatchBtn.classList.add('pulse');
                 return;
             }
         }

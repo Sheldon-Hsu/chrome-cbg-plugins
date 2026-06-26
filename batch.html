@@ -452,7 +452,7 @@
 <body>
 <div class="app-container">
     <header class="app-header">
-        <h1><i class="fas fa-dragon"></i>批量计算</h1>
+        <h1><i class="fas fa-dragon"></i>批量计算 <span id="mode_tag" style="font-size:0.7rem;background:rgba(255,255,255,0.2);padding:2px 6px;border-radius:8px;vertical-align:middle"></span></h1>
         <p>从列表页批量计算所有角色的折扣</p>
     </header>
 
@@ -472,12 +472,17 @@
             <i class="fas fa-arrow-right"></i> 下一页
         </button>
     </div>
-    <div class="section-header">
+    <div class="section-header" id="pc_buttons">
         <button id="batch_data" class="btn btn-warning">
             <i class="fas fa-list"></i> 计算当前页
         </button>
         <button id="auto_batch_btn" class="btn btn-primary pulse">
             <i class="fas fa-forward"></i> 自动计算多页
+        </button>
+    </div>
+    <div class="section-header" id="pocket_buttons" style="display:none">
+        <button id="pocket_batch_btn" class="btn btn-primary pulse">
+            <i class="fas fa-calculator"></i> 计算多个角色
         </button>
     </div>
 
@@ -519,7 +524,7 @@
                 <span>忽略花样年华</span>
             </label>
             <div style="margin-left:auto;display:flex;align-items:center;gap:4px;font-size:0.8rem">
-                <span>自动翻页数</span>
+                <span id="page_count_label">自动翻页数</span>
                 <input type="number" id="page_count" value="10" min="1" max="999"
                        style="width:45px;padding:3px;border:1px solid #ddd;border-radius:3px;text-align:center;font-size:0.8rem">
             </div>

@@ -1326,7 +1326,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
     // ========== 口袋版：自动翻页批量计算 ==========
     if (request.action === "autoBatchPocketFetch") {
-        const totalItems = request.totalPages || 20; // 口袋版用数量而非页数
+        const totalItems = request.totalItems || request.totalPages || 20; // 口袋版用数量而非页数
 
         function execScript(tabId, opts) {
             return new Promise((resolve, reject) => {
