@@ -1101,17 +1101,21 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
         // 口袋版批量数据抓取：点击每个列表项进入详情页提取数据
         async function extractPocketBatchWithDetail(tabId) {
-            // 1. 先获取列表中所有角色的基本信息
+            // 1. 先获取列表中所有角色的基本信息（排除推荐角色）
             const listItems = await execScript(tabId, {function: () => {
                 const items = document.querySelectorAll('.list-item-link.product-item.js_product_item');
-                return Array.from(items).map((item, index) => {
+                const result = [];
+                items.forEach((item, domIndex) => {
+                    // 排除推荐区域（root_j7DZQ）中的角色
+                    if (item.closest('.root_j7DZQ')) return;
                     const name = item.querySelector('.name')?.textContent?.trim() || '';
                     const levelText = item.querySelector('.level')?.textContent?.trim() || '';
                     const priceText = item.querySelector('.price')?.textContent?.trim() || '';
                     const server = item.querySelector('.server')?.textContent?.trim() || '';
                     const attr = item.querySelector('.attr')?.textContent?.trim() || '';
-                    return { index, name, levelText, priceText, server, attr };
+                    result.push({ domIndex, name, levelText, priceText, server, attr });
                 });
+                return result;
             }});
 
             if (!listItems || listItems.length === 0) {
@@ -1132,16 +1136,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                     status: "extracting"
                 });
 
-                // 点击列表项进入详情页
+                // 点击列表项进入详情页（使用domIndex定位到原始DOM位置）
                 const clickResult = await execScript(tabId, {function: (idx) => {
                     const items = document.querySelectorAll('.list-item-link.product-item.js_product_item');
                     if (!items || items.length === 0) return false;
                     const item = items[idx];
                     if (!item) return false;
-                    // 点击列表项
                     item.click();
                     return true;
-                }, args: [i]});
+                }, args: [item.domIndex]});
 
                 if (!clickResult) continue;
 
@@ -1309,9 +1312,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                     if (!items || items.length === 0) return;
                     const item = items[idx];
                     if (!item) return;
-                    // 将当前处理的角色滚动到视口中间
                     item.scrollIntoView({block: 'center', behavior: 'smooth'});
-                }, args: [i]});
+                }, args: [item.domIndex]});
 
                 // 组合数据
                 const levelMatch = item.levelText.match(/(\d+)/);
@@ -1553,17 +1555,20 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                         });
                         return;
                     }
-                    // 获取当前列表项
+                    // 获取当前列表项（排除推荐角色）
                     const listItems = await execScript(tabId, {function: () => {
                         const items = document.querySelectorAll('.list-item-link.product-item.js_product_item');
-                        return Array.from(items).map((item, index) => {
+                        const result = [];
+                        items.forEach((item, domIndex) => {
+                            if (item.closest('.root_j7DZQ')) return;
                             const name = item.querySelector('.name')?.textContent?.trim() || '';
                             const levelText = item.querySelector('.level')?.textContent?.trim() || '';
                             const priceText = item.querySelector('.price')?.textContent?.trim() || '';
                             const server = item.querySelector('.server')?.textContent?.trim() || '';
                             const attr = item.querySelector('.attr')?.textContent?.trim() || '';
-                            return { index, name, levelText, priceText, server, attr };
+                            result.push({ domIndex, name, levelText, priceText, server, attr });
                         });
+                        return result;
                     }});
 
                     if (!listItems || listItems.length === 0) {
@@ -1585,9 +1590,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                         }});
                         await delay(2000);
 
-                        // 检查是否有新数据加载
+                        // 检查是否有新数据加载（排除推荐角色）
                         const newCount = await execScript(tabId, {function: () => {
-                            return document.querySelectorAll('.list-item-link.product-item.js_product_item').length;
+                            const items = document.querySelectorAll('.list-item-link.product-item.js_product_item');
+                            return Array.from(items).filter(item => !item.closest('.root_j7DZQ')).length;
                         }});
                         if (newCount <= listItems.length) {
                             consecutiveFailures++;
@@ -1624,16 +1630,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                             status: "extracting"
                         });
 
-                        // 点击列表项进入详情页
+                        // 点击列表项进入详情页（使用domIndex定位到原始DOM位置）
                         const clickResult = await execScript(tabId, {function: (idx) => {
                             const items = document.querySelectorAll('.list-item-link.product-item.js_product_item');
                             if (!items || items.length === 0) return false;
                             const item = items[idx];
                             if (!item) return false;
-                            // 点击列表项
                             item.click();
                             return true;
-                        }, args: [itemIdx]});
+                        }, args: [item.domIndex]});
 
                         if (!clickResult) {
                             processedCount++;
@@ -1664,9 +1669,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                             if (!items || items.length === 0) return;
                             const item = items[idx];
                             if (!item) return;
-                            // 将当前处理的角色滚动到视口中间
                             item.scrollIntoView({block: 'center', behavior: 'smooth'});
-                        }, args: [itemIdx]});
+                        }, args: [item.domIndex]});
 
                         // 组合数据
                         const levelMatch = item.levelText.match(/(\d+)/);
