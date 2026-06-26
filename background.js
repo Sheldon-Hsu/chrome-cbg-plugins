@@ -228,7 +228,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         return true;
     }
 
-    // 跳转到下一页：调用页面的 goto(cur_page + 1)
+    // 跳转到下一页：模拟点击页面上的"下一页"链接
     if (request.action === "goToNextPage") {
         chrome.tabs.query({url: "*://xyq.cbg.163.com/*"}, (tabs) => {
             if (!tabs || tabs.length === 0) {
@@ -241,16 +241,17 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 target: {tabId},
                 world: "MAIN",
                 function: () => {
-                    if (typeof window.goto === 'function' && typeof pager === 'object') {
-                        let cur = pager.cur_page || 1;
-                        let total = pager.num_end || 1;
-                        if (cur >= total) {
-                            return {success: false, error: "已是最后一页", curPage: cur, totalPage: total};
+                    // 查找分页区域中的"下一页"链接
+                    const pagerEl = document.getElementById('pager_templ');
+                    if (!pagerEl) return {success: false, error: "未找到分页组件"};
+                    const links = pagerEl.querySelectorAll('a');
+                    for (const link of links) {
+                        if (link.textContent.trim() === '下一页') {
+                            link.click();
+                            return {success: true, page: (typeof pager !== 'undefined' ? pager.cur_page : 0) + 1};
                         }
-                        window.goto(cur + 1);
-                        return {success: true, page: cur + 1, totalPage: total};
                     }
-                    return {success: false, error: "页面无 goto 函数"};
+                    return {success: false, error: "未找到下一页链接"};
                 }
             }, (results) => {
                 if (chrome.runtime.lastError) {
@@ -296,16 +297,18 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             return {curPage: 1, totalPage: 1};
         }
 
-        // 跳转到下一页
+        // 跳转到下一页：模拟点击页面上的"下一页"链接
         function gotoNextPage() {
-            if (typeof window.goto === 'function' && typeof pager === 'object') {
-                let cur = pager.cur_page || 1;
-                let total = pager.num_end || 1;
-                if (cur >= total) return {success: false, curPage: cur, totalPage: total};
-                window.goto(cur + 1);
-                return {success: true, page: cur + 1, totalPage: total};
+            const pagerEl = document.getElementById('pager_templ');
+            if (!pagerEl) return {success: false, error: "未找到分页组件"};
+            const links = pagerEl.querySelectorAll('a');
+            for (const link of links) {
+                if (link.textContent.trim() === '下一页') {
+                    link.click();
+                    return {success: true, page: (typeof pager !== 'undefined' ? pager.cur_page : 0) + 1};
+                }
             }
-            return {success: false, error: "页面无 goto 函数"};
+            return {success: false, error: "未找到下一页链接"};
         }
 
         // 等待页面翻页完成（goto 可能导致页面重新加载）
