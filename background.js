@@ -336,6 +336,43 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             }
         }
 
+        // 检查页面数据是否已加载完成
+        // 通过检测 textarea 元素和对应的角色链接是否都已渲染
+        function checkDataLoaded() {
+            try {
+                const textareas = document.querySelectorAll('textarea[id^="other_info_"]');
+                if (textareas.length === 0) return false;
+
+                // 检查每个 textarea 是否都有对应的角色链接已渲染
+                let loadedCount = 0;
+                for (const textarea of textareas) {
+                    const ordersn = textarea.id.replace('other_info_', '');
+                    const link = document.querySelector('a[data_game_ordersn="' + ordersn + '"]');
+                    if (link && link.closest('tr')) {
+                        loadedCount++;
+                    }
+                }
+
+                // 至少有一半的数据已渲染完成（考虑可能有部分数据加载失败）
+                return loadedCount >= Math.ceil(textareas.length / 2);
+            } catch (e) {
+                return false;
+            }
+        }
+
+        // 等待数据加载完成的通用函数
+        // maxWait: 最大等待时间（ms），interval: 检查间隔（ms）
+        async function waitForDataLoad(maxWait = 10000, interval = 300) {
+            const startTime = Date.now();
+            while (Date.now() - startTime < maxWait) {
+                if (checkDataLoaded()) {
+                    return true;
+                }
+                await delay(interval);
+            }
+            return false;
+        }
+
         // 提取当前页面的角色数据（与 batchFetchData 共用同一逻辑）
         function extractPageData() {
             const LIFE_SKILL_IDS = new Set(["201","202","203","206","208","211","212","216","230","237"]);
@@ -478,9 +515,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                         status: "extracting"
                     });
 
-                    // 滚动到底部触发懒加载，等待加载完成
+                    // 滚动到底部触发懒加载，等待数据加载完成
                     await execScript(tabId, {world: "MAIN", function: scrollToBottom});
-                    await delay(1500);
+                    const dataLoaded = await execScript(tabId, {world: "MAIN", function: waitForDataLoad});
+                    if (!dataLoaded) {
+                        // 如果等待超时，再额外等待一小段时间作为兜底
+                        await delay(1000);
+                    }
 
                     // 提取当前页数据
                     const results = await execScript(tabId, {function: extractPageData});
@@ -520,8 +561,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                             try {
                                 const info = await execScript(tabId, {world: "MAIN", function: getPageInfo});
                                 if (info.curPage > beforePage) {
-                                    // 页码变了，再等一下让数据加载完
-                                    await delay(1000);
                                     pageChanged = true;
                                     break;
                                 }
@@ -538,6 +577,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                                 reason: "翻页超时"
                             });
                             break;
+                        }
+
+                        // 翻页成功后，等待数据加载完成
+                        const dataLoaded = await execScript(tabId, {world: "MAIN", function: waitForDataLoad});
+                        if (!dataLoaded) {
+                            // 如果等待超时，再额外等待一小段时间作为兜底
+                            await delay(1000);
                         }
                     }
                 }
@@ -577,6 +623,43 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         // 滚动到页面底部，触发懒加载等页面行为
         function scrollToBottom() {
             window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'});
+        }
+
+        // 检查页面数据是否已加载完成
+        // 通过检测 textarea 元素和对应的角色链接是否都已渲染
+        function checkDataLoaded() {
+            try {
+                const textareas = document.querySelectorAll('textarea[id^="other_info_"]');
+                if (textareas.length === 0) return false;
+
+                // 检查每个 textarea 是否都有对应的角色链接已渲染
+                let loadedCount = 0;
+                for (const textarea of textareas) {
+                    const ordersn = textarea.id.replace('other_info_', '');
+                    const link = document.querySelector('a[data_game_ordersn="' + ordersn + '"]');
+                    if (link && link.closest('tr')) {
+                        loadedCount++;
+                    }
+                }
+
+                // 至少有一半的数据已渲染完成（考虑可能有部分数据加载失败）
+                return loadedCount >= Math.ceil(textareas.length / 2);
+            } catch (e) {
+                return false;
+            }
+        }
+
+        // 等待数据加载完成的通用函数
+        // maxWait: 最大等待时间（ms），interval: 检查间隔（ms）
+        async function waitForDataLoad(maxWait = 10000, interval = 300) {
+            const startTime = Date.now();
+            while (Date.now() - startTime < maxWait) {
+                if (checkDataLoaded()) {
+                    return true;
+                }
+                await delay(interval);
+            }
+            return false;
         }
 
         // 提取当前页面的角色数据（ISOLATED world，仅读 DOM）
@@ -697,9 +780,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             const tabId = tab.id;
 
             try {
-                // 滚动到底部触发懒加载，等待加载完成后提取数据
+                // 滚动到底部触发懒加载，等待数据加载完成
                 await execScript(tabId, {world: "MAIN", function: scrollToBottom});
-                await delay(1500);
+                const dataLoaded = await execScript(tabId, {world: "MAIN", function: waitForDataLoad});
+                if (!dataLoaded) {
+                    // 如果等待超时，再额外等待一小段时间作为兜底
+                    await delay(1000);
+                }
 
                 const results = await execScript(tabId, {function: extractPageData});
 
