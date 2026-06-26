@@ -868,6 +868,732 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             });
         }, 3000);
     }
+
+    // ========== 口袋版：单个计算数据抓取 ==========
+    if (request.action === "fetchPocketData") {
+        chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
+            chrome.scripting.executeScript({
+                target: {tabId: tabs[0].id},
+                function: async () => {
+                    const data = {
+                        price: 0, qyd: 0, jyCur: 0, jyMax: 0, school: '',
+                        gjxl: 0, gjxlUpper: 0, fsxl: 0, fsxlUpper: 0,
+                        fyxl: 0, fyxlUpper: 0, kfxl: 0, kfxlUpper: 0,
+                        gjkzl: 0, fskzl: 0, fykzl: 0, kfkzl: 0,
+                        skill_0: 0, skill_1: 0, skill_2: 0, skill_3: 0,
+                        skill_4: 0, skill_5: 0, skill_6: 0,
+                        qs: 0, mx: 0, cWeapon: 0, cook: 0,
+                        zy: 0, ys: 0, js: 0, qj: 0, strong: 0, speed: 0
+                    };
+
+                    // 延迟函数
+                    const delay = ms => new Promise(r => setTimeout(r, ms));
+
+                    // 提取价格
+                    const priceEl = document.querySelector('.price_OskaR, .price');
+                    if (priceEl) {
+                        data.price = parseFloat(priceEl.textContent.replace(/[^\d.]/g, '')) || 0;
+                    }
+
+                    // 提取门派（从角色信息区域）
+                    const roleInfo = document.querySelector('.roleInfo_u6xHT, .title_q5uZ9');
+                    if (roleInfo) {
+                        const schoolEl = roleInfo.querySelector('.txt');
+                        if (schoolEl) {
+                            data.school = schoolEl.textContent.trim();
+                        }
+                    }
+
+                    // 从当前页面提取基础数据（乾元丹、机缘在所有tab都可见）
+                    const bodyText = document.body.innerText;
+
+                    // 乾元丹数量
+                    const qydMatch = bodyText.match(/新版乾元丹数量[：:]\s*(\d+)/);
+                    if (qydMatch) data.qyd = parseInt(qydMatch[1]) || 0;
+
+                    // 月饼粽子机缘
+                    const jyMatch = bodyText.match(/月饼粽子机缘[：:]\s*(\d+)\s*\/\s*(\d+)/);
+                    if (jyMatch) {
+                        data.jyCur = parseInt(jyMatch[1]) || 0;
+                        data.jyMax = parseInt(jyMatch[2]) || 0;
+                    }
+
+                    // 找到所有tab
+                    const tabItems = document.querySelectorAll('.hair-tab .tabs .item');
+                    let xiulianTab = null;
+                    let skillTab = null;
+                    tabItems.forEach(tab => {
+                        const text = tab.textContent.trim();
+                        if (text.includes('人物') || text.includes('修炼')) {
+                            xiulianTab = tab;
+                        }
+                        if (text === '技能') {
+                            skillTab = tab;
+                        }
+                    });
+
+                    // 点击"人物/修炼"tab并读取修炼数据
+                    if (xiulianTab) {
+                        // 记录点击前的内容，用于检测变化
+                        const beforeText = document.body.innerText;
+                        xiulianTab.click();
+                        // 等待tab切换和内容加载（最多等待2秒）
+                        for (let i = 0; i < 20; i++) {
+                            await delay(100);
+                            const currentText = document.body.innerText;
+                            // 检测内容是否包含修炼数据
+                            if (currentText.includes('攻击修炼') || currentText.includes('防御修炼')) {
+                                break;
+                            }
+                        }
+                        // 额外等待确保数据完全加载
+                        await delay(200);
+
+                        // 读取修炼数据
+                        const xiulianText = document.body.innerText;
+
+                        // 人物修炼（前一列）
+                        const gjxlMatch = xiulianText.match(/攻击修炼[：:]\s*(\d+)(?:\/(\d+))?/);
+                        if (gjxlMatch) {
+                            data.gjxl = parseInt(gjxlMatch[1]) || 0;
+                            data.gjxlUpper = parseInt(gjxlMatch[2]) || 0;
+                        }
+                        const fyxlMatch = xiulianText.match(/防御修炼[：:]\s*(\d+)(?:\/(\d+))?/);
+                        if (fyxlMatch) {
+                            data.fyxl = parseInt(fyxlMatch[1]) || 0;
+                            data.fyxlUpper = parseInt(fyxlMatch[2]) || 0;
+                        }
+                        const fsxlMatch = xiulianText.match(/法术修炼[：:]\s*(\d+)(?:\/(\d+))?/);
+                        if (fsxlMatch) {
+                            data.fsxl = parseInt(fsxlMatch[1]) || 0;
+                            data.fsxlUpper = parseInt(fsxlMatch[2]) || 0;
+                        }
+                        const kfxlMatch = xiulianText.match(/抗法修炼[：:]\s*(\d+)(?:\/(\d+))?/);
+                        if (kfxlMatch) {
+                            data.kfxl = parseInt(kfxlMatch[1]) || 0;
+                            data.kfxlUpper = parseInt(kfxlMatch[2]) || 0;
+                        }
+
+                        // 宠物修炼（后一列）
+                        const gjkzlMatch = xiulianText.match(/攻击控制力[：:]\s*(\d+)/);
+                        if (gjkzlMatch) data.gjkzl = parseInt(gjkzlMatch[1]) || 0;
+                        const fykzlMatch = xiulianText.match(/防御控制力[：:]\s*(\d+)/);
+                        if (fykzlMatch) data.fykzl = parseInt(fykzlMatch[1]) || 0;
+                        const fskzlMatch = xiulianText.match(/法术控制力[：:]\s*(\d+)/);
+                        if (fskzlMatch) data.fskzl = parseInt(fskzlMatch[1]) || 0;
+                        const kfkzlMatch = xiulianText.match(/抗法控制力[：:]\s*(\d+)/);
+                        if (kfkzlMatch) data.kfkzl = parseInt(kfkzlMatch[1]) || 0;
+                    }
+
+                    // 点击"技能"tab并读取师门技能和生活技能
+                    if (skillTab) {
+                        skillTab.click();
+                        // 等待tab切换和内容加载（最多等待2秒）
+                        for (let i = 0; i < 20; i++) {
+                            await delay(100);
+                            const currentText = document.body.innerText;
+                            // 检测内容是否包含技能数据
+                            if (currentText.includes('师门技能') || currentText.includes('强身术') || currentText.includes('冥想')) {
+                                break;
+                            }
+                        }
+                        // 额外等待确保数据完全加载
+                        await delay(200);
+
+                        // 读取技能数据
+                        const skillText = document.body.innerText;
+
+                        // 师门技能提取（查找7个技能等级）
+                        const skillPattern = /师门技能[^\d]*(\d+)[^\d]*(\d+)[^\d]*(\d+)[^\d]*(\d+)[^\d]*(\d+)[^\d]*(\d+)[^\d]*(\d+)/;
+                        const skillMatch = skillText.match(skillPattern);
+                        if (skillMatch) {
+                            for (let i = 0; i < 7; i++) {
+                                data['skill_' + i] = Math.min(parseInt(skillMatch[i + 1]) || 0, 180);
+                            }
+                        }
+
+                        // 生活技能提取（支持多种分隔符格式）
+                        const lifeSkillPatterns = {
+                            qs: /强身(?:术)?[：:\s]\s*(\d+)/,
+                            mx: /冥想[：:\s]\s*(\d+)/,
+                            cWeapon: /暗器(?:技巧)?[：:\s]\s*(\d+)/,
+                            cook: /烹饪(?:技巧)?[：:\s]\s*(\d+)/,
+                            zy: /中药(?:医理)?[：:\s]\s*(\d+)/,
+                            ys: /养生(?:之道)?[：:\s]\s*(\d+)/,
+                            js: /健身(?:术)?[：:\s]\s*(\d+)/,
+                            qj: /巧匠(?:之术)?[：:\s]\s*(\d+)/,
+                            strong: /强壮[：:\s]\s*(\d+)/,
+                            speed: /神速[：:\s]\s*(\d+)/
+                        };
+
+                        for (const [key, pattern] of Object.entries(lifeSkillPatterns)) {
+                            const match = skillText.match(pattern);
+                            if (match) {
+                                data[key] = parseInt(match[1]) || 0;
+                            }
+                        }
+                    }
+
+                    return data;
+                }
+            }, (results) => {
+                chrome.runtime.sendMessage({
+                    action: "updateData",
+                    data: results[0].result
+                });
+            });
+        });
+    }
+
+    // ========== 口袋版：批量计算数据抓取（当前页） ==========
+    if (request.action === "batchFetchPocketData") {
+        function execScript(tabId, opts) {
+            return new Promise((resolve, reject) => {
+                chrome.scripting.executeScript(Object.assign({target: {tabId}}, opts), (results) => {
+                    if (chrome.runtime.lastError) return reject(new Error(chrome.runtime.lastError.message));
+                    if (!results || !results[0]) return reject(new Error("脚本未返回结果"));
+                    resolve(results[0].result);
+                });
+            });
+        }
+
+        function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+        // 口袋版批量数据抓取：点击每个列表项进入详情页提取数据
+        async function extractPocketBatchWithDetail(tabId) {
+            // 1. 先获取列表中所有角色的基本信息
+            const listItems = await execScript(tabId, {function: () => {
+                const items = document.querySelectorAll('.extend-product-item.list-item');
+                return Array.from(items).map((item, index) => {
+                    const name = item.querySelector('.name')?.textContent?.trim() || '';
+                    const levelText = item.querySelector('.level')?.textContent?.trim() || '';
+                    const priceText = item.querySelector('.price')?.textContent?.trim() || '';
+                    const server = item.querySelector('.server')?.textContent?.trim() || '';
+                    const attr = item.querySelector('.attr')?.textContent?.trim() || '';
+                    return { index, name, levelText, priceText, server, attr };
+                });
+            }});
+
+            if (!listItems || listItems.length === 0) {
+                return [];
+            }
+
+            const results = [];
+
+            // 2. 逐个点击进入详情页提取数据
+            for (let i = 0; i < listItems.length; i++) {
+                const item = listItems[i];
+
+                // 点击列表项进入详情页
+                const clickResult = await execScript(tabId, {function: (idx) => {
+                    const items = document.querySelectorAll('.extend-product-item.list-item');
+                    const item = items[idx];
+                    if (!item) return false;
+                    const link = item.querySelector('.list-item-link');
+                    if (!link) return false;
+                    link.click();
+                    return true;
+                }, args: [i]});
+
+                if (!clickResult) continue;
+
+                // 等待详情页加载
+                await delay(2000);
+
+                // 检测详情页是否加载完成
+                const detailLoaded = await execScript(tabId, {function: () => {
+                    // 检测详情页特征元素
+                    return document.querySelector('.page-role-detail') !== null
+                        || document.querySelector('.product-content') !== null
+                        || document.body.innerText.includes('攻击修炼');
+                }});
+
+                if (!detailLoaded) {
+                    // 再等一会儿
+                    await delay(1500);
+                }
+
+                // 从详情页提取数据
+                const detailData = await execScript(tabId, {function: async () => {
+                    const data = {
+                        qyd: 0, jyCur: 0, jyMax: 0,
+                        gjxl: 0, gjxlUpper: 0, fsxl: 0, fsxlUpper: 0,
+                        fyxl: 0, fyxlUpper: 0, kfxl: 0, kfxlUpper: 0,
+                        gjkzl: 0, fskzl: 0, fykzl: 0, kfkzl: 0,
+                        skill_0: 0, skill_1: 0, skill_2: 0, skill_3: 0,
+                        skill_4: 0, skill_5: 0, skill_6: 0,
+                        qs: 0, mx: 0, cWeapon: 0, cook: 0,
+                        zy: 0, ys: 0, js: 0, qj: 0, strong: 0, speed: 0
+                    };
+
+                    const delay = ms => new Promise(r => setTimeout(r, ms));
+
+                    // 从当前页面提取基础数据
+                    const bodyText = document.body.innerText;
+                    const qydMatch = bodyText.match(/新版乾元丹数量[：:]\s*(\d+)/);
+                    if (qydMatch) data.qyd = parseInt(qydMatch[1]) || 0;
+                    const jyMatch = bodyText.match(/月饼粽子机缘[：:]\s*(\d+)\s*\/\s*(\d+)/);
+                    if (jyMatch) {
+                        data.jyCur = parseInt(jyMatch[1]) || 0;
+                        data.jyMax = parseInt(jyMatch[2]) || 0;
+                    }
+
+                    // 找到所有tab
+                    const tabItems = document.querySelectorAll('.hair-tab .tabs .item');
+                    let xiulianTab = null;
+                    let skillTab = null;
+                    tabItems.forEach(tab => {
+                        const text = tab.textContent.trim();
+                        if (text.includes('人物') || text.includes('修炼')) xiulianTab = tab;
+                        if (text === '技能') skillTab = tab;
+                    });
+
+                    // 点击"人物/修炼"tab并读取修炼数据
+                    if (xiulianTab) {
+                        xiulianTab.click();
+                        // 等待tab切换和内容加载（最多等待2秒）
+                        for (let i = 0; i < 20; i++) {
+                            await delay(100);
+                            const currentText = document.body.innerText;
+                            if (currentText.includes('攻击修炼') || currentText.includes('防御修炼')) {
+                                break;
+                            }
+                        }
+                        await delay(200);
+
+                        const xiulianText = document.body.innerText;
+                        // 人物修炼
+                        const gjxlMatch = xiulianText.match(/攻击修炼[：:]\s*(\d+)(?:\/(\d+))?/);
+                        if (gjxlMatch) { data.gjxl = parseInt(gjxlMatch[1]) || 0; data.gjxlUpper = parseInt(gjxlMatch[2]) || 0; }
+                        const fyxlMatch = xiulianText.match(/防御修炼[：:]\s*(\d+)(?:\/(\d+))?/);
+                        if (fyxlMatch) { data.fyxl = parseInt(fyxlMatch[1]) || 0; data.fyxlUpper = parseInt(fyxlMatch[2]) || 0; }
+                        const fsxlMatch = xiulianText.match(/法术修炼[：:]\s*(\d+)(?:\/(\d+))?/);
+                        if (fsxlMatch) { data.fsxl = parseInt(fsxlMatch[1]) || 0; data.fsxlUpper = parseInt(fsxlMatch[2]) || 0; }
+                        const kfxlMatch = xiulianText.match(/抗法修炼[：:]\s*(\d+)(?:\/(\d+))?/);
+                        if (kfxlMatch) { data.kfxl = parseInt(kfxlMatch[1]) || 0; data.kfxlUpper = parseInt(kfxlMatch[2]) || 0; }
+                        // 宠物修炼
+                        const gjkzlMatch = xiulianText.match(/攻击控制力[：:]\s*(\d+)/);
+                        if (gjkzlMatch) data.gjkzl = parseInt(gjkzlMatch[1]) || 0;
+                        const fykzlMatch = xiulianText.match(/防御控制力[：:]\s*(\d+)/);
+                        if (fykzlMatch) data.fykzl = parseInt(fykzlMatch[1]) || 0;
+                        const fskzlMatch = xiulianText.match(/法术控制力[：:]\s*(\d+)/);
+                        if (fskzlMatch) data.fskzl = parseInt(fskzlMatch[1]) || 0;
+                        const kfkzlMatch = xiulianText.match(/抗法控制力[：:]\s*(\d+)/);
+                        if (kfkzlMatch) data.kfkzl = parseInt(kfkzlMatch[1]) || 0;
+                    }
+
+                    // 点击"技能"tab并读取师门技能和生活技能
+                    if (skillTab) {
+                        skillTab.click();
+                        // 等待tab切换和内容加载（最多等待2秒）
+                        for (let i = 0; i < 20; i++) {
+                            await delay(100);
+                            const currentText = document.body.innerText;
+                            if (currentText.includes('师门技能') || currentText.includes('强身术') || currentText.includes('冥想')) {
+                                break;
+                            }
+                        }
+                        await delay(200);
+
+                        const skillText = document.body.innerText;
+                        // 师门技能
+                        const skillPattern = /师门技能[^\d]*(\d+)[^\d]*(\d+)[^\d]*(\d+)[^\d]*(\d+)[^\d]*(\d+)[^\d]*(\d+)[^\d]*(\d+)/;
+                        const skillMatch = skillText.match(skillPattern);
+                        if (skillMatch) {
+                            for (let j = 0; j < 7; j++) data['skill_' + j] = Math.min(parseInt(skillMatch[j + 1]) || 0, 180);
+                        }
+                        // 生活技能（支持多种分隔符格式）
+                        const lifeSkillMap = {
+                            qs: /强身(?:术)?[：:\s]\s*(\d+)/, mx: /冥想[：:\s]\s*(\d+)/,
+                            cWeapon: /暗器(?:技巧)?[：:\s]\s*(\d+)/, cook: /烹饪(?:技巧)?[：:\s]\s*(\d+)/,
+                            zy: /中药(?:医理)?[：:\s]\s*(\d+)/, ys: /养生(?:之道)?[：:\s]\s*(\d+)/,
+                            js: /健身(?:术)?[：:\s]\s*(\d+)/, qj: /巧匠(?:之术)?[：:\s]\s*(\d+)/,
+                            strong: /强壮[：:\s]\s*(\d+)/, speed: /神速[：:\s]\s*(\d+)/
+                        };
+                        for (const [key, pattern] of Object.entries(lifeSkillMap)) {
+                            const match = skillText.match(pattern);
+                            if (match) data[key] = parseInt(match[1]) || 0;
+                        }
+                    }
+
+                    return data;
+                }});
+
+                // 返回列表页
+                await execScript(tabId, {function: () => {
+                    // 尝试点击返回按钮
+                    const backBtn = document.querySelector('.iff-icon-back, .back, [class*="back"]');
+                    if (backBtn) {
+                        backBtn.click();
+                    } else {
+                        history.back();
+                    }
+                }});
+
+                // 等待列表页加载
+                await delay(2000);
+
+                // 检测列表页是否加载完成
+                const listLoaded = await execScript(tabId, {function: () => {
+                    return document.querySelectorAll('.extend-product-item.list-item').length > 0;
+                }});
+
+                if (!listLoaded) {
+                    await delay(1500);
+                }
+
+                // 组合数据
+                const levelMatch = item.levelText.match(/(\d+)/);
+                const level = levelMatch ? parseInt(levelMatch[1]) : 0;
+                const price = parseFloat(item.priceText.replace(/[^\d.]/g, '')) || 0;
+
+                // 解析门派（从attr中提取，如"化圣九 成就:3575 总修:76 总宠修:93"）
+                const attrParts = item.attr.split(/\s+/);
+                const school = attrParts[0] || '';
+
+                results.push({
+                    ordersn: `pocket_${i}_${Date.now()}`,
+                    name: item.name,
+                    level,
+                    school,
+                    schoolCode: 0,
+                    server: item.server,
+                    price,
+                    detailUrl: '',
+                    ...(detailData || {})
+                });
+            }
+
+            return results;
+        }
+
+        chrome.tabs.query({active: true, currentWindow: true}, async (tabs) => {
+            if (!tabs || tabs.length === 0) {
+                chrome.runtime.sendMessage({
+                    action: "batchUpdateData",
+                    error: "未找到口袋版页面"
+                });
+                return;
+            }
+            const tab = tabs.find(t => t.active) || tabs[0];
+            const tabId = tab.id;
+
+            try {
+                // 先滚动到底部触发懒加载
+                await execScript(tabId, {function: () => {
+                    window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'});
+                }});
+                await delay(1000);
+
+                const results = await extractPocketBatchWithDetail(tabId);
+
+                if (!results || results.length === 0) {
+                    chrome.runtime.sendMessage({
+                        action: "batchUpdateData",
+                        error: "未找到角色数据"
+                    });
+                } else {
+                    chrome.runtime.sendMessage({
+                        action: "batchUpdateData",
+                        results: results
+                    });
+                }
+            } catch (e) {
+                chrome.runtime.sendMessage({
+                    action: "batchUpdateData",
+                    error: "提取失败: " + e.message
+                });
+            }
+        });
+    }
+
+    // ========== 口袋版：自动翻页批量计算 ==========
+    if (request.action === "autoBatchPocketFetch") {
+        const totalItems = request.totalPages || 20; // 口袋版用数量而非页数
+
+        function execScript(tabId, opts) {
+            return new Promise((resolve, reject) => {
+                chrome.scripting.executeScript(Object.assign({target: {tabId}}, opts), (results) => {
+                    if (chrome.runtime.lastError) return reject(new Error(chrome.runtime.lastError.message));
+                    if (!results || !results[0]) return reject(new Error("脚本未返回结果"));
+                    resolve(results[0].result);
+                });
+            });
+        }
+
+        function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+        // 从详情页提取数据的通用函数
+        async function extractDetailDataFromPage() {
+            const data = {
+                qyd: 0, jyCur: 0, jyMax: 0,
+                gjxl: 0, gjxlUpper: 0, fsxl: 0, fsxlUpper: 0,
+                fyxl: 0, fyxlUpper: 0, kfxl: 0, kfxlUpper: 0,
+                gjkzl: 0, fskzl: 0, fykzl: 0, kfkzl: 0,
+                skill_0: 0, skill_1: 0, skill_2: 0, skill_3: 0,
+                skill_4: 0, skill_5: 0, skill_6: 0,
+                qs: 0, mx: 0, cWeapon: 0, cook: 0,
+                zy: 0, ys: 0, js: 0, qj: 0, strong: 0, speed: 0
+            };
+
+            const delay = ms => new Promise(r => setTimeout(r, ms));
+
+            // 从当前页面提取基础数据
+            const bodyText = document.body.innerText;
+            const qydMatch = bodyText.match(/新版乾元丹数量[：:]\s*(\d+)/);
+            if (qydMatch) data.qyd = parseInt(qydMatch[1]) || 0;
+            const jyMatch = bodyText.match(/月饼粽子机缘[：:]\s*(\d+)\s*\/\s*(\d+)/);
+            if (jyMatch) {
+                data.jyCur = parseInt(jyMatch[1]) || 0;
+                data.jyMax = parseInt(jyMatch[2]) || 0;
+            }
+
+            // 找到所有tab
+            const tabItems = document.querySelectorAll('.hair-tab .tabs .item');
+            let xiulianTab = null;
+            let skillTab = null;
+            tabItems.forEach(tab => {
+                const text = tab.textContent.trim();
+                if (text.includes('人物') || text.includes('修炼')) xiulianTab = tab;
+                if (text === '技能') skillTab = tab;
+            });
+
+            // 点击"人物/修炼"tab并读取修炼数据
+            if (xiulianTab) {
+                xiulianTab.click();
+                // 等待tab切换和内容加载（最多等待2秒）
+                for (let i = 0; i < 20; i++) {
+                    await delay(100);
+                    const currentText = document.body.innerText;
+                    if (currentText.includes('攻击修炼') || currentText.includes('防御修炼')) {
+                        break;
+                    }
+                }
+                await delay(200);
+
+                const xiulianText = document.body.innerText;
+                // 人物修炼
+                const gjxlMatch = xiulianText.match(/攻击修炼[：:]\s*(\d+)(?:\/(\d+))?/);
+                if (gjxlMatch) { data.gjxl = parseInt(gjxlMatch[1]) || 0; data.gjxlUpper = parseInt(gjxlMatch[2]) || 0; }
+                const fyxlMatch = xiulianText.match(/防御修炼[：:]\s*(\d+)(?:\/(\d+))?/);
+                if (fyxlMatch) { data.fyxl = parseInt(fyxlMatch[1]) || 0; data.fyxlUpper = parseInt(fyxlMatch[2]) || 0; }
+                const fsxlMatch = xiulianText.match(/法术修炼[：:]\s*(\d+)(?:\/(\d+))?/);
+                if (fsxlMatch) { data.fsxl = parseInt(fsxlMatch[1]) || 0; data.fsxlUpper = parseInt(fsxlMatch[2]) || 0; }
+                const kfxlMatch = xiulianText.match(/抗法修炼[：:]\s*(\d+)(?:\/(\d+))?/);
+                if (kfxlMatch) { data.kfxl = parseInt(kfxlMatch[1]) || 0; data.kfxlUpper = parseInt(kfxlMatch[2]) || 0; }
+                // 宠物修炼
+                const gjkzlMatch = xiulianText.match(/攻击控制力[：:]\s*(\d+)/);
+                if (gjkzlMatch) data.gjkzl = parseInt(gjkzlMatch[1]) || 0;
+                const fykzlMatch = xiulianText.match(/防御控制力[：:]\s*(\d+)/);
+                if (fykzlMatch) data.fykzl = parseInt(fykzlMatch[1]) || 0;
+                const fskzlMatch = xiulianText.match(/法术控制力[：:]\s*(\d+)/);
+                if (fskzlMatch) data.fskzl = parseInt(fskzlMatch[1]) || 0;
+                const kfkzlMatch = xiulianText.match(/抗法控制力[：:]\s*(\d+)/);
+                if (kfkzlMatch) data.kfkzl = parseInt(kfkzlMatch[1]) || 0;
+            }
+
+            // 点击"技能"tab并读取师门技能和生活技能
+            if (skillTab) {
+                skillTab.click();
+                // 等待tab切换和内容加载（最多等待2秒）
+                for (let i = 0; i < 20; i++) {
+                    await delay(100);
+                    const currentText = document.body.innerText;
+                    if (currentText.includes('师门技能') || currentText.includes('强身术') || currentText.includes('冥想')) {
+                        break;
+                    }
+                }
+                await delay(200);
+
+                const skillText = document.body.innerText;
+                // 师门技能
+                const skillPattern = /师门技能[^\d]*(\d+)[^\d]*(\d+)[^\d]*(\d+)[^\d]*(\d+)[^\d]*(\d+)[^\d]*(\d+)[^\d]*(\d+)/;
+                const skillMatch = skillText.match(skillPattern);
+                if (skillMatch) {
+                    for (let j = 0; j < 7; j++) data['skill_' + j] = Math.min(parseInt(skillMatch[j + 1]) || 0, 180);
+                }
+                // 生活技能（支持多种分隔符格式）
+                const lifeSkillMap = {
+                    qs: /强身(?:术)?[：:\s]\s*(\d+)/, mx: /冥想[：:\s]\s*(\d+)/,
+                    cWeapon: /暗器(?:技巧)?[：:\s]\s*(\d+)/, cook: /烹饪(?:技巧)?[：:\s]\s*(\d+)/,
+                    zy: /中药(?:医理)?[：:\s]\s*(\d+)/, ys: /养生(?:之道)?[：:\s]\s*(\d+)/,
+                    js: /健身(?:术)?[：:\s]\s*(\d+)/, qj: /巧匠(?:之术)?[：:\s]\s*(\d+)/,
+                    strong: /强壮[：:\s]\s*(\d+)/, speed: /神速[：:\s]\s*(\d+)/
+                };
+                for (const [key, pattern] of Object.entries(lifeSkillMap)) {
+                    const match = skillText.match(pattern);
+                    if (match) data[key] = parseInt(match[1]) || 0;
+                }
+            }
+
+            return data;
+        }
+
+        chrome.tabs.query({active: true, currentWindow: true}, async (tabs) => {
+            if (!tabs || tabs.length === 0) {
+                chrome.runtime.sendMessage({
+                    action: "autoBatchProgress",
+                    error: "未找到口袋版页面"
+                });
+                return;
+            }
+            const tab = tabs.find(t => t.active) || tabs[0];
+            const tabId = tab.id;
+
+            try {
+                // 口袋版使用无限滚动，需要滚动加载更多
+                // 先获取当前可见列表项数量
+                let processedCount = 0;
+                let allResults = [];
+                let consecutiveFailures = 0;
+                const MAX_FAILURES = 3;
+
+                chrome.runtime.sendMessage({
+                    action: "autoBatchProgress",
+                    currentPage: 0,
+                    totalPages: totalItems,
+                    status: "start"
+                });
+
+                while (processedCount < totalItems && consecutiveFailures < MAX_FAILURES) {
+                    // 获取当前列表项
+                    const listItems = await execScript(tabId, {function: () => {
+                        const items = document.querySelectorAll('.extend-product-item.list-item');
+                        return Array.from(items).map((item, index) => {
+                            const name = item.querySelector('.name')?.textContent?.trim() || '';
+                            const levelText = item.querySelector('.level')?.textContent?.trim() || '';
+                            const priceText = item.querySelector('.price')?.textContent?.trim() || '';
+                            const server = item.querySelector('.server')?.textContent?.trim() || '';
+                            const attr = item.querySelector('.attr')?.textContent?.trim() || '';
+                            return { index, name, levelText, priceText, server, attr };
+                        });
+                    }});
+
+                    if (!listItems || listItems.length === 0) {
+                        consecutiveFailures++;
+                        // 滚动加载更多
+                        await execScript(tabId, {function: () => {
+                            window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'});
+                        }});
+                        await delay(2000);
+                        continue;
+                    }
+
+                    // 找到还未处理的项
+                    const startIndex = allResults.length;
+                    if (startIndex >= listItems.length) {
+                        // 需要滚动加载更多
+                        await execScript(tabId, {function: () => {
+                            window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'});
+                        }});
+                        await delay(2000);
+
+                        // 检查是否有新数据加载
+                        const newCount = await execScript(tabId, {function: () => {
+                            return document.querySelectorAll('.extend-product-item.list-item').length;
+                        }});
+                        if (newCount <= listItems.length) {
+                            consecutiveFailures++;
+                        }
+                        continue;
+                    }
+
+                    consecutiveFailures = 0;
+
+                    // 处理当前批次（最多处理剩余需要的数量）
+                    const batchSize = Math.min(listItems.length - startIndex, totalItems - processedCount);
+
+                    for (let i = 0; i < batchSize; i++) {
+                        const itemIdx = startIndex + i;
+                        const item = listItems[itemIdx];
+
+                        chrome.runtime.sendMessage({
+                            action: "autoBatchProgress",
+                            currentPage: processedCount + 1,
+                            totalPages: totalItems,
+                            status: "extracting"
+                        });
+
+                        // 点击进入详情页
+                        const clickResult = await execScript(tabId, {function: (idx) => {
+                            const items = document.querySelectorAll('.extend-product-item.list-item');
+                            const item = items[idx];
+                            if (!item) return false;
+                            const link = item.querySelector('.list-item-link');
+                            if (!link) return false;
+                            link.click();
+                            return true;
+                        }, args: [itemIdx]});
+
+                        if (!clickResult) {
+                            processedCount++;
+                            continue;
+                        }
+
+                        // 等待详情页加载
+                        await delay(2000);
+
+                        // 提取详情数据
+                        const detailData = await execScript(tabId, {function: extractDetailDataFromPage});
+
+                        // 返回列表页
+                        await execScript(tabId, {function: () => {
+                            const backBtn = document.querySelector('.iff-icon-back, .back, [class*="back"]');
+                            if (backBtn) {
+                                backBtn.click();
+                            } else {
+                                history.back();
+                            }
+                        }});
+
+                        await delay(2000);
+
+                        // 组合数据
+                        const levelMatch = item.levelText.match(/(\d+)/);
+                        const level = levelMatch ? parseInt(levelMatch[1]) : 0;
+                        const price = parseFloat(item.priceText.replace(/[^\d.]/g, '')) || 0;
+                        const attrParts = item.attr.split(/\s+/);
+                        const school = attrParts[0] || '';
+
+                        allResults.push({
+                            ordersn: `pocket_${itemIdx}_${Date.now()}`,
+                            name: item.name,
+                            level,
+                            school,
+                            schoolCode: 0,
+                            server: item.server,
+                            price,
+                            detailUrl: '',
+                            ...(detailData || {})
+                        });
+
+                        processedCount++;
+
+                        // 发送进度
+                        chrome.runtime.sendMessage({
+                            action: "autoBatchProgress",
+                            currentPage: processedCount,
+                            totalPages: totalItems,
+                            results: [allResults[allResults.length - 1]],
+                            status: "pageDone"
+                        });
+                    }
+                }
+
+                chrome.runtime.sendMessage({
+                    action: "autoBatchProgress",
+                    currentPage: processedCount,
+                    totalPages: totalItems,
+                    status: "done"
+                });
+            } catch (e) {
+                chrome.runtime.sendMessage({
+                    action: "autoBatchProgress",
+                    error: "口袋版自动计算失败: " + e.message
+                });
+            }
+        });
+    }
 });
 
 

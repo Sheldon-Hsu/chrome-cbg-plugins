@@ -14,7 +14,8 @@
       "data/data.json"
     ],
     "matches": [
-      "*://xyq.cbg.163.com/*"
+      "*://xyq.cbg.163.com/*",
+      "*://xyq-m.cbg.163.com/*"
     ]
   }],
   "action": {
@@ -31,9 +32,10 @@
   "side_panel": {
     "default_path": "index.html"
   },
-  "permissions": [ "scripting","sidePanel","tabs"],
+  "permissions": [ "scripting","sidePanel","tabs","storage"],
   "host_permissions": [
     "*://xyq.cbg.163.com/*",
+    "*://xyq-m.cbg.163.com/*",
     "file:///*/*"
   ]
 }
