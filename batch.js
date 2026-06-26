@@ -269,6 +269,65 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     }
 
+    // 表头排序
+    let currentSortCol = 'discount'; // 'discount' | 'diff'
+    let discountAsc = true;   // 折扣默认正序
+    let diffAsc = false;      // 差值默认倒序
+
+    function sortTableRows() {
+        const tbodyEl = document.getElementById('batch_tbody');
+        const allDataRows = Array.from(tbodyEl.querySelectorAll('tr:not(.detail-row)'));
+        const detailRows = Array.from(tbodyEl.querySelectorAll('.detail-row'));
+
+        const getVal = (row, col) => {
+            const cells = row.querySelectorAll('td');
+            if (col === 'discount') {
+                const text = cells[4] ? cells[4].textContent : '';
+                const match = text.match(/([\d.]+)折/);
+                return match ? parseFloat(match[1]) : 999;
+            } else {
+                const text = cells[5] ? cells[5].textContent : '';
+                return parseFloat(text) || 0;
+            }
+        };
+
+        const asc = currentSortCol === 'discount' ? discountAsc : diffAsc;
+        allDataRows.sort((a, b) => {
+            const va = getVal(a, currentSortCol);
+            const vb = getVal(b, currentSortCol);
+            return asc ? (va - vb) : (vb - va);
+        });
+
+        // 移除所有行，按排序后顺序重新插入
+        detailRows.forEach(r => r.remove());
+        allDataRows.forEach(row => tbodyEl.appendChild(row));
+    }
+
+    // 表头点击事件
+    document.getElementById('th_discount').addEventListener('click', function () {
+        if (currentSortCol === 'discount') {
+            discountAsc = !discountAsc;
+        } else {
+            currentSortCol = 'discount';
+            discountAsc = true;
+        }
+        this.textContent = '折扣 ' + (discountAsc ? '▼' : '▲');
+        document.getElementById('th_diff').textContent = '差值';
+        sortTableRows();
+    });
+
+    document.getElementById('th_diff').addEventListener('click', function () {
+        if (currentSortCol === 'diff') {
+            diffAsc = !diffAsc;
+        } else {
+            currentSortCol = 'diff';
+            diffAsc = false;
+        }
+        this.textContent = '差值 ' + (diffAsc ? '▼' : '▲');
+        document.getElementById('th_discount').textContent = '折扣';
+        sortTableRows();
+    });
+
     // 用当前比例重新计算所有缓存数据
     function recalculateAll(rawData, yxbPrice, guoziPrice, ratios, ignoreHuanian) {
         let calcResults = [];
@@ -527,21 +586,8 @@ document.addEventListener('DOMContentLoaded', async function () {
                 tbodyEl.innerHTML = tbodyHtml;
             }
 
-            // 按折扣重新排序所有行
-            const allDataRows = Array.from(tbodyEl.querySelectorAll('tr:not(.detail-row)'));
-            allDataRows.sort((a, b) => {
-                const getDiscount = (row) => {
-                    const cells = row.querySelectorAll('td');
-                    const text = cells[4] ? cells[4].textContent : '';
-                    const match = text.match(/([\d.]+)折/);
-                    return match ? parseFloat(match[1]) : 999;
-                };
-                return getDiscount(a) - getDiscount(b);
-            });
-            // 移除所有行（包括详情面板），按排序后顺序重新插入
-            const detailRows = tbodyEl.querySelectorAll('.detail-row');
-            detailRows.forEach(r => r.remove());
-            allDataRows.forEach(row => tbodyEl.appendChild(row));
+            // 按当前排序规则排序所有行
+            sortTableRows();
 
             // 点击行：新标签页打开角色页面 + 展开详情面板
             // 使用事件委托，避免重复绑定监听器
@@ -750,20 +796,8 @@ document.addEventListener('DOMContentLoaded', async function () {
                 });
                 tbodyEl.insertAdjacentHTML('beforeend', tbodyHtml);
 
-                // 按折扣重新排序所有行
-                const allDataRows = Array.from(tbodyEl.querySelectorAll('tr:not(.detail-row)'));
-                allDataRows.sort((a, b) => {
-                    const getDiscount = (row) => {
-                        const cells = row.querySelectorAll('td');
-                        const text = cells[4] ? cells[4].textContent : '';
-                        const match = text.match(/([\d.]+)折/);
-                        return match ? parseFloat(match[1]) : 999;
-                    };
-                    return getDiscount(a) - getDiscount(b);
-                });
-                const detailRows = tbodyEl.querySelectorAll('.detail-row');
-                detailRows.forEach(r => r.remove());
-                allDataRows.forEach(row => tbodyEl.appendChild(row));
+                // 按当前排序规则排序所有行
+                sortTableRows();
 
                 // 为每行存储 detailUrl
                 const sortedRows = tbodyEl.querySelectorAll('tr:not(.detail-row)');
