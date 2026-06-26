@@ -228,7 +228,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         return true;
     }
 
-    // 跳转到下一页：模拟点击页面上的"下一页"链接
+    // 跳转到下一页：模拟点击页面渲染后的"下一页"链接
     if (request.action === "goToNextPage") {
         chrome.tabs.query({url: "*://xyq.cbg.163.com/*"}, (tabs) => {
             if (!tabs || tabs.length === 0) {
@@ -241,10 +241,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 target: {tabId},
                 world: "MAIN",
                 function: () => {
-                    // 查找分页区域中的"下一页"链接
-                    const pagerEl = document.getElementById('pager_templ');
-                    if (!pagerEl) return {success: false, error: "未找到分页组件"};
-                    const links = pagerEl.querySelectorAll('a');
+                    // 渲染后的分页在 #pager_bar .pages 中
+                    const pagerBar = document.getElementById('pager_bar');
+                    if (!pagerBar) return {success: false, error: "未找到分页栏"};
+                    const links = pagerBar.querySelectorAll('.pages a');
                     for (const link of links) {
                         if (link.textContent.trim() === '下一页') {
                             link.click();
@@ -297,11 +297,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             return {curPage: 1, totalPage: 1};
         }
 
-        // 跳转到下一页：模拟点击页面上的"下一页"链接
+        // 跳转到下一页：模拟点击渲染后的"下一页"链接（#pager_bar .pages）
         function gotoNextPage() {
-            const pagerEl = document.getElementById('pager_templ');
-            if (!pagerEl) return {success: false, error: "未找到分页组件"};
-            const links = pagerEl.querySelectorAll('a');
+            const pagerBar = document.getElementById('pager_bar');
+            if (!pagerBar) return {success: false, error: "未找到分页栏"};
+            const links = pagerBar.querySelectorAll('.pages a');
             for (const link of links) {
                 if (link.textContent.trim() === '下一页') {
                     link.click();
