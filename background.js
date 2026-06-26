@@ -1092,14 +1092,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                     status: "extracting"
                 });
 
-                // 将列表项滚动到视口中间，然后点击进入详情页
+                // 点击列表项进入详情页
                 const clickResult = await execScript(tabId, {function: (idx) => {
                     const items = document.querySelectorAll('.list-item-link.product-item.js_product_item');
                     if (!items || items.length === 0) return false;
                     const item = items[idx];
                     if (!item) return false;
-                    // 将列表项滚动到视口中间
-                    item.scrollIntoView({block: 'center', behavior: 'smooth'});
                     // 点击列表项
                     item.click();
                     return true;
@@ -1251,6 +1249,16 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 if (!listLoaded) {
                     await delay(1500);
                 }
+
+                // 返回列表页后，滚动到当前处理的角色位置
+                await execScript(tabId, {function: (idx) => {
+                    const items = document.querySelectorAll('.list-item-link.product-item.js_product_item');
+                    if (!items || items.length === 0) return;
+                    const item = items[idx];
+                    if (!item) return;
+                    // 将当前处理的角色滚动到视口中间
+                    item.scrollIntoView({block: 'center', behavior: 'smooth'});
+                }, args: [i]});
 
                 // 组合数据
                 const levelMatch = item.levelText.match(/(\d+)/);
@@ -1523,14 +1531,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                             status: "extracting"
                         });
 
-                        // 将列表项滚动到视口中间，然后点击进入详情页
+                        // 点击列表项进入详情页
                         const clickResult = await execScript(tabId, {function: (idx) => {
                             const items = document.querySelectorAll('.list-item-link.product-item.js_product_item');
                             if (!items || items.length === 0) return false;
                             const item = items[idx];
                             if (!item) return false;
-                            // 将列表项滚动到视口中间
-                            item.scrollIntoView({block: 'center', behavior: 'smooth'});
                             // 点击列表项
                             item.click();
                             return true;
@@ -1558,6 +1564,16 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                         }});
 
                         await delay(2000);
+
+                        // 返回列表页后，滚动到当前处理的角色位置
+                        await execScript(tabId, {function: (idx) => {
+                            const items = document.querySelectorAll('.list-item-link.product-item.js_product_item');
+                            if (!items || items.length === 0) return;
+                            const item = items[idx];
+                            if (!item) return;
+                            // 将当前处理的角色滚动到视口中间
+                            item.scrollIntoView({block: 'center', behavior: 'smooth'});
+                        }, args: [itemIdx]});
 
                         // 组合数据
                         const levelMatch = item.levelText.match(/(\d+)/);
