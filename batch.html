@@ -158,9 +158,15 @@
         }
 
         @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.03); }
-            100% { transform: scale(1); }
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.03);
+            }
+            100% {
+                transform: scale(1);
+            }
         }
 
         .data-item {
@@ -323,7 +329,9 @@
             padding: 0 4px;
         }
 
-        .dp-close:hover { color: #333; }
+        .dp-close:hover {
+            color: #333;
+        }
 
         .dp-section {
             margin-bottom: 6px;
@@ -452,8 +460,13 @@
         <button id="back_btn" class="btn btn-back">
             <i class="fas fa-arrow-left"></i> 返回
         </button>
+    </div>
+    <div class="section-header">
         <button id="first_page_btn" class="btn btn-next">
             <i class="fas fa-home"></i> 首页
+        </button>
+        <button id="pre_page_btn" class="btn btn-next">
+            <i class="fas fa-home"></i> 上一页
         </button>
         <button id="next_page_btn" class="btn btn-primary">
             <i class="fas fa-arrow-right"></i> 下一页
@@ -507,20 +520,27 @@
             </label>
             <div style="margin-left:auto;display:flex;align-items:center;gap:4px;font-size:0.8rem">
                 <span>自动翻页数</span>
-                <input type="number" id="page_count" value="10" min="1" max="999" style="width:45px;padding:3px;border:1px solid #ddd;border-radius:3px;text-align:center;font-size:0.8rem">
+                <input type="number" id="page_count" value="10" min="1" max="999"
+                       style="width:45px;padding:3px;border:1px solid #ddd;border-radius:3px;text-align:center;font-size:0.8rem">
             </div>
         </div>
         <div class="data-item" style="margin-top:4px">
-            <div class="compare-option" style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem; flex-wrap: nowrap;">
+            <div class="compare-option"
+                 style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem; flex-wrap: nowrap;">
                 <label style="display: flex; align-items: center; gap: 4px; cursor: pointer; color: #333; white-space: nowrap;">
                     <input type="checkbox" id="addToCompare" checked style="width:16px;height:16px;cursor:pointer">
                     <span>把当前所有角色加入比对</span>
                 </label>
-                <button id="clearCacheBtn" class="btn btn-small" style="display:none; font-size: 0.75rem; padding: 0 2px; white-space: nowrap; flex: 0 0 auto; width: 33%; min-width: 0;">清空</button>
+                <button id="clearCacheBtn" class="btn btn-small"
+                        style="display:none; font-size: 0.75rem; padding: 0 2px; white-space: nowrap; flex: 0 0 auto; width: 33%; min-width: 0;">
+                    清空
+                </button>
                 <span id="cacheStatus" style="color: #666; font-size: 0.75rem; white-space: nowrap;"></span>
             </div>
         </div>
-        <div id="qydHint" style="color: #666; font-size: 0.7rem; margin-top: 4px;">💡 展开详情面板时会自动从详情页读取乾元丹和机缘</div>
+        <div id="qydHint" style="color: #666; font-size: 0.7rem; margin-top: 4px;">💡
+            展开详情面板时会自动从详情页读取乾元丹和机缘
+        </div>
     </div>
 
     <div id="batch_results" style="display:none">
@@ -534,13 +554,14 @@
             <div class="batch-table-wrap">
                 <table class="batch-table">
                     <thead>
-                        <tr>
-                            <th>门派</th>
-                            <th>等级</th>
-                            <th>页面价</th>
-                            <th>计算值</th>
-                            <th>折扣</th>
-                        </tr>
+                    <tr>
+                        <th>门派</th>
+                        <th>等级</th>
+                        <th>页面价</th>
+                        <th>计算值</th>
+                        <th>折扣</th>
+                        <th>差值</th>
+                    </tr>
                     </thead>
                     <tbody id="batch_tbody"></tbody>
                 </table>
