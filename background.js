@@ -937,7 +937,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                     const delay = ms => new Promise(r => setTimeout(r, ms));
 
                     // 提取价格
-                    const priceEl = document.querySelector('.price_OskaR, .price');
+                    const priceEl = document.querySelector('.price_OskaR');
                     if (priceEl) {
                         data.price = parseFloat(priceEl.textContent.replace(/[^\d.]/g, '')) || 0;
                     }
@@ -1415,7 +1415,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             const delay = ms => new Promise(r => setTimeout(r, ms));
 
             // 从详情页提取价格
-            const priceEl = document.querySelector('.price');
+            const priceEl = document.querySelector('.price_OskaR');
             if (priceEl) {
                 data.price = parseFloat(priceEl.textContent.replace(/[^\d.]/g, '')) || 0;
             }
@@ -1651,27 +1651,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                         // 提取详情数据
                         const detailData = await execScript(tabId, {function: extractDetailDataFromPage});
 
-                        // 返回列表页
-                        await execScript(tabId, {function: () => {
-                            const backBtn = document.querySelector('.iff-icon-back, .back, [class*="back"]');
-                            if (backBtn) {
-                                backBtn.click();
-                            } else {
-                                history.back();
-                            }
-                        }});
-
-                        await delay(2000);
-
-                        // 返回列表页后，滚动到当前处理的角色位置
-                        await execScript(tabId, {function: (idx) => {
-                            const items = document.querySelectorAll('.list-item-link.product-item.js_product_item');
-                            if (!items || items.length === 0) return;
-                            const item = items[idx];
-                            if (!item) return;
-                            item.scrollIntoView({block: 'center', behavior: 'smooth'});
-                        }, args: [item.domIndex]});
-
                         // 组合数据
                         const levelMatch = item.levelText.match(/(\d+)/);
                         const level = levelMatch ? parseInt(levelMatch[1]) : 0;
@@ -1697,7 +1676,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
                         processedCount++;
 
-                        // 发送进度
+                        // 先发送计算结果到批量结果表格显示
                         chrome.runtime.sendMessage({
                             action: "autoBatchProgress",
                             currentPage: processedCount,
@@ -1705,6 +1684,27 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                             results: [allResults[allResults.length - 1]],
                             status: "pageDone"
                         });
+
+                        // 返回列表页
+                        await execScript(tabId, {function: () => {
+                            const backBtn = document.querySelector('.iff-icon-back, .back, [class*="back"]');
+                            if (backBtn) {
+                                backBtn.click();
+                            } else {
+                                history.back();
+                            }
+                        }});
+
+                        await delay(2000);
+
+                        // 返回列表页后，滚动到当前处理的角色位置
+                        await execScript(tabId, {function: (idx) => {
+                            const items = document.querySelectorAll('.list-item-link.product-item.js_product_item');
+                            if (!items || items.length === 0) return;
+                            const item = items[idx];
+                            if (!item) return;
+                            item.scrollIntoView({block: 'center', behavior: 'smooth'});
+                        }, args: [item.domIndex]});
                     }
                 }
 
