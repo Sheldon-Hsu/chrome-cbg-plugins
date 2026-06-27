@@ -1,4 +1,5 @@
 let globalCostData = null;
+let currentMode = 'pc'; // 'pc' | 'pocket'，由 index.js 通过 chrome.storage.local 设置
 
 async function loadJSON() {
     try {
@@ -12,9 +13,19 @@ async function loadJSON() {
     }
 }
 
+
 document.addEventListener('DOMContentLoaded', function () {
 
     globalCostData = loadJSON();
+
+    // 从存储中读取模式
+    chrome.storage.local.get('calcMode', function (result) {
+        currentMode = result.calcMode || 'pc';
+        const modeTag = document.getElementById('mode_tag');
+        if (modeTag) {
+            modeTag.textContent = currentMode === 'pocket' ? '口袋版' : '电脑版';
+        }
+    });
 
     const find_data = document.getElementById('find_data');
     const xiulian_data = document.getElementById('xiulian_data');
@@ -278,7 +289,11 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!yxbPrice || !guoziPrice) {
             alert("先输入游戏币价格和修炼果价格")
         } else {
-            chrome.runtime.sendMessage({action: "fetchData"});
+            if (currentMode === 'pocket') {
+                chrome.runtime.sendMessage({action: "fetchPocketData"});
+            } else {
+                chrome.runtime.sendMessage({action: "fetchData"});
+            }
             chrome.runtime.onMessage.addListener((request) => {
 
                 if (request.action === "updateData") {
