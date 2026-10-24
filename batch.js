@@ -7,6 +7,16 @@ function parseRatio(val) {
     return isNaN(n) ? 1 : n;
 }
 
+// 当前页面上的四项比例
+function currentRatios() {
+    return {
+        xiulian: parseRatio(document.getElementById('xiulian_ratio').value),
+        bbxiu: parseRatio(document.getElementById('bbxiu_ratio').value),
+        school_skill: parseRatio(document.getElementById('school_skill_ratio').value),
+        life_skill: parseRatio(document.getElementById('life_skill_data_ratio').value)
+    };
+}
+
 async function loadJSON() {
     try {
         const url = chrome.runtime.getURL('data/data.json');
@@ -16,6 +26,118 @@ async function loadJSON() {
     } catch (error) {
         console.error('Failed to load JSON:', error);
     }
+}
+
+// ========== 高价值提示（道具 > 5 件 或 进阶召唤兽 > 1 只） ==========
+function hvEscape(s) {
+    return String(s === undefined || s === null ? '' : s).replace(/[&<>"']/g, function (c) {
+        return {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c];
+    });
+}
+
+function hvReasonText(data) {
+    if (!data) return '';
+    let text = '';
+    if (data.hvReasons && data.hvReasons.length) {
+        text = data.hvReasons.join('；');
+    } else {
+        const parts = [];
+        if (typeof data.hvItemCount === 'number') parts.push('道具 ' + data.hvItemCount + ' 件');
+        if (typeof data.hvAdvancedPetCount === 'number') parts.push('进阶召唤兽 ' + data.hvAdvancedPetCount + ' 只');
+        text = parts.join('；');
+    }
+    if (data.hvError) text += (text ? '；' : '') + data.hvError;
+    return text;
+}
+
+function hvBannerHTML(data) {
+    if (!data || !data.hvHigh) return '';
+    return '<div class="dp-hv-banner"><strong>⚠ 该角色可能携带高价值装备/召唤兽</strong>'
+        + '<div>' + hvEscape(hvReasonText(data) || '满足提示条件') + '</div></div>';
+}
+
+// 在结果行的门派单元格里加/去“高价值”标记
+function applyHighValueToRow(row, data) {
+    if (!row || !row.cells) return;
+    const firstCell = row.cells[0];
+    if (!firstCell) return;
+    let badge = firstCell.querySelector('.hv-badge');
+    if (data && data.hvHigh) {
+        row.classList.add('high-value-row');
+        if (!badge) {
+            badge = document.createElement('span');
+            badge.className = 'hv-badge';
+            firstCell.appendChild(badge);
+        }
+        badge.textContent = '⚠ 高价值';
+        badge.title = hvReasonText(data) || '满足高价值提示条件';
+    } else {
+        if (badge) badge.remove();
+        row.classList.remove('high-value-row');
+    }
+}
+
+// 在已展开的详情面板顶部加/去提示条
+function updateDetailPanelHighValue(panel, data) {
+    if (!panel) return;
+    let banner = panel.querySelector('.dp-hv-banner');
+    if (data && data.hvHigh) {
+        if (!banner) {
+            banner = document.createElement('div');
+            banner.className = 'dp-hv-banner';
+            const header = panel.querySelector('.dp-header');
+            if (header && header.parentNode === panel) {
+                panel.insertBefore(banner, header.nextSibling);
+            } else {
+                panel.insertBefore(banner, panel.firstChild);
+            }
+        }
+        banner.innerHTML = '<strong>⚠ 该角色可能携带高价值装备/召唤兽</strong>'
+            + '<div>' + hvEscape(hvReasonText(data) || '满足提示条件') + '</div>';
+    } else if (banner) {
+        banner.remove();
+    }
+}
+
+function findBatchRowByOrdersn(ordersn) {
+    if (!ordersn) return null;
+    const rows = document.querySelectorAll('#batch_tbody tr[data-ordersn]');
+    for (let i = 0; i < rows.length; i++) {
+        if (rows[i].dataset.ordersn === ordersn) return rows[i];
+    }
+    return null;
+}
+
+function findBatchRowByDetailUrl(url) {
+    if (!url) return null;
+    const normalized = String(url).split('#')[0];
+    const rows = document.querySelectorAll('#batch_tbody tr[data-ordersn]');
+    for (let i = 0; i < rows.length; i++) {
+        const u = (rows[i].dataset.detailUrl || '').split('#')[0];
+        if (u && u === normalized) return rows[i];
+    }
+    return null;
+}
+
+// 重新抓取同一角色时，保留已经检测过的高价值结果
+const HV_FIELDS = ['hvDone', 'hvHigh', 'hvItemCount', 'hvItemBreakdown', 'hvAdvancedPetCount',
+    'hvPetChecked', 'hvPetCount', 'hvLxValues', 'hvReasons', 'hvError'];
+// 列表页 JSON 里没有、只能点开详情页补的字段。
+// 其余参与计算的字段（修炼/宠修/师门/生活技能）列表页已经按官方配置精确提取，
+// 和单算窗口同一口径，不需要再用详情页回填。
+const DETAIL_CALC_FIELDS = ['qyd', 'jyCur', 'jyMax'];
+
+function mergePreservingHighValue(map, r) {
+    const prev = map[r.ordersn];
+    if (prev) {
+        HV_FIELDS.forEach(function (k) {
+            if (prev[k] !== undefined) r[k] = prev[k];
+        });
+        DETAIL_CALC_FIELDS.forEach(function (k) {
+            if ((r[k] === undefined || r[k] === 0 || r[k] === '') && prev[k] !== undefined) r[k] = prev[k];
+        });
+    }
+    map[r.ordersn] = r;
 }
 
 // 纯计算函数：从数据对象计算消耗，不操作 DOM
@@ -137,6 +259,7 @@ function buildDetailPanelHTML(char) {
     return '<div class="detail-panel">'
         + '<div class="dp-header"><strong>' + char.school + ' Lv.' + char.level + ' — ￥' + char.price + '</strong>'
         + '<button class="dp-close" title="关闭">&times;</button></div>'
+        + hvBannerHTML(char)
 
         + '<div class="dp-section"><div class="dp-section-title">修炼</div><div class="dp-fields">'
         + field('乾元丹', 'qyd', inp('qyd', char.qyd))
@@ -206,12 +329,7 @@ function bindDetailPanelEvents(panel, char) {
             return;
         }
 
-        const ratios = {
-            xiulian: parseRatio(document.getElementById('xiulian_ratio').value),
-            bbxiu: parseRatio(document.getElementById('bbxiu_ratio').value),
-            school_skill: parseRatio(document.getElementById('school_skill_ratio').value),
-            life_skill: parseRatio(document.getElementById('life_skill_data_ratio').value)
-        };
+        const ratios = currentRatios();
 
         // 构建 checkbox 映射：key -> 是否勾选
         const checked = {};
@@ -291,6 +409,9 @@ document.addEventListener('DOMContentLoaded', async function () {
     // 自动计算状态标记
     let isAutoBatching = false;
     let isPaused = false;
+
+    // 高价值检测状态
+    let hvScanning = false;
 
     // 缓存原始数据和计算结果（按 ordersn 去重）
     let cachedRawData = [];
@@ -393,7 +514,11 @@ document.addEventListener('DOMContentLoaded', async function () {
         // 展开：新标签页打开角色详情，并从详情页读取乾元丹
         if (detailUrl) {
             window.open(detailUrl, '_blank');
-            chrome.runtime.sendMessage({action: "fetchQydFromDetail", detailUrl: detailUrl});
+            chrome.runtime.sendMessage({
+                action: "fetchQydFromDetail",
+                detailUrl: detailUrl,
+                ordersn: row.dataset.ordersn || ''
+            });
         }
         if (existing) existing.remove();
 
@@ -472,12 +597,79 @@ document.addEventListener('DOMContentLoaded', async function () {
             if (d > 0 && d <= 5) row.classList.add('discount-good');
             else if (d > 5 && d <= 6.5) row.classList.add('discount-mid');
             else row.classList.add('discount-bad');
+            // 保留/刷新高价值标记
+            applyHighValueToRow(row, r);
         });
+    }
+
+    // 单个角色数据变化后（如从详情页读到乾元丹/机缘），重算并刷新该行
+    function refreshRowCalculation(ordersn) {
+        const data = charDataMap[ordersn];
+        if (!data) return;
+        let yxbPrice = parseFloat(document.getElementById('yxbPrice_value').value);
+        let guoziPrice = parseFloat(document.getElementById('guoziPrice_value').value);
+        if (!yxbPrice || !guoziPrice) return;
+
+        const calc = calculateFromData(data, globalCostData, yxbPrice, guoziPrice, currentRatios());
+        const merged = Object.assign({}, data, calc);
+        charDataMap[ordersn] = merged;
+
+        // 同步缓存，避免比例变化/重新抓取后丢失详情页数据
+        const rawIdx = cachedRawData.findIndex(r => r.ordersn === ordersn);
+        if (rawIdx >= 0) {
+            DETAIL_CALC_FIELDS.forEach(function (k) {
+                if (data[k] !== undefined) cachedRawData[rawIdx][k] = data[k];
+            });
+        }
+        const calcIdx = cachedCalcResults.findIndex(r => r.ordersn === ordersn);
+        if (calcIdx >= 0) cachedCalcResults[calcIdx] = merged;
+
+        const row = findBatchRowByOrdersn(ordersn);
+        if (!row || !row.cells) return;
+        const cells = row.cells;
+        if (cells[3]) {
+            const a = cells[3].querySelector('a');
+            if (a) a.textContent = '￥' + calc.rmbDiscount;
+        }
+        if (cells[4]) {
+            const a = cells[4].querySelector('a');
+            if (a) a.textContent = calc.discount === '—' ? '—' : calc.discount + '折';
+        }
+        if (cells[5]) {
+            const a = cells[5].querySelector('a');
+            const diff = parseFloat(calc.rmbDiscount) - parseFloat(merged.price);
+            if (a) a.textContent = isNaN(diff) ? '—' : (diff > 0 ? '+' + diff : String(diff));
+        }
+        const d = parseFloat(calc.discount) || 0;
+        row.classList.remove('discount-good', 'discount-mid', 'discount-bad');
+        if (d > 0 && d <= 5) row.classList.add('discount-good');
+        else if (d > 5 && d <= 6.5) row.classList.add('discount-mid');
+        else row.classList.add('discount-bad');
+        applyHighValueToRow(row, merged);
     }
 
     // 返回按钮
     backBtn.addEventListener('click', function () {
         chrome.runtime.sendMessage({action: "switchPage", page: "index.html"});
+    });
+
+    // 打开独立单算窗口：批量任务继续在当前侧边栏运行
+    // 把当前金价/修炼果价/四项比例带过去，保证两边算出的总值可以对比
+    document.getElementById('standalone_btn').addEventListener('click', function () {
+        const params = new URLSearchParams({standalone: '1'});
+        [
+            'yxbPrice_value', 'guoziPrice_value',
+            'xiulian_ratio', 'bbxiu_ratio', 'school_skill_ratio', 'life_skill_data_ratio'
+        ].forEach(function (id) {
+            const el = document.getElementById(id);
+            if (el) params.set(id, el.value);
+        });
+        chrome.windows.create({
+            url: chrome.runtime.getURL('sidebar.html') + '?' + params.toString(),
+            type: 'popup',
+            width: 480,
+            height: 900
+        });
     });
 
     // 首页按钮
@@ -526,6 +718,52 @@ document.addEventListener('DOMContentLoaded', async function () {
         document.getElementById('batch_tbody').innerHTML = '';
         document.getElementById('batch_summary').innerHTML = '';
     });
+
+    // 批量检测高价值道具/召唤兽
+    const hvScanBtn = document.getElementById('hv_scan_btn');
+    if (hvScanBtn) {
+        hvScanBtn.addEventListener('click', function () {
+            if (hvScanning) {
+                chrome.runtime.sendMessage({action: 'stopHighValueScan'});
+                hvScanBtn.disabled = true;
+                hvScanBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 停止中...';
+                return;
+            }
+
+            const rows = Array.from(document.querySelectorAll('#batch_tbody tr[data-ordersn]'));
+            const items = [];
+            const seen = new Set();
+            rows.forEach(function (row) {
+                const ordersn = row.dataset.ordersn;
+                const detailUrl = row.dataset.detailUrl;
+                if (!ordersn || !detailUrl || seen.has(ordersn)) return;
+                seen.add(ordersn);
+                // 已检测过的角色跳过，避免重复打开详情页
+                const cached = charDataMap[ordersn];
+                if (cached && cached.hvDone) return;
+                items.push({ordersn: ordersn, detailUrl: detailUrl});
+            });
+
+            const progressEl = document.getElementById('batch_progress');
+            if (!items.length) {
+                if (progressEl) {
+                    progressEl.style.display = 'block';
+                    progressEl.textContent = '没有需要检测的角色（已全部检测完成）';
+                }
+                return;
+            }
+
+            hvScanning = true;
+            hvScanBtn.innerHTML = '<i class="fas fa-stop"></i> 停止检测';
+            hvScanBtn.classList.remove('btn-warning');
+            hvScanBtn.classList.add('btn-danger');
+            if (progressEl) {
+                progressEl.style.display = 'block';
+                progressEl.textContent = '正在检测高价值道具/召唤兽...';
+            }
+            chrome.runtime.sendMessage({action: 'batchHighValueScan', items: items});
+        });
+    }
 
     // 批量计算按钮
     batchBtn.addEventListener('click', function () {
@@ -697,12 +935,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             let yxbPrice = parseFloat(document.getElementById('yxbPrice_value').value);
             let guoziPrice = parseFloat(document.getElementById('guoziPrice_value').value);
 
-            const ratios = {
-                xiulian: parseRatio(document.getElementById('xiulian_ratio').value),
-                bbxiu: parseRatio(document.getElementById('bbxiu_ratio').value),
-                school_skill: parseRatio(document.getElementById('school_skill_ratio').value),
-                life_skill: parseRatio(document.getElementById('life_skill_data_ratio').value)
-            };
+            const ratios = currentRatios();
 
             // 检查是否忽略花样年华
             const ignoreHuanian = document.getElementById('ignore_huanian').checked;
@@ -717,7 +950,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                 // 合并原始数据到缓存
                 const mergedMap = {};
                 cachedRawData.forEach(r => { mergedMap[r.ordersn] = r; });
-                newResults.forEach(r => { mergedMap[r.ordersn] = r; });
+                newResults.forEach(r => { mergePreservingHighValue(mergedMap, r); });
                 cachedRawData = Object.values(mergedMap);
                 updateCacheStatus();
                 rawDataToCalc = cachedRawData;
@@ -784,6 +1017,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                 row.style.cursor = 'pointer';
                 const link = row.querySelector('a');
                 if (link) row.dataset.detailUrl = link.href;
+                applyHighValueToRow(row, charDataMap[row.dataset.ordersn]);
             });
 
             // 汇总
@@ -877,12 +1111,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                 const tbodyEl = document.getElementById('batch_tbody');
                 const summaryEl = document.getElementById('batch_summary');
 
-                const ratios = {
-                    xiulian: parseRatio(document.getElementById('xiulian_ratio').value),
-                    bbxiu: parseRatio(document.getElementById('bbxiu_ratio').value),
-                    school_skill: parseRatio(document.getElementById('school_skill_ratio').value),
-                    life_skill: parseRatio(document.getElementById('life_skill_data_ratio').value)
-                };
+                const ratios = currentRatios();
                 const ignoreHuanian = document.getElementById('ignore_huanian').checked;
 
                 let newResults = request.results;
@@ -894,7 +1123,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                 trulyNewRaw = newResults.filter(r => !cachedIds.has(r.ordersn));
                 const mergedMap = {};
                 cachedRawData.forEach(r => { mergedMap[r.ordersn] = r; });
-                newResults.forEach(r => { mergedMap[r.ordersn] = r; });
+                newResults.forEach(r => { mergePreservingHighValue(mergedMap, r); });
                 cachedRawData = Object.values(mergedMap);
                 updateCacheStatus();
                 rawDataToCalc = cachedRawData;
@@ -944,6 +1173,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                     row.style.cursor = 'pointer';
                     const link = row.querySelector('a');
                     if (link) row.dataset.detailUrl = link.href;
+                    applyHighValueToRow(row, charDataMap[row.dataset.ordersn]);
                 });
 
                 // 汇总（追加模式）
@@ -1002,32 +1232,106 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     });
 
-    // 监听从详情页读取的乾元丹和机缘数据，更新详情面板并自动重新计算
+    // 监听从详情页读取的乾元丹和机缘数据：写回缓存、刷新表格行，并更新详情面板
     chrome.runtime.onMessage.addListener((request) => {
-        if (request.action === "qydFetched" && request.detailUrl) {
-            const qydInput = document.querySelector('.detail-panel input[data-key="qyd"]');
-            if (qydInput) {
-                qydInput.value = request.qyd;
-                // 更新机缘
-                const jyCurInput = document.querySelector('.detail-panel input[data-key="jyCur"]');
-                const jyMaxInput = document.querySelector('.detail-panel input[data-key="jyMax"]');
-                if (jyCurInput) jyCurInput.value = request.jyCur || 0;
-                if (jyMaxInput) jyMaxInput.value = request.jyMax || 0;
-                // 同时更新 charDataMap 中的缓存数据
-                const detailRow = qydInput.closest('.detail-row');
-                if (detailRow && detailRow.previousElementSibling) {
-                    const ordersn = detailRow.previousElementSibling.dataset.ordersn;
-                    if (ordersn && charDataMap[ordersn]) {
-                        charDataMap[ordersn].qyd = request.qyd;
-                        charDataMap[ordersn].jyCur = request.jyCur || 0;
-                        charDataMap[ordersn].jyMax = request.jyMax || 0;
-                    }
+        if (request.action !== "qydFetched" || !request.detailUrl) return;
+
+        // 定位到对应的角色（优先用后台带回来的 ordersn）
+        let row = request.ordersn ? findBatchRowByOrdersn(request.ordersn) : null;
+        if (!row) row = findBatchRowByDetailUrl(request.detailUrl);
+        const ordersn = request.ordersn || (row ? row.dataset.ordersn : '');
+        if (!ordersn || !charDataMap[ordersn]) return;
+
+        // 读取失败时后台会传 null，此时保留原值
+        const hasQyd = request.qyd !== null && request.qyd !== undefined && request.qyd !== '';
+        const hasJy = typeof request.jyMax === 'number';
+        if (hasQyd) charDataMap[ordersn].qyd = request.qyd;
+        if (hasJy) {
+            charDataMap[ordersn].jyCur = request.jyCur || 0;
+            charDataMap[ordersn].jyMax = request.jyMax;
+        }
+        if (!hasQyd && !hasJy) return;
+
+        // 重算并同步表格行与缓存
+        refreshRowCalculation(ordersn);
+
+        // 如果该角色的详情面板正展开，回填输入框并重新计算
+        row = findBatchRowByOrdersn(ordersn);
+        const detailRow = row ? row.nextElementSibling : null;
+        const panel = detailRow && detailRow.classList.contains('detail-row')
+            ? detailRow.querySelector('.detail-panel') : null;
+        if (panel) {
+            const qydInput = panel.querySelector('input[data-key="qyd"]');
+            const jyCurInput = panel.querySelector('input[data-key="jyCur"]');
+            const jyMaxInput = panel.querySelector('input[data-key="jyMax"]');
+            if (hasQyd && qydInput) qydInput.value = request.qyd;
+            if (hasJy && jyCurInput) jyCurInput.value = request.jyCur || 0;
+            if (hasJy && jyMaxInput) jyMaxInput.value = request.jyMax;
+            const calcBtn = panel.querySelector('.dp-calc-btn');
+            if (calcBtn) calcBtn.click();
+        }
+    });
+
+    // 监听高价值检测结果
+    chrome.runtime.onMessage.addListener((request) => {
+        if (request.action === "highValueFetched") {
+            const data = {
+                hvDone: !!request.hvDone,
+                hvHigh: !!request.hvHigh,
+                hvItemCount: typeof request.hvItemCount === 'number' ? request.hvItemCount : 0,
+                hvItemBreakdown: request.hvItemBreakdown || null,
+                hvAdvancedPetCount: typeof request.hvAdvancedPetCount === 'number' ? request.hvAdvancedPetCount : 0,
+                hvPetChecked: !!request.hvPetChecked,
+                hvPetCount: typeof request.hvPetCount === 'number' ? request.hvPetCount : 0,
+                hvLxValues: Array.isArray(request.hvLxValues) ? request.hvLxValues : [],
+                hvReasons: Array.isArray(request.hvReasons) ? request.hvReasons : [],
+                hvError: request.hvError || ''
+            };
+
+            let row = request.ordersn ? findBatchRowByOrdersn(request.ordersn) : null;
+            if (!row && request.detailUrl) row = findBatchRowByDetailUrl(request.detailUrl);
+            const ordersn = request.ordersn || (row ? row.dataset.ordersn : '');
+
+            // 写入缓存，比例变化重新计算或重新抓取后仍能保留
+            if (ordersn) {
+                if (charDataMap[ordersn]) Object.assign(charDataMap[ordersn], data);
+                const raw = cachedRawData.find(function (r) { return r.ordersn === ordersn; });
+                if (raw) Object.assign(raw, data);
+                const calc = cachedCalcResults.find(function (r) { return r.ordersn === ordersn; });
+                if (calc) Object.assign(calc, data);
+            }
+
+            if (row) {
+                applyHighValueToRow(row, data);
+                const next = row.nextElementSibling;
+                if (next && next.classList.contains('detail-row')) {
+                    updateDetailPanelHighValue(next.querySelector('.detail-panel'), data);
                 }
-                // 自动点击"重新计算"按钮
-                const panel = qydInput.closest('.detail-panel');
-                if (panel) {
-                    const calcBtn = panel.querySelector('.dp-calc-btn');
-                    if (calcBtn) calcBtn.click();
+            }
+            return;
+        }
+
+        if (request.action === "highValueScanProgress") {
+            const progressEl = document.getElementById('batch_progress');
+            const btn = document.getElementById('hv_scan_btn');
+            if (request.status === 'scanning') {
+                if (progressEl) {
+                    progressEl.style.display = 'block';
+                    progressEl.textContent = '正在检测高价值（' + request.index + '/' + request.total + '）...';
+                }
+                return;
+            }
+            if (request.status === 'done') {
+                hvScanning = false;
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> 检测高价值';
+                    btn.classList.remove('btn-danger');
+                    btn.classList.add('btn-warning');
+                }
+                if (progressEl) {
+                    progressEl.style.display = 'block';
+                    progressEl.textContent = request.stopped ? '高价值检测已停止' : '高价值检测完成';
                 }
             }
         }

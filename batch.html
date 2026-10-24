@@ -275,6 +275,39 @@
             display: block;
         }
 
+        /* 高价值提示 */
+        .batch-table .hv-badge {
+            display: inline-block;
+            margin-top: 3px;
+            padding: 0 4px;
+            border-radius: 3px;
+            background: #c0392b;
+            color: #fff;
+            font-size: 0.62rem;
+            line-height: 1.5;
+            white-space: nowrap;
+            cursor: help;
+        }
+
+        .batch-table tr.high-value-row > td:first-child {
+            box-shadow: inset 3px 0 0 #c0392b;
+        }
+
+        .detail-panel .dp-hv-banner {
+            background: #fdecea;
+            border: 1px solid #f5c6cb;
+            color: #a12622;
+            border-radius: 4px;
+            padding: 5px 6px;
+            margin-bottom: 6px;
+            font-size: 0.68rem;
+            line-height: 1.5;
+        }
+
+        .detail-panel .dp-hv-banner strong {
+            font-size: 0.72rem;
+        }
+
         .batch-summary {
             display: flex;
             justify-content: space-between;
@@ -460,6 +493,9 @@
         <button id="back_btn" class="btn btn-back">
             <i class="fas fa-arrow-left"></i> 返回
         </button>
+        <button id="standalone_btn" class="btn btn-primary" title="打开独立的单算窗口，批量计算仍会在侧边栏继续运行">
+            <i class="fas fa-window-restore"></i> 单算窗口
+        </button>
     </div>
     <div class="section-header">
         <button id="first_page_btn" class="btn btn-next">
@@ -478,6 +514,10 @@
         </button>
         <button id="auto_batch_btn" class="btn btn-primary pulse">
             <i class="fas fa-forward"></i> 自动计算多页
+        </button>
+        <button id="hv_scan_btn" class="btn btn-warning"
+                title="逐条打开角色详情页，检测道具超过5件或进阶召唤兽超过1只的角色（使用后台标签页，可随时停止）">
+            <i class="fas fa-exclamation-triangle"></i> 检测高价值
         </button>
     </div>
     <div class="section-header" id="pocket_buttons" style="display:none">
@@ -552,7 +592,7 @@
             </div>
         </div>
         <div id="qydHint" style="color: #666; font-size: 0.7rem; margin-top: 4px;">💡
-            展开详情面板时会自动从详情页读取乾元丹和机缘
+            展开详情面板时会自动从详情页读取乾元丹和机缘，并检测高价值道具/召唤兽
         </div>
     </div>
 

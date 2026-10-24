@@ -401,6 +401,24 @@
         </div>
     </div>
 
+    <div class="card" id="target_tab_row" style="display:none">
+        <div class="card-title">
+            <i class="fas fa-window-restore"></i>
+            <h2>计算目标</h2>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px">
+            <select id="target_tab"
+                    style="flex:1;min-width:0;padding:6px;border:1px solid #ddd;border-radius:4px;font-size:0.8rem;background:#fff"></select>
+            <button id="refresh_target_btn" class="btn btn-primary"
+                    style="flex:none;min-width:auto;padding:6px 10px;font-size:0.8rem">
+                <i class="fas fa-sync"></i> 刷新
+            </button>
+        </div>
+        <div style="color:#888;font-size:0.7rem;margin-top:4px">
+            请选择要读取的角色详情页。切换游戏标签页后，切回本窗口即可自动更新。
+        </div>
+    </div>
+
 
     <div class="section-header">
         <button id="back_btn" class="btn btn-back">
@@ -670,42 +688,42 @@
                         <input type="text" class="item-cost" id="strong_ratio_cost" style=" display: none " readonly>
                     </div>
                     <div class="data-item" id="cWeapon">
-                        <input type="checkbox" class="item-select">
+                        <input type="checkbox" class="item-select" checked>
                         <div class="item-label">暗器</div>
                         <input type="text" class="item-value" id="cWeapon_value">
                         <input type="text" class="item-cost" id="cWeapon_cost" readonly>
                         <input type="text" class="item-cost" id="cWeapon_ratio_cost" style=" display: none " readonly>
                     </div>
                     <div class="data-item" id="cook">
-                        <input type="checkbox" class="item-select">
+                        <input type="checkbox" class="item-select" checked>
                         <div class="item-label">烹饪</div>
                         <input type="text" class="item-value" id="cook_value">
                         <input type="text" class="item-cost" id="cook_cost" readonly>
                         <input type="text" class="item-cost" id="cook_ratio_cost" style=" display: none " readonly>
                     </div>
                     <div class="data-item" id="ys">
-                        <input type="checkbox" class="item-select">
+                        <input type="checkbox" class="item-select" checked>
                         <div class="item-label">养生之道</div>
                         <input type="text" class="item-value" id="ys_value">
                         <input type="text" class="item-cost" id="ys_cost" readonly>
                         <input type="text" class="item-cost" id="ys_ratio_cost" style=" display: none " readonly>
                     </div>
                     <div class="data-item" id="js">
-                        <input type="checkbox" class="item-select">
+                        <input type="checkbox" class="item-select" checked>
                         <div class="item-label">健身</div>
                         <input type="text" class="item-value" id="js_value">
                         <input type="text" class="item-cost" id="js_cost" readonly>
                         <input type="text" class="item-cost" id="js_ratio_cost" style=" display: none " readonly>
                     </div>
                     <div class="data-item" id="qj">
-                        <input type="checkbox" class="item-select">
+                        <input type="checkbox" class="item-select" checked>
                         <div class="item-label">巧匠</div>
                         <input type="text" class="item-value" id="qj_value">
                         <input type="text" class="item-cost" id="qj_cost" readonly>
                         <input type="text" class="item-cost" id="qj_ratio_cost" style=" display: none " readonly>
                     </div>
                     <div class="data-item" id="zy">
-                        <input type="checkbox" class="item-select">
+                        <input type="checkbox" class="item-select" checked>
                         <div class="item-label">中药</div>
                         <input type="text" class="item-value" id="zy_value">
                         <input type="text" class="item-cost" id="zy_cost" readonly>
