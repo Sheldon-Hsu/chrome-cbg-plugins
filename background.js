@@ -1452,21 +1452,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         });
     }
 
-    // 批量计算：从已打开的角色详情页读取乾元丹，并检测高价值道具/召唤兽
+    // 批量计算：从已打开的角色详情页读取乾元丹/机缘。
+    // 高价值检测只在用户点击「检测高价值」时执行，展开详情不会自动触发。
     if (request.action === "fetchQydFromDetail" && request.detailUrl) {
         const detailUrl = request.detailUrl;
         const ordersn = request.ordersn || '';
-
-        // 读完详情页后继续检测高价值道具/召唤兽
-        function finishWithHighValue(tabId) {
-            injectHighValueDetect(tabId).then((hv) => {
-                chrome.runtime.sendMessage(Object.assign({
-                    action: "highValueFetched",
-                    ordersn: ordersn,
-                    detailUrl: detailUrl
-                }, hv));
-            });
-        }
 
         // 列表页能拿到的数据（修炼、师门、生活技能）已经和详情页一致，
         // 这里只补列表页没有的乾元丹/机缘。刚打开的新标签页可能还没渲染完，失败时重试。
@@ -1486,11 +1476,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                         jyCur: data.jyCur !== undefined ? data.jyCur : null,
                         jyMax: data.jyMax !== undefined ? data.jyMax : null
                     });
-                    finishWithHighValue(tabId);
                 } else if (attempt < 2) {
                     setTimeout(() => readFullDetail(tabId, attempt + 1), 1500);
-                } else {
-                    finishWithHighValue(tabId);
                 }
             });
         }
@@ -1498,17 +1485,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         // 等待详情页加载完成
         setTimeout(() => {
             chrome.tabs.query({url: detailUrl}, (tabs) => {
-                if (!tabs || tabs.length === 0) {
-                    chrome.runtime.sendMessage({
-                        action: "highValueFetched",
-                        ordersn: ordersn,
-                        detailUrl: detailUrl,
-                        hvDone: false,
-                        hvHigh: false,
-                        hvError: '未找到角色详情标签页'
-                    });
-                    return;
-                }
+                if (!tabs || tabs.length === 0) return;
                 readFullDetail(tabs[0].id, 0);
             });
         }, 3000);
