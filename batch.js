@@ -140,6 +140,14 @@ function mergePreservingHighValue(map, r) {
     map[r.ordersn] = r;
 }
 
+// 人物修炼的有效上限只有两档：145 级以下 21，145 级及以上 25。
+// 修炼上限被“改”到超过该等级的有效值时，超出部分不计价。
+function effectiveXiuUpper(charLevel) {
+    const lv = parseInt(charLevel);
+    if (!lv || lv <= 0) return 25; // 等级未知时不额外限制
+    return lv >= 145 ? 25 : 21;
+}
+
 // 纯计算函数：从数据对象计算消耗，不操作 DOM
 function calculateFromData(charData, costData, yxbPrice, guoziPriceVal, ratios) {
     function lookupCost(type, level, upper) {
@@ -166,14 +174,15 @@ function calculateFromData(charData, costData, yxbPrice, guoziPriceVal, ratios) 
     let total_origin = 0;
     let total_discount = 0;
 
-    // 修炼
+    // 修炼（上限按角色等级折算有效值，超出部分不计价）
     let r = ratios.xiulian;
+    const xiuCap = effectiveXiuUpper(charData.level);
     let items = [
         {type: "qianyuandan", level: charData.qyd, upper: 0},
-        {type: "gongxiu", level: charData.gjxl, upper: charData.gjxlUpper},
-        {type: "gongxiu", level: charData.fsxl, upper: charData.fsxlUpper},
-        {type: "fangxiu", level: charData.fyxl, upper: charData.fyxlUpper},
-        {type: "fangxiu", level: charData.kfxl, upper: charData.kfxlUpper}
+        {type: "gongxiu", level: charData.gjxl, upper: Math.min(parseInt(charData.gjxlUpper) || 0, xiuCap)},
+        {type: "gongxiu", level: charData.fsxl, upper: Math.min(parseInt(charData.fsxlUpper) || 0, xiuCap)},
+        {type: "fangxiu", level: charData.fyxl, upper: Math.min(parseInt(charData.fyxlUpper) || 0, xiuCap)},
+        {type: "fangxiu", level: charData.kfxl, upper: Math.min(parseInt(charData.kfxlUpper) || 0, xiuCap)}
     ];
     items.forEach(item => {
         let c = lookupCost(item.type, item.level, item.upper);
@@ -346,6 +355,9 @@ function bindDetailPanelEvents(panel, char) {
             const isEnabled = checked[cbKey] !== undefined ? checked[cbKey] : true;
             edited[key] = isEnabled ? (parseFloat(input.value) || 0) : 0;
         });
+
+        // 等级不在可编辑字段里，补上供修炼有效上限使用
+        edited.level = char.level;
 
         const calc = calculateFromData(edited, globalCostData, yxbPrice, guoziPrice, ratios);
         panel.querySelector('.dp-rmb').textContent = '￥' + calc.rmbDiscount;

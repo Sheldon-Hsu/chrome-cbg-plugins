@@ -65,8 +65,12 @@ function pcExtractDetailData() {
         const kindName = roleBox.querySelector('#kindName');
         data.school = kindName ? kindName.textContent.trim() : '';
 
-        // 乾元丹 / 机缘
+        // 乾元丹 / 机缘 / 角色等级
         Array.from(roleBox.querySelectorAll('td')).forEach(td => {
+            if (td.textContent.includes('级别')) {
+                const lvMatch = td.textContent.match(/级别[：:]\s*(\d+)/);
+                if (lvMatch) data.level = parseInt(lvMatch[1]) || 0;
+            }
             if (td.textContent.includes('新版乾元丹数量')) {
                 const parts = td.textContent.split('：');
                 if (parts.length > 1) data.qyd = parts[1].trim();
@@ -562,7 +566,7 @@ async function pocketExtractDetailData() {
         }
 
         const data = {
-            price: 0, qyd: 0, jyCur: 0, jyMax: 0, school: '',
+            price: 0, qyd: 0, jyCur: 0, jyMax: 0, school: '', level: 0,
             gjxl: 0, gjxlUpper: 0, fsxl: 0, fsxlUpper: 0,
             fyxl: 0, fyxlUpper: 0, kfxl: 0, kfxlUpper: 0,
             gjkzl: 0, fskzl: 0, fykzl: 0, kfkzl: 0,
@@ -583,6 +587,14 @@ async function pocketExtractDetailData() {
         if (roleInfo) {
             const schoolEl = roleInfo.querySelector('.txt');
             if (schoolEl) data.school = schoolEl.textContent.trim();
+        }
+
+        // 角色等级（用于按等级折算修炼有效上限）
+        const levelEl = document.querySelector('.pi-info .level');
+        if (levelEl) data.level = parseInt(levelEl.textContent.replace(/[^\d]/g, '')) || 0;
+        if (!data.level) {
+            const lvMatch = document.body.innerText.match(/等级[：:]\s*(\d+)/);
+            if (lvMatch) data.level = parseInt(lvMatch[1]) || 0;
         }
 
         // 找到页签

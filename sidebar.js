@@ -44,6 +44,8 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 
     let guoziPrice = parseFloat(document.getElementById('guoziPrice_value').value);
+    // 当前角色的等级（由详情页读取，决定修炼有效上限）
+    let characterLevel = 0;
 
     // 详情页 URL 判断（与 background.js 的 isDetailUrl 保持一致）
     function isDetailUrl(url, isPocket) {
@@ -271,9 +273,19 @@ document.addEventListener('DOMContentLoaded', async function () {
         return isNaN(n) ? 1 : n;
     }
 
+    // 人物修炼的有效上限只有两档：145 级以下 21，145 级及以上 25。
+    // 与 batch.js 的 effectiveXiuUpper 保持一致。
+    function effectiveXiuUpper(charLevel) {
+        const lv = parseInt(charLevel);
+        if (!lv || lv <= 0) return 25; // 等级未知时不额外限制
+        return lv >= 145 ? 25 : 21;
+    }
+
     function setCost(element, item_id, type, level, ratio = 1, upper = 0) {
 
         if (!level) level = 0;
+        // 上限超过该等级的有效值时，超出部分不计价
+        upper = Math.min(parseInt(upper) || 0, effectiveXiuUpper(characterLevel));
         if (type === "bbxiu") {
             try {
                 let size = globalCostData[type][level.toString()]["guozi_size"]
@@ -525,6 +537,8 @@ document.addEventListener('DOMContentLoaded', async function () {
     function applyData(request) {
         //乾元丹
         console.log("接收到的数据：", request.data)
+        // 角色等级决定修炼有效上限
+        characterLevel = parseInt(request.data.level) || 0;
         let level = request.data.qyd || 0;
         let upper = 0;
         xiulian_data.querySelector('#qyd_value').value = level;

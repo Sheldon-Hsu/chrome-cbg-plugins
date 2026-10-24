@@ -91,7 +91,7 @@ Key extraction details:
 
 - Units: `totalcost` and `guozi_size` are in **万两**; `yxbPrice` is **元/万两** (default `0.0716`); `guoziPrice` is **万两 per 修炼果** (default `85`).
 - `lookupCost(type, level, upper)` reads `costData[type][level].totalcost`, except `bbxiu`, whose cost is `guozi_size * guoziPrice`.
-- Cultivation upper limits: when `upper > 20`, add `xiulianshangxian[upper].times * 2` for `fangxiu` and `* 3` for `gongxiu`.
+- Cultivation upper limits: the reported upper is first clamped to the character's level-based effective maximum, which has only two tiers — **21 below level 145, 25 at level 145 and above**. Unknown level means no extra clamp. Then, when the clamped `upper > 20`, add `xiulianshangxian[upper].times * 2` for `fangxiu` and `* 3` for `gongxiu`. The clamping helper is `effectiveXiuUpper()` and exists in both `sidebar.js` and `batch.js`. `level` comes from the list JSON (`iGrade`) or, for the single calculator, from the detail page (`级别：N` on PC, `.pi-info .level` / `等级：N` on pocket).
 - Two totals are computed: `total_origin` (no ratios) and `total_discount` (each category multiplied by its ratio). RMB is each total × `yxbPrice`.
 - Ratios: `xiulian_ratio` for 乾元丹+人物修炼, `bbxiu_ratio` for pet cultivation, `school_skill_ratio`, `life_skill_data_ratio`. Empty input means 1 (`parseRatio` in both `batch.js` and `sidebar.js`); 0 is allowed.
 - Both implementations accumulate the exact per-item cost × ratio and round only once at the RMB step, so the single calculator and the batch table give the same number. All ten life skills are counted in both by default.
@@ -119,7 +119,7 @@ Lookup-table ranges: `qianyuandan` 0–9, `gongxiu`/`fangxiu`/`bbxiu` 0–25, `x
 
 The extension has no modules, so several algorithms are intentionally (or historically) duplicated. When changing one, grep for the others:
 
-- **Cost lookup/formula** exists twice: `sidebar.js:setCost()` + `calculator()` (DOM-driven) and `batch.js:calculateFromData()` (pure). Change both or results diverge.
+- **Cost lookup/formula** exists twice: `sidebar.js:setCost()` + `calculator()` (DOM-driven) and `batch.js:calculateFromData()` (pure). Change both or results diverge — this includes the `effectiveXiuUpper()` level-based clamp.
 - **PC list extraction** (`extractPageData`) is duplicated in `batchFetchData` and `autoBatchFetch`; the surrounding loop and progress handling also differ slightly. Likewise **pocket detail extraction** is duplicated in `batchFetchPocketData` and `autoBatchPocketFetch`.
 - **Default prices** `0.0716` / `85` are hard-coded in `index.html`, `sidebar.html`, and `batch.html`.
 - Skill field names are repeated across background extraction, sidebar input IDs, batch panel HTML, and the calculators.
